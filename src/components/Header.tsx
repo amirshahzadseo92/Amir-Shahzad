@@ -39,29 +39,15 @@ export default function Header({
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-md transition-all duration-300">
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        {/* Logo & New Article Action */}
+      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-4 lg:px-4">
+        {/* Logo & Navigation Action */}
         <div className="flex items-center gap-2 sm:gap-4">
           <div 
             onClick={() => handleNavClick('home')}
-            className="cursor-pointer"
+            className="cursor-pointer flex items-center h-full"
           >
             <Logo size="md" showText={true} />
           </div>
-
-          <button
-            onClick={() => {
-              if (onNewArticleClick) {
-                onNewArticleClick();
-              } else {
-                handleNavClick('library');
-              }
-            }}
-            className="hidden md:flex items-center gap-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white px-3 py-1.5 md:px-4 md:py-2 text-[11px] md:text-xs font-bold tracking-wide transition-all shadow-sm hover:shadow shadow-emerald-100 shrink-0 cursor-pointer"
-          >
-            <PenTool className="h-3.5 w-3.5" />
-            <span>New Article</span>
-          </button>
         </div>
 
         {/* Desktop Navigation */}

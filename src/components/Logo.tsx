@@ -17,44 +17,46 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true }) => {
   }, []);
 
   // Dimensions based on size prop
-  const containerSize = size === 'sm' ? 'h-9 w-9' : size === 'lg' ? 'h-14 w-14' : 'h-9 w-9 md:h-11 md:w-11';
-  const outerRingSize = size === 'sm' ? 'h-[44px] w-[44px]' : size === 'lg' ? 'h-[72px] w-[72px]' : 'h-[44px] w-[44px] md:h-[56px] md:w-[56px]';
-  const middleRingSize = size === 'sm' ? 'h-[38px] w-[38px]' : size === 'lg' ? 'h-[62px] w-[62px]' : 'h-[38px] w-[38px] md:h-[48px] md:w-[48px]';
-  const innerSvgSize = size === 'sm' ? 'h-5 w-5' : size === 'lg' ? 'h-7 w-7' : 'h-5 w-5 md:h-6 md:w-6';
+  const containerSize = size === 'sm' ? 'h-9 w-9' : size === 'lg' ? 'h-14 w-14' : 'h-9 w-9 md:h-[38px] md:w-[38px]';
+  const outerRingSize = size === 'sm' ? 'h-[44px] w-[44px]' : size === 'lg' ? 'h-[72px] w-[72px]' : 'h-[44px] w-[44px] md:h-[48px] md:w-[48px]';
+  const middleRingSize = size === 'sm' ? 'h-[38px] w-[38px]' : size === 'lg' ? 'h-[62px] w-[62px]' : 'h-[38px] w-[38px] md:h-[42px] md:w-[42px]';
+  const innerSvgSize = size === 'sm' ? 'h-5 w-5' : size === 'lg' ? 'h-7 w-7' : 'h-5 w-5 md:h-[22px] md:w-[22px]';
   
   // Custom styled templates for APEX and OS inside the emblem
   const apexStyle = size === 'sm' 
     ? 'text-[10px] font-extrabold tracking-tighter italic font-serif' 
     : size === 'lg' 
       ? 'text-[17px] font-extrabold tracking-tighter italic font-serif' 
-      : 'text-[10px] md:text-[13.5px] font-extrabold tracking-tighter italic font-serif';
+      : 'text-[10px] md:text-[11.5px] font-extrabold tracking-tighter italic font-serif';
 
   const osStyle = size === 'sm' 
     ? 'text-[14px] font-extrabold tracking-tighter italic font-serif' 
     : size === 'lg' 
       ? 'text-[24px] font-extrabold tracking-tighter italic font-serif' 
-      : 'text-[14px] md:text-[19px] font-extrabold tracking-tighter italic font-serif';
+      : 'text-[14px] md:text-[16px] font-extrabold tracking-tighter italic font-serif';
 
-  const outerTextSize = size === 'sm' ? 'text-lg' : size === 'lg' ? 'text-2xl' : 'text-base md:text-xl';
-  const outerOsTextSize = size === 'sm' ? 'text-xl font-black' : size === 'lg' ? 'text-3xl font-black' : 'text-lg md:text-2xl font-black';
-  const outerSubTextSize = size === 'sm' ? 'text-[8px]' : size === 'lg' ? 'text-[10px]' : 'text-[7.5px] md:text-[9px]';
+  const outerTextSize = size === 'sm' ? 'text-lg' : size === 'lg' ? 'text-2xl' : 'text-base md:text-[18px]';
+  const outerOsTextSize = size === 'sm' ? 'text-xl font-black' : size === 'lg' ? 'text-3xl font-black' : 'text-lg md:text-[22px] font-black';
+  const outerSubTextSize = size === 'sm' ? 'text-[8px]' : size === 'lg' ? 'text-[10px]' : 'text-[7.5px] md:text-[8.5px]';
 
   return (
-    <div className="flex items-center gap-2 md:gap-3.5 group select-none py-0.5 md:py-1 relative">
+    <div className="flex items-center gap-2 md:gap-3 group select-none py-0.5 md:py-0.5 relative md:translate-y-[1.5px]">
       {/* Dynamic Automated Outer Ring + Emblem Wrapper */}
-      <div className={`relative flex items-center justify-center shrink-0 ${containerSize === 'h-9 w-9' ? 'h-[44px] w-[44px]' : size === 'lg' ? 'h-[72px] w-[72px]' : 'h-[44px] w-[44px] md:h-[56px] md:w-[56px]'}`}>
+      <div className={`relative flex items-center justify-center shrink-0 ${size === 'sm' ? 'h-[44px] w-[44px]' : size === 'lg' ? 'h-[72px] w-[72px]' : 'h-[44px] w-[44px] md:h-[48px] md:w-[48px]'}`}>
         
         {/* AUTOMATION RING 1: Outermost dynamic orbit with dashed line (Slow clockwise rotation) */}
-        <div 
-          className={`absolute inset-0 m-auto rounded-full border border-dashed border-slate-950/30 animate-[spin_20s_linear_infinite] pointer-events-none ${outerRingSize}`}
-          style={{ transformOrigin: 'center' }}
-        />
+        <div className={`absolute inset-0 m-auto pointer-events-none flex items-center justify-center ${outerRingSize}`}>
+          <div 
+            className="w-full h-full rounded-full border border-dashed border-slate-950/30 animate-[spin_20s_linear_infinite]"
+          />
+        </div>
 
         {/* AUTOMATION RING 2: Middle orbit with dotted style (Faster counter-clockwise rotation) */}
-        <div 
-          className={`absolute inset-0 m-auto rounded-full border border-dotted border-slate-950/25 animate-[spin_10s_linear_infinite_reverse] pointer-events-none ${middleRingSize}`}
-          style={{ transformOrigin: 'center' }}
-        />
+        <div className={`absolute inset-0 m-auto pointer-events-none flex items-center justify-center ${middleRingSize}`}>
+          <div 
+            className="w-full h-full rounded-full border border-dotted border-slate-950/25 animate-[spin_10s_linear_infinite_reverse]"
+          />
+        </div>
 
         {/* AUTOMATION NODES: High-tech pulsing satellite points with dynamic, automatic color-cycling */}
         <span className="absolute -top-1 -right-1 flex h-2 w-2 z-10">
