@@ -1,0 +1,14 @@
+# Wrangler configuration file for deploying static Vite React app to Cloudflare
+name = "apexos"
+compatibility_date = "2024-04-03"
+
+# Define the build command to compile our Vite application
+[build]
+command = "npm run build"
+
+# Tell Cloudflare to serve static files from the build output directory (dist)
+[assets]
+directory = "./dist"
+
+# For Cloudflare Pages integration
+pages_build_output_dir = "dist"

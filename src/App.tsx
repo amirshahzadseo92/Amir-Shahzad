@@ -1,0 +1,565 @@
+import React, { useState, useMemo } from 'react';
+import { 
+  CheckCircle2, 
+  X, 
+  LogIn, 
+  CreditCard, 
+  Lock, 
+  Sparkles, 
+  AlertCircle, 
+  Info,
+  ShieldCheck,
+  Award
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+
+// Import local types
+import { ActivePage, ArticleBrief, ContentOrder } from './types';
+
+// Import mock datasets
+import { MOCK_BRIEFS, MOCK_ORDERS } from './data/mockData';
+
+// Import modular layouts & subpages
+import Header from './components/Header';
+import Footer from './components/Footer';
+import Dashboard from './components/Dashboard';
+
+import Home from './pages/Home';
+import BriefLibrary from './pages/BriefLibrary';
+import BriefDetail from './pages/BriefDetail';
+import Pricing from './pages/Pricing';
+import Blog from './pages/Blog';
+import Contact from './pages/Contact';
+
+export default function App() {
+  // Navigation & Details Routing states
+  const [currentPage, setCurrentPage] = useState<ActivePage>('home');
+  const [selectedBriefId, setSelectedBriefId] = useState<string | null>(null);
+  const [searchKeyword, setSearchKeyword] = useState<string>('');
+  const [activeLibraryTab, setActiveLibraryTab] = useState<'brief' | 'outline' | 'content' | 'write'>('brief');
+
+  // Authentication states
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [userEmail, setUserEmail] = useState<string>('hafizamirsaifi12345@gmail.com');
+  const [tempEmail, setTempEmail] = useState<string>('');
+  const [tempPassword, setTempPassword] = useState<string>('');
+  const [authModalType, setAuthModalType] = useState<'login' | 'signup' | null>(null);
+
+  // Core application transactional states
+  const [orders, setOrders] = useState<ContentOrder[]>(MOCK_ORDERS);
+  const [unlockedBriefIds, setUnlockedBriefIds] = useState<string[]>(['brief-2', 'brief-4']); // Pre-unlocked free briefs
+
+  // Outline Unlock Transaction state
+  const [unlockTargetId, setUnlockTargetId] = useState<string | null>(null);
+
+  // Toast banner alerts state
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info'; visible: boolean } | null>(null);
+
+  // Helper trigger to display custom toast
+  const triggerToast = (message: string, type: 'success' | 'info' = 'success') => {
+    setToast({ message, type, visible: true });
+    // Auto clear
+    setTimeout(() => {
+      setToast(prev => prev ? { ...prev, visible: false } : null);
+    }, 4500);
+  };
+
+  // Auth Action: Log in simulation
+  const handleLoginConfirm = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tempEmail || !tempPassword) {
+      triggerToast('Please provide both credentials.', 'info');
+      return;
+    }
+    setUserEmail(tempEmail);
+    setIsLoggedIn(true);
+    setAuthModalType(null);
+    triggerToast(`Welcome back, ${tempEmail.split('@')[0]}! Workspace synced successfully.`, 'success');
+  };
+
+  // Auth Action: Sign up simulation
+  const handleSignUpConfirm = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!tempEmail || !tempPassword) {
+      triggerToast('Please complete registration fields.', 'info');
+      return;
+    }
+    setUserEmail(tempEmail);
+    setIsLoggedIn(true);
+    setAuthModalType(null);
+    triggerToast('Account created! Welcome to Apex OS high performance workspaces.', 'success');
+  };
+
+  // Log out action
+  const handleLogOutToggle = () => {
+    if (isLoggedIn) {
+      setIsLoggedIn(false);
+      triggerToast('You have logged out of the workspace.', 'info');
+    } else {
+      setTempEmail(userEmail);
+      setTempPassword('');
+      setAuthModalType('login');
+    }
+  };
+
+  // Unlock Trigger
+  const handleUnlockTrigger = (id: string) => {
+    setUnlockTargetId(id);
+  };
+
+  // Payment Confirmation Action for Premium outlines
+  const handlePaymentConfirm = () => {
+    if (!unlockTargetId) return;
+
+    // Append to unlocked lists
+    setUnlockedBriefIds(prev => [...prev, unlockTargetId]);
+    
+    // Create simulated outline order record automatically
+    const targetBrief = MOCK_BRIEFS.find(b => b.id === unlockTargetId);
+    if (targetBrief) {
+      const newOrderRecord: ContentOrder = {
+        id: `ord-${Math.floor(100 + Math.random() * 900)}`,
+        title: `Premium Outline: ${targetBrief.title}`,
+        serviceType: 'Outline Access License',
+        status: 'Completed',
+        amount: '$49',
+        date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+      };
+      setOrders(prev => [newOrderRecord, ...prev]);
+    }
+
+    setUnlockTargetId(null);
+    triggerToast('Payment authorized successfully! Premium outline is now fully readable.', 'success');
+  };
+
+  // Navigate directly to contact to order custom copy
+  const handleOrderContentNavigate = (title: string) => {
+    setCurrentPage('contact');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    triggerToast(`Configuring campaign preset: "${title}"`, 'info');
+  };
+
+  // Add new order from dashboard
+  const handleAddNewOrder = (newOrder: ContentOrder) => {
+    setOrders(prev => [newOrder, ...prev]);
+  };
+
+  // Filter selected brief metadata for detail page
+  const selectedBrief = useMemo(() => {
+    return MOCK_BRIEFS.find(b => b.id === selectedBriefId) || MOCK_BRIEFS[0];
+  }, [selectedBriefId]);
+
+  // Compute related articles of similar category
+  const relatedBriefs = useMemo(() => {
+    if (!selectedBrief) return [];
+    return MOCK_BRIEFS.filter(b => b.category === selectedBrief.category && b.id !== selectedBrief.id).slice(0, 2);
+  }, [selectedBrief]);
+
+  return (
+    <div className="flex min-h-screen flex-col bg-white">
+      {/* Sticky Header */}
+      <Header
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        isLoggedIn={isLoggedIn}
+        onLoginToggle={handleLogOutToggle}
+        onSignUpOpen={() => {
+          setTempEmail('');
+          setTempPassword('');
+          setAuthModalType('signup');
+        }}
+        onNewArticleClick={() => {
+          setActiveLibraryTab('write');
+          setCurrentPage('library');
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        }}
+      />
+
+      {/* Main Render Views Router */}
+      <main className="flex-grow">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentPage + (selectedBriefId || '')}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -12 }}
+            transition={{ duration: 0.25, ease: 'easeOut' }}
+          >
+            {currentPage === 'home' && (
+              <Home
+                briefs={MOCK_BRIEFS}
+                setCurrentPage={setCurrentPage}
+                setSelectedBriefId={setSelectedBriefId}
+                setSearchKeyword={setSearchKeyword}
+                onToast={triggerToast}
+              />
+            )}
+
+            {currentPage === 'library' && (
+              <BriefLibrary
+                briefs={MOCK_BRIEFS}
+                setCurrentPage={setCurrentPage}
+                setSelectedBriefId={setSelectedBriefId}
+                searchKeyword={searchKeyword}
+                setSearchKeyword={setSearchKeyword}
+                initialLibrary={activeLibraryTab}
+                onLibraryChange={setActiveLibraryTab}
+              />
+            )}
+
+            {currentPage === 'detail' && selectedBrief && (
+              <BriefDetail
+                brief={selectedBrief}
+                onBack={() => {
+                  setCurrentPage('library');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                isUnlocked={unlockedBriefIds.includes(selectedBrief.id)}
+                onUnlock={handleUnlockTrigger}
+                onOrderContent={handleOrderContentNavigate}
+                relatedBriefs={relatedBriefs}
+                setSelectedBriefId={setSelectedBriefId}
+              />
+            )}
+
+            {currentPage === 'pricing' && (
+              <Pricing
+                setCurrentPage={setCurrentPage}
+                onToast={triggerToast}
+              />
+            )}
+
+            {currentPage === 'blog' && (
+              <Blog
+                onToast={triggerToast}
+              />
+            )}
+
+            {currentPage === 'contact' && (
+              <Contact
+                initialSubject={selectedBriefId ? `Custom Copywriting: ${selectedBrief.title}` : ''}
+                onToast={triggerToast}
+              />
+            )}
+
+            {currentPage === 'dashboard' && (
+              <Dashboard
+                userEmail={userEmail}
+                unlockedBriefIds={unlockedBriefIds.filter(id => id !== 'brief-2' && id !== 'brief-4')} // only user-unlocked ones
+                allBriefsCount={MOCK_BRIEFS.filter(b => b.status === 'Premium').length}
+                orders={orders}
+                onAddNewOrder={handleAddNewOrder}
+                onToast={triggerToast}
+                onNavigateToLibrary={() => {
+                  setCurrentPage('library');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </main>
+
+      {/* Styled Footer */}
+      <Footer 
+        setCurrentPage={setCurrentPage}
+        onToast={triggerToast}
+      />
+
+      {/* MODAL: Login System */}
+      <AnimatePresence>
+        {authModalType === 'login' && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setAuthModalType(null)}
+              className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" 
+            />
+
+            {/* Dialog Content */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 sm:p-8 shadow-2xl z-10 space-y-6"
+            >
+              <button 
+                onClick={() => setAuthModalType(null)}
+                className="absolute right-4 top-4 rounded-lg p-1.5 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="text-center space-y-1.5">
+                <div className="mx-auto rounded-xl bg-emerald-50 text-emerald-600 p-2.5 w-fit">
+                  <LogIn className="h-5 w-5" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Sign in to Apex OS</h3>
+                <p className="text-xs text-gray-500">Access unlocked outlines and view active writing briefs</p>
+              </div>
+
+              <form onSubmit={handleLoginConfirm} className="space-y-4">
+                <div className="space-y-1">
+                  <label htmlFor="login-email" className="text-2xs font-bold text-gray-500 uppercase tracking-wider block">Work Email</label>
+                  <input 
+                    id="login-email"
+                    type="email" 
+                    required
+                    value={tempEmail}
+                    onChange={(e) => setTempEmail(e.target.value)}
+                    placeholder="name@company.com"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label htmlFor="login-password" className="text-2xs font-bold text-gray-500 uppercase tracking-wider block">Password</label>
+                  <input 
+                    id="login-password"
+                    type="password" 
+                    required
+                    value={tempPassword}
+                    onChange={(e) => setTempPassword(e.target.value)}
+                    placeholder="Enter account security key"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 shadow shadow-emerald-50 transition-colors"
+                >
+                  Access Workspace
+                </button>
+              </form>
+
+              <div className="text-center">
+                <button 
+                  onClick={() => setAuthModalType('signup')}
+                  className="text-2xs text-emerald-600 hover:underline font-semibold"
+                >
+                  New to the platform? Register workspace
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL: Sign Up System */}
+      <AnimatePresence>
+        {authModalType === 'signup' && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setAuthModalType(null)}
+              className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" 
+            />
+
+            {/* Dialog Content */}
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 sm:p-8 shadow-2xl z-10 space-y-6"
+            >
+              <button 
+                onClick={() => setAuthModalType(null)}
+                className="absolute right-4 top-4 rounded-lg p-1.5 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="text-center space-y-1.5">
+                <div className="mx-auto rounded-xl bg-emerald-50 text-emerald-600 p-2.5 w-fit">
+                  <Award className="h-5 w-5" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Create Corporate Workspace</h3>
+                <p className="text-xs text-gray-500">Scale high volumes of data-backed, high-performing organic layouts</p>
+              </div>
+
+              <form onSubmit={handleSignUpConfirm} className="space-y-4">
+                <div className="space-y-1">
+                  <label htmlFor="signup-email" className="text-2xs font-bold text-gray-500 uppercase tracking-wider block">Your Corporate Email</label>
+                  <input 
+                    id="signup-email"
+                    type="email" 
+                    required
+                    value={tempEmail}
+                    onChange={(e) => setTempEmail(e.target.value)}
+                    placeholder="name@company.com"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label htmlFor="signup-password" className="text-2xs font-bold text-gray-500 uppercase tracking-wider block">Set Password</label>
+                  <input 
+                    id="signup-password"
+                    type="password" 
+                    required
+                    value={tempPassword}
+                    onChange={(e) => setTempPassword(e.target.value)}
+                    placeholder="Minimum 8 characters"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <button 
+                  type="submit"
+                  className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3 shadow shadow-emerald-50 transition-colors"
+                >
+                  Generate Workspace Keys
+                </button>
+              </form>
+
+              <div className="text-center">
+                <button 
+                  onClick={() => setAuthModalType('login')}
+                  className="text-2xs text-emerald-600 hover:underline font-semibold"
+                >
+                  Already have access? Log in
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* MODAL: Premium Checkout Payment Form */}
+      <AnimatePresence>
+        {unlockTargetId && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setUnlockTargetId(null)}
+              className="absolute inset-0 bg-gray-900/60 backdrop-blur-sm" 
+            />
+
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="relative w-full max-w-md rounded-3xl border border-gray-100 bg-white p-6 sm:p-8 shadow-2xl z-10 space-y-6"
+            >
+              <button 
+                onClick={() => setUnlockTargetId(null)}
+                className="absolute right-4 top-4 rounded-lg p-1.5 text-gray-400 hover:bg-gray-50 hover:text-gray-600"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="text-center space-y-1">
+                <div className="mx-auto rounded-xl bg-amber-50 text-amber-600 p-2.5 w-fit">
+                  <CreditCard className="h-5 w-5" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-900">Secure Checkout Gate</h3>
+                <p className="text-xs text-gray-500">SaaS Outline License Authorization</p>
+              </div>
+
+              {/* Mock Credit card decoration */}
+              <div className="rounded-2xl bg-gradient-to-tr from-emerald-800 to-emerald-950 p-5 text-white shadow-md space-y-6">
+                <div className="flex justify-between items-center">
+                  <span className="text-2xs font-semibold tracking-wider font-mono">APEX OS ELITE LICENSE</span>
+                  <div className="h-5 w-8 bg-white/20 rounded" />
+                </div>
+                <div className="space-y-1">
+                  <span className="block text-2xs text-emerald-300 font-mono">AUTHORIZED INVESTMENT</span>
+                  <span className="text-2xl font-bold tracking-tight font-mono">$49.00 USD</span>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="space-y-1">
+                  <label htmlFor="card-number" className="text-2xs font-bold text-gray-500 uppercase tracking-wider block">Card Details</label>
+                  <input 
+                    id="card-number"
+                    type="text" 
+                    defaultValue="4000 1234 5678 9010" 
+                    placeholder="Card Number"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label htmlFor="card-expiry" className="text-2xs font-bold text-gray-500 uppercase tracking-wider block">Expiry</label>
+                    <input 
+                      id="card-expiry"
+                      type="text" 
+                      defaultValue="06 / 29" 
+                      placeholder="MM / YY"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label htmlFor="card-cvc" className="text-2xs font-bold text-gray-500 uppercase tracking-wider block">CVC</label>
+                    <input 
+                      id="card-cvc"
+                      type="password" 
+                      defaultValue="777" 
+                      placeholder="•••"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-3.5 py-2.5 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono"
+                    />
+                  </div>
+                </div>
+
+                <button 
+                  onClick={handlePaymentConfirm}
+                  className="w-full flex items-center justify-center space-x-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 shadow"
+                >
+                  <span>Authorize & Process $49.00</span>
+                </button>
+
+                <div className="flex items-center justify-center space-x-1 text-2xs text-gray-400 font-medium">
+                  <ShieldCheck className="h-4 w-4 text-emerald-500" />
+                  <span>Encrypted SSL 256-bit certified transaction protocol</span>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* GLOBAL BANNER TOAST */}
+      <AnimatePresence>
+        {toast && toast.visible && (
+          <motion.div
+            initial={{ opacity: 0, y: 50, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 20, scale: 0.95 }}
+            className="fixed bottom-5 right-5 z-50 flex items-center space-x-3 rounded-2xl bg-gray-900 text-white p-4 max-w-sm shadow-xl border border-gray-800"
+          >
+            {toast.type === 'success' ? (
+              <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+            ) : (
+              <Info className="h-5 w-5 text-indigo-400 shrink-0" />
+            )}
+            <p className="text-xs leading-relaxed font-semibold pr-4">
+              {toast.message}
+            </p>
+            <button 
+              onClick={() => setToast(prev => prev ? { ...prev, visible: false } : null)}
+              className="rounded-lg p-0.5 hover:bg-gray-800 text-gray-400 hover:text-white"
+              aria-label="Close Toast"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+    </div>
+  );
+}
