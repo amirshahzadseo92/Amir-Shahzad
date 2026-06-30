@@ -38,7 +38,7 @@ export default function Header({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-gray-100 bg-white/80 backdrop-blur-md transition-all duration-300">
+    <header className="sticky top-0 z-50 w-full border-b border-zinc-900 bg-black/95 backdrop-blur-md transition-all duration-300">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-4 lg:px-4">
         {/* Logo & Navigation Action */}
         <div className="flex items-center gap-2 sm:gap-4">
@@ -46,7 +46,7 @@ export default function Header({
             onClick={() => handleNavClick('home')}
             className="cursor-pointer flex items-center h-full"
           >
-            <Logo size="md" showText={true} />
+            <Logo size="md" showText={true} theme="dark" />
           </div>
         </div>
 
@@ -58,8 +58,8 @@ export default function Header({
               <button
                 key={item.page}
                 onClick={() => handleNavClick(item.page)}
-                className={`relative py-2 text-sm font-medium transition-colors hover:text-emerald-600 ${
-                  isActive ? 'text-emerald-600' : 'text-gray-500'
+                className={`relative py-2 text-sm font-medium transition-colors hover:text-emerald-400 ${
+                  isActive ? 'text-emerald-400' : 'text-zinc-400'
                 }`}
               >
                 {item.label}
@@ -76,8 +76,8 @@ export default function Header({
           {isLoggedIn && (
             <button
               onClick={() => handleNavClick('dashboard')}
-              className={`relative py-2 text-sm font-medium transition-colors hover:text-emerald-600 ${
-                currentPage === 'dashboard' ? 'text-emerald-600' : 'text-gray-500'
+              className={`relative py-2 text-sm font-medium transition-colors hover:text-emerald-400 ${
+                currentPage === 'dashboard' ? 'text-emerald-400' : 'text-zinc-400'
               }`}
             >
               Dashboard
@@ -98,14 +98,14 @@ export default function Header({
             <div className="flex items-center space-x-3">
               <button
                 onClick={() => handleNavClick('dashboard')}
-                className="flex items-center space-x-1.5 rounded-full bg-emerald-50/80 px-4 py-2 text-sm font-medium text-emerald-700 hover:bg-emerald-100 transition-all border border-emerald-100"
+                className="flex items-center space-x-1.5 rounded-full bg-emerald-950/40 px-4 py-2 text-sm font-medium text-emerald-400 hover:bg-emerald-900/40 transition-all border border-emerald-900"
               >
                 <LayoutDashboard className="h-4 w-4" />
                 <span>My Workspace</span>
               </button>
               <button
                 onClick={onLoginToggle}
-                className="rounded-full p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 transition-colors"
+                className="rounded-full p-2 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
                 title="Log Out"
               >
                 <LogOut className="h-4 w-4" />
@@ -115,13 +115,13 @@ export default function Header({
             <>
               <button
                 onClick={onLoginToggle}
-                className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors px-3 py-2"
+                className="text-sm font-medium text-zinc-400 hover:text-white transition-colors px-3 py-2"
               >
                 Login
               </button>
               <button
                 onClick={onSignUpOpen}
-                className="flex items-center space-x-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 text-sm font-medium transition-all shadow-sm hover:shadow shadow-emerald-100"
+                className="flex items-center space-x-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 text-sm font-medium transition-all shadow-sm hover:shadow shadow-emerald-950/30"
               >
                 <span>Sign Up</span>
                 <ChevronRight className="h-4 w-4" />
@@ -134,7 +134,7 @@ export default function Header({
         <div className="flex items-center md:hidden">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="rounded-lg p-2 text-gray-500 hover:bg-gray-50 hover:text-gray-700 focus:outline-none"
+            className="rounded-lg p-2 text-zinc-400 hover:bg-zinc-900 hover:text-white focus:outline-none"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
@@ -150,7 +150,7 @@ export default function Header({
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-16 left-0 right-0 z-50 md:hidden border-t border-b border-gray-100 bg-white shadow-xl"
+            className="absolute top-16 left-0 right-0 z-50 md:hidden border-t border-b border-zinc-900 bg-black shadow-xl"
           >
             <div className="space-y-1 px-4 py-3 pb-6">
               {navItems.map((item) => (
@@ -159,8 +159,8 @@ export default function Header({
                   onClick={() => handleNavClick(item.page)}
                   className={`flex w-full items-center py-2.5 text-base font-medium rounded-lg px-3 ${
                     currentPage === item.page
-                      ? 'bg-emerald-50 text-emerald-700'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-emerald-950/40 text-emerald-400'
+                      : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
                   }`}
                 >
                   {item.label}
@@ -171,39 +171,39 @@ export default function Header({
                   onClick={() => handleNavClick('dashboard')}
                   className={`flex w-full items-center py-2.5 text-base font-medium rounded-lg px-3 ${
                     currentPage === 'dashboard'
-                      ? 'bg-emerald-50 text-emerald-700'
-                      : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-emerald-950/40 text-emerald-400'
+                      : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
                   }`}
                 >
                   Dashboard
                 </button>
               )}
-              <div className="pt-4 border-t border-gray-100 flex flex-col space-y-2 px-3">
+              <div className="pt-4 border-t border-zinc-900 flex flex-col space-y-2 px-3">
                 {isLoggedIn ? (
                   <div className="flex flex-col space-y-2">
                     <button
                       onClick={() => handleNavClick('dashboard')}
-                      className="flex items-center justify-center space-x-2 rounded-xl bg-emerald-50 px-4 py-2.5 text-sm font-medium text-emerald-700"
+                      className="flex items-center justify-center space-x-2 rounded-xl bg-emerald-950/40 px-4 py-2.5 text-sm font-medium text-emerald-400 border border-emerald-900"
                     >
                       <LayoutDashboard className="h-4 w-4" />
                       <span>My Workspace</span>
                     </button>
                     <button
                       onClick={onLoginToggle}
-                      className="flex items-center justify-center space-x-2 rounded-xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                      className="flex items-center justify-center space-x-2 rounded-xl border border-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-900"
                     >
                       <LogOut className="h-4 w-4" />
                       <span>Sign Out</span>
                     </button>
                   </div>
                 ) : (
-                  <>
+                  <div className="flex flex-col space-y-2">
                     <button
                       onClick={() => {
                         setMobileMenuOpen(false);
                         onLoginToggle();
                       }}
-                      className="flex items-center justify-center rounded-xl border border-gray-200 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-50"
+                      className="flex items-center justify-center rounded-xl border border-zinc-800 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-900"
                     >
                       Login
                     </button>
@@ -216,7 +216,7 @@ export default function Header({
                     >
                       Sign Up
                     </button>
-                  </>
+                  </div>
                 )}
               </div>
             </div>

@@ -4,9 +4,10 @@ import { motion, AnimatePresence } from 'motion/react';
 interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
   showText?: boolean;
+  theme?: 'light' | 'dark';
 }
 
-export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true }) => {
+export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme = 'light' }) => {
   const [logoText, setLogoText] = useState<'APEX' | 'OS'>('APEX');
 
   useEffect(() => {
@@ -47,14 +48,14 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true }) => {
         {/* AUTOMATION RING 1: Outermost dynamic orbit with dashed line (Slow clockwise rotation) */}
         <div className={`absolute inset-0 m-auto pointer-events-none flex items-center justify-center ${outerRingSize}`}>
           <div 
-            className="w-full h-full rounded-full border border-dashed border-slate-950/30 animate-[spin_20s_linear_infinite]"
+            className={`w-full h-full rounded-full border border-dashed ${theme === 'dark' ? 'border-white/80' : 'border-slate-950/30'} animate-[spin_20s_linear_infinite]`}
           />
         </div>
 
         {/* AUTOMATION RING 2: Middle orbit with dotted style (Faster counter-clockwise rotation) */}
         <div className={`absolute inset-0 m-auto pointer-events-none flex items-center justify-center ${middleRingSize}`}>
           <div 
-            className="w-full h-full rounded-full border border-dotted border-slate-950/25 animate-[spin_10s_linear_infinite_reverse]"
+            className={`w-full h-full rounded-full border border-dotted ${theme === 'dark' ? 'border-white/70' : 'border-slate-950/25'} animate-[spin_10s_linear_infinite_reverse]`}
           />
         </div>
 
@@ -177,14 +178,14 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true }) => {
       {showText && (
         <div className="flex flex-col justify-center pl-1 whitespace-nowrap">
           <div className="flex items-baseline gap-1">
-            <span className={`font-sans font-black tracking-[0.06em] text-slate-900 italic uppercase leading-none ${outerTextSize}`}>
+            <span className={`font-sans font-black tracking-[0.06em] italic uppercase leading-none ${outerTextSize} ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
               Apex
             </span>
             <span className={`font-display bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent uppercase leading-none tracking-[0.06em] ${outerOsTextSize}`}>
               OS
             </span>
           </div>
-          <span className={`font-display font-semibold text-black tracking-[0.2em] uppercase mt-0.5 md:mt-1.5 leading-none select-none ${outerSubTextSize}`}>
+          <span className={`font-display font-semibold tracking-[0.2em] uppercase mt-0.5 md:mt-1.5 leading-none select-none ${outerSubTextSize} ${theme === 'dark' ? 'text-slate-400' : 'text-black'}`}>
             Traffic Engine
           </span>
         </div>
