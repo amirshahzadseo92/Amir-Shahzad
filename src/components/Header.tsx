@@ -25,8 +25,8 @@ export default function Header({
 
   const navItems: { label: string; page: ActivePage }[] = [
     { label: 'Home', page: 'home' },
-    { label: 'Content Hub', page: 'library' },
-    { label: 'Pricing', page: 'pricing' },
+    { label: 'Portfolio', page: 'library' },
+    { label: 'Apex Tool', page: 'pricing' },
     { label: 'Blog', page: 'blog' },
     { label: 'Contact', page: 'contact' },
   ];

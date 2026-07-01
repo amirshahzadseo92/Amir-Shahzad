@@ -48,14 +48,14 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
         {/* AUTOMATION RING 1: Outermost dynamic orbit with dashed line (Slow clockwise rotation) */}
         <div className={`absolute inset-0 m-auto pointer-events-none flex items-center justify-center ${outerRingSize}`}>
           <div 
-            className={`w-full h-full rounded-full border border-dashed ${theme === 'dark' ? 'border-white/80' : 'border-slate-950/30'} animate-[spin_20s_linear_infinite]`}
+            className={`w-full h-full rounded-full border border-dashed ${theme === 'dark' ? 'border-white' : 'border-slate-950/30'} animate-[spin_20s_linear_infinite]`}
           />
         </div>
 
         {/* AUTOMATION RING 2: Middle orbit with dotted style (Faster counter-clockwise rotation) */}
         <div className={`absolute inset-0 m-auto pointer-events-none flex items-center justify-center ${middleRingSize}`}>
           <div 
-            className={`w-full h-full rounded-full border border-dotted ${theme === 'dark' ? 'border-white/70' : 'border-slate-950/25'} animate-[spin_10s_linear_infinite_reverse]`}
+            className={`w-full h-full rounded-full border border-dotted ${theme === 'dark' ? 'border-white' : 'border-slate-950/25'} animate-[spin_10s_linear_infinite_reverse]`}
           />
         </div>
 

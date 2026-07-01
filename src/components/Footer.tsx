@@ -36,9 +36,7 @@ export default function Footer({ setCurrentPage, onToast }: FooterProps) {
             <div className="cursor-pointer" onClick={() => navigateTo('home')}>
               <Logo size="sm" showText={true} />
             </div>
-            <p className="max-w-xs text-sm text-gray-500 leading-relaxed">
-              Unlock unmatched organic traffic with data-backed content briefs, premium semantic outlines, and expert-written agency content.
-            </p>
+
             <div className="flex space-x-4">
               <a href="#" className="text-gray-400 hover:text-emerald-600 transition-colors">
                 <Twitter className="h-5 w-5" />
@@ -63,7 +61,7 @@ export default function Footer({ setCurrentPage, onToast }: FooterProps) {
                 <ul className="mt-4 space-y-2.5">
                   <li>
                     <button onClick={() => navigateTo('library')} className="text-sm text-gray-500 hover:text-emerald-600 transition-colors text-left">
-                      Content Hub
+                      Portfolio
                     </button>
                   </li>
                   <li>
@@ -78,7 +76,7 @@ export default function Footer({ setCurrentPage, onToast }: FooterProps) {
                   </li>
                   <li>
                     <button onClick={() => navigateTo('pricing')} className="text-sm text-gray-500 hover:text-emerald-600 transition-colors text-left">
-                      SaaS Enterprise Pricing
+                      SaaS Enterprise Apex Tool
                     </button>
                   </li>
                 </ul>
