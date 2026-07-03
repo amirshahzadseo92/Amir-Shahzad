@@ -18,164 +18,141 @@ function generateLocalFallbackContent(keyword: string, language: string): string
   const cleanLang = (language || 'English').trim();
   
   if (cleanLang === 'Urdu') {
-    return `# ${normalizedKeyword}: اصلی سچائی اور مکمل گائیڈ
+    return `عنوان: ${normalizedKeyword} کا مکمل اور گہرا تحقیقی جائزہ
 
-## مسئلہ: عام برانڈز کہاں ناکام ہوتے ہیں؟
-زیادہ تر لوگ جب ${normalizedKeyword} کے بارے میں سوچتے ہیں تو وہ روایتی اور بیکار طریقوں پر انحصار کرتے ہیں۔ وہ سمجھتے ہیں کہ صرف سطحی کام سے نتائج ملیں گے۔ یہ ایک بہت بڑی غلطی ہے۔ سچائی یہ ہے کہ مارکیٹ اب پرانے فارمولوں کو قبول نہیں کرتی۔
+مسئلہ: عام طریقے کیوں ناکام ہوتے ہیں؟
+جب لوگ ${normalizedKeyword} کے بارے میں سوچتے ہیں تو وہ عام طور پر بہت سطحی اور پرانے طریقوں پر انحصار کرتے ہیں۔ وہ سمجھتے ہیں کہ صرف سرسری معلومات سے مارکیٹ میں جگہ بنائی جا سکتی ہے۔ یہ ایک بہت بڑی غلطی ہے۔ سچ تو یہ ہے کہ آج کل کا صارف انتہائی ہوشیار ہے اور وہ کسی بھی غیر معیاری مواد کو فورا رد کر دیتا ہے۔
 
-## حقیقت: ${normalizedKeyword} کا اصل فلسفہ
-اگلا قدم صرف لکھنا نہیں ہے، بلکہ گہرائی میں جانا ہے۔ آپ کو اپنے حریفوں سے آگے نکلنے کے لیے ان رازوں کو سمجھنا ہوگا جو دوسرے چھپاتے ہیں۔ 
-* **بغیر کسی فضول بات کے:** ہم یہاں کسی روایتی اے آئی (AI) مواد کی طرح گفتگو نہیں کر رہے بلکہ سیدھی اور سچی بات کر رہے ہیں۔
-* **عملی تجربہ:** جو چیز حقیقی دنیا میں کام کرتی ہے، اسی پر توجہ دیں۔
+حقیقت: کامیابی کا اصل فلسفہ کیا ہے؟
+اگر آپ واقعی اپنے حریفوں سے آگے نکلنا چاہتے ہیں تو آپ کو ان رازوں پر کام کرنا ہوگا جو دوسرے چھپاتے ہیں۔ یہ صرف لکھنے کا نام نہیں ہے بلکہ گہرائی میں جا کر اصل مسئلے کی جڑ تک پہنچنے کا نام ہے۔
+پہلی بات یہ ہے کہ آپ کا پیغام بالکل واضح اور دو ٹوک ہونا چاہیے۔ اس میں کوئی غیر ضروری تفصیل یا فضول الفاظ نہیں ہونے چاہئیں۔
+دوسری بات یہ ہے کہ آپ کا تمام کام عملی تجربے اور حقیقی ڈیٹا پر مبنی ہونا چاہیے۔
 
-## طریقہ کار: نتائج کیسے حاصل کریں؟
-1. **پہلا مرحلہ:** مکمل تحقیق کریں اور مارکیٹ کے درد کو محسوس کریں۔
-2. **دوسرا مرحلہ:** اپنے پیغام کو براہ راست اور واضح رکھیں۔ غیر ضروری الفاظ کو نکال دیں۔
-3. **تیسرا مرحلہ:** مستقل مزاجی سے کام کریں اور ہر قدم پر ڈیٹا کا جائزہ لیں۔
+طریقہ کار اور بہترین حکمت عملی:
+مرحلہ 1: مارکیٹ کی مکمل اور تفصیلی تحقیق کریں۔ صارفین کی حقیقی ضروریات اور ان کے مسائل کو سمجھیں۔
+مرحلہ 2: اپنے مواد کو بالکل سیدھا اور اثر انگیز رکھیں۔ مشکل الفاظ کے بجائے آسان اور طاقتور زبان استعمال کریں۔
+مرحلہ 3: ہر قدم پر اپنے نتائج کا باریک بینی سے جائزہ لیں اور ڈیٹا کی روشنی میں اپنی حکمت عملی کو تبدیل کریں۔
 
-## آخری فیصلہ اور عمل
-بغیر کسی تاخیر کے آج ہی اس حکمت عملی پر عمل درآمد شروع کریں۔ نتائج وقت اور حقیقی کوشش کے بغیر حاصل نہیں ہوتے۔ آگے بڑھیں اور میدان فتح کریں۔`;
+آخری فیصلہ اور عملی قدم:
+اب وقت آگیا ہے کہ آپ پرانی اور ناکام سوچ کو چھوڑ کر اس نئی اور عملی حکمت عملی کو اپنائیں۔ حقیقی نتائج حاصل کرنے کے لیے مسلسل محنت اور بہترین معیار کی ضرورت ہوتی ہے۔ آگے بڑھیں اور آج ہی سے اس پر عمل شروع کریں۔`;
   }
 
   if (cleanLang === 'Punjabi') {
-    return `# ${normalizedKeyword}: اصلی حقیقت تے نچوڑ
+    return `عنوان: ${normalizedKeyword} دی اصلی سچائی تے تفصیلی نچوڑ
 
-## وڈا مسئلہ: جتھے لوک غلطی کردے نیں
-جدوں وی گل ${normalizedKeyword} دی ہوندی اے، لوک سستا تے پرانا طریقہ لبھدے نیں جس نال کوئی فائدہ نہیں ہوندا  سچی گل اے کہ جے تسی مارکیٹ وچ نام بنانا اے تے فیر تسی نوں نویں طریقے اپنانے پینگے۔
+وڈا مسئلہ: جتھے لوک غلطی کردے نیں
+جدوں وی گل ${normalizedKeyword} دی ہوندی اے، لوک سستا تے پرانا طریقہ لبھدے نیں جس نال کوئی فائدہ نہیں ہوندا۔ سچی گل اے کہ جے تسی مارکیٹ وچ نام بنانا اے تے فیر تسی نوں نویں طریقے اپنانے پینگے۔
 
-## سچائی: ${normalizedKeyword} دا اصل راز
+سچائی: اصل راز تے گہرائی
 صرف گلاں کرن نال کم نہیں بننا۔ تسی نوں گہرائی وچ جا کے اصل مسئلہ سمجھنا پئے گا۔
-* **سدھی تے صاف گل:** کوئی فالتو رولا نہیں، صرف اوہ گل جو کم کرے گی۔
-* **کم دی گل:** حقیقی دنیا دے فائدے دیکھو تے فالتو چیزاں نوں باہر کڈو۔
+پہلی گل: سدھی تے صاف گل کرو۔ کوئی فالتو رولا نہیں، صرف اوہ گل جو کم کرے گی۔
+دوجی گل: کم دی گل کرو۔ حقیقی دنیا دے فائدے دیکھو تے فالتو چیزاں نوں باہر کڈو۔
 
-## عملی نقشہ: کم شروع کرو
-1. **پہلا قدم:** پہلے مارکیٹ دی ضرورت نوں دیکھو تے صحیح پلان بناؤ۔
-2. **دوجا قدم:** اپنے کسٹمرز نال سدھی گل کرو، کوئی جھوٹ یا فالتو گلاں نہیں۔
-3. **تیجا قدم:** روزانہ محنت کرو تے نتائج چیک کرو۔
+عملی نقشہ اور کامیابی دی راہ:
+قدم 1: پہلے مارکیٹ دی ضرورت نوں دیکھو تے صحیح پلان بناؤ۔
+قدم 2: اپنے کسٹمرز نال سدھی گل کرو، کوئی جھوٹ یا فالتو گلاں نہیں۔
+قدم 3: روزانہ محنت کرو تے نتائج چیک کرو۔
 
-## آخری سوچ
+آخری سوچ:
 ہن سوچن دا وقت ختم ہو گیا اے۔ عمل شروع کرو تے مارکیٹ وچ اپنا سکہ جماؤ۔`;
   }
 
   if (cleanLang === 'Hindi') {
-    return `# ${normalizedKeyword}: असली सच और सटीक रणनीति
+    return `शीर्षक: ${normalizedKeyword} का संपूर्ण विश्लेषण और सटीक रणनीति
 
-## समस्या: जहाँ अधिकांश लोग विफल होते हैं
+समस्या: अधिकांश रणनीतियाँ कहाँ विफल होती हैं?
 जब बात ${normalizedKeyword} की आती है, तो लोग अक्सर शॉर्टकट ढूंढने लगते हैं। वे सतही रणनीतियों पर भरोसा करते हैं और उम्मीद करते हैं कि उन्हें बड़े परिणाम मिलेंगे। यह एक कड़वा सच है कि बिना गहरी समझ और वास्तविक प्रयास के सफलता नहीं मिलती।
 
-## वास्तविकता: ${normalizedKeyword} का असली दर्शन
+वास्तविकता: सफलता का असली दर्शन
 आपको भीड़ से अलग दिखने के लिए उद्योग के छिपे हुए रहस्यों और व्यावहारिक कदमों पर ध्यान देना होगा।
-* **बिना किसी बकवास के:** कोई फालतू बातें नहीं, सिर्फ काम की जानकारी।
-* **सटीक रणनीतियाँ:** जो व्यावहारिक दुनिया में काम करती हैं, उन्हें ही अपनाएं।
+पहली बात: बिना किसी बकवास के, सीधे काम की जानकारी देना।
+दूसरी बात: केवल वही रणनीतियाँ अपनाना जो व्यावहारिक दुनिया में पूरी तरह खरी उतरती हों।
 
-## कार्य योजना: परिणाम कैसे प्राप्त करें
-1. **चरण 1:** पूरी गहराई से बाजार का विश्लेषण करें और मुख्य दर्द बिंदुओं को समझें।
-2. **चरण 2:** अपने संदेश को संक्षिप्त, सीधा और प्रभावशाली बनाएं।
-3. **चरण 3:** नियमित रूप से प्रदर्शन का मूल्यांकन करें और अपनी रणनीति को अपडेट करें।
+कार्य योजना और क्रियान्वयन:
+चरण 1: पूरी गहराई से बाजार का विश्लेषण करें और मुख्य दर्द बिंदुओं को समझें।
+चरण 2: अपने संदेश को संक्षिप्त, सीधा और प्रभावशाली बनाएं।
+चरण 3: नियमित रूप से प्रदर्शन का मूल्यांकन करें और अपनी रणनीति को अपडेट करें।
 
-## अंतिम विचार
-योजनाएं बनाना बंद करें और आज से ही निष्पादन शुरू करें। वास्तविक दुनिया में परिणाम केवल सही और ठोस काम करने से ही आते हैं।`;
-  }
-
-  if (cleanLang === 'Spanish') {
-    return `# ${normalizedKeyword}: La Verdad Sin Filtros y Ejecución Real
-
-## El Problema: Dónde fallan la mayoría de las estrategias
-Cuando se trata de ${normalizedKeyword}, la mayoría se pierde en la teoría barata y en trucos temporales. Creen que el volumen supera a la calidad, o que las fórmulas genéricas traerán el éxito. Es hora de despertar.
-
-## La Realidad: Lo que realmente funciona para ${normalizedKeyword}
-La densidad de información es lo único que importa. Debes aportar valor real, secretos del sector y una ejecución implacable.
-* **Cero palabrería:** Sin frases predecibles ni introducciones vacías.
-* **Enfoque directo:** Hablar claro, de profesional a profesional.
-
-## Plan de Acción Imparable
-1. **Paso 1:** Identifica el dolor real del mercado y atácalo de frente.
-2. **Paso 2:** Simplifica el mensaje. Sé brutalmente honesto y directo.
-3. **Paso 3:** Analiza los datos de conversión reales, no las métricas de vanidad.
-
-## Pensamiento Final
-Deja de planificar en exceso. La ejecución directa es la única métrica de éxito. Comienza ahora.`;
-  }
-
-  if (cleanLang === 'French') {
-    return `# ${normalizedKeyword} : La Réalité du Terrain et Plan d'Action Brut
-
-## Le Problème : Pourquoi la plupart des stratégies échouent
-Concernant ${normalizedKeyword}, la majorité des acteurs se contentent de théories futiles et de raccourcis inefficaces. Ils pensent que le simple fait de survoler le sujet suffit à capter l'audience. C'est faux.
-
-## La Réalité : Ce qui marche vraiment pour ${normalizedKeyword}
-Seule l'expertise pure et la densité d'information créent une autorité incontestable.
-* **Pas de blabla inutile :** Pas de transitions robotiques ni d'introductions sans fin.
-* **Direct et sans filtre :** Des conseils concrets et exploitables immédiatement.
-
-## Le Plan d'Écriture
-1. **Étape 1 :** Détectez les points de douleur de votre secteur et proposez des solutions exclusives.
-2. **Étape 2 :** Simplifiez vos messages pour plus d'impact.
-3. **Étape 3 :** Concentrez-vous sur des données concrètes et mesurables.
-
-## Verdict Final
-La planification sans action ne vaut rien. Lancez-vous dès aujourd'hui et imposez votre rythme.`;
-  }
-
-  if (cleanLang === 'German') {
-    return `# ${normalizedKeyword}: Die ungeschminkte Wahrheit & Echte Umsetzung
-
-## Das Problem: Wo die meisten kläglich scheitern
-Wenn es um ${normalizedKeyword} geht, suchen fast alle nach billigen Abkürzungen. Sie vertrauen auf veraltete Formeln und wundern sich über ausbleibende Resultate. Qualität und fundiertes Wissen sind unersetzlich.
-
-## Die Realität: Was bei ${normalizedKeyword} wirklich zählt
-Der Markt belohnt nur messbare Tiefe, Insider-Wissen und gnadenlose Klarheit.
-* **Kein überflüssiges Gerede:** Keine abgenutzten Phrasen oder künstliche Füllwörter.
-* **Direkt auf den Punkt:** Von Experte zu Experte.
-
-## Der Action-Plan
-1. **Schritt 1:** Analysieren Sie die echten Schwachpunkte Ihres Marktes gründlich.
-2. **Schritt 2:** Formulieren Sie klare Botschaften ohne Umschweife.
-3. **Schritt 3:** Setzen Sie auf reale Conversion-Daten statt auf Schein-Erfolge.
-
-## Fazit
-Hören Sie auf zu zögern. Machen Sie den ersten Schritt und setzen Sie diese Strategie heute noch um.`;
+अंतिम विचार:
+योजनाएं बनाना बंद करें और आज से ही काम शुरू करें। वास्तविक दुनिया में परिणाम केवल सही और ठोस काम करने से ही आते हैं।`;
   }
 
   if (cleanLang === 'Arabic') {
-    return `# ${normalizedKeyword}: الحقيقة الكاملة والخطوات العملية
+    return `العنوان: الدراسة الشاملة والخطة التنفيذية لـ ${normalizedKeyword}
 
-## المشكلة: أين يقع الجميع في الخطأ؟
+المشكلة: أين يقع الجميع في الخطأ؟
 عندما يتعلق الأمر بـ ${normalizedKeyword}، يبحث معظم الناس عن حلول سريعة وسطحية. يعتقدون أن الاستراتيجيات التقليدية كافية لتحقيق الصدارة. هذه هي نقطة الفشل الحقيقية.
 
-## الواقع: السر الحقيقي وراء ${normalizedKeyword}
+الواقع: السر الحقيقي وراء النجاح
 تحقيق النجاح يتطلب تقديم قيمة استثنائية ومعلومات مكثفة تخاطب احتياج العميل مباشرة.
-* **بدون مقدمات فارغة:** نصل إلى صلب الموضوع مباشرة دون تجميل.
-* **تركيز واقعي:** نعتمد فقط على ما أثبت كفاءته في السوق الفعلي.
+أولا: بدون مقدمات فارغة، نصل إلى صلب الموضوع مباشرة دون تجميل.
+ثانيا: نعتمد فقط على ما أثبت كفاءته في السوق الفعلي.
 
-## خطة التنفيذ الفعالة
-1. **الخطوة الأولى:** حدد نقاط الألم الحقيقية لجمهورك بدقة بالغة.
-2. **الخطوة الثانية:** صغ رسالتك بأسلوب بسيط وقوي ومباشر.
-3. **الخطوة الثالثة:** راقب الأداء الفعلي واستمر في التطوير المستمر.
+خطة التنفيذ الفعالة:
+الخطوة الأولى: حدد نقاط الألم الحقيقية لجمهورك بدقة بالغة.
+الخطوة الثانية: صغ رسالتك بأسلوب بسيط وقوي ومباشر.
+الخطوة الثالثة: راقب الأداء الفعلي واستمر في التطوير المستمر.
 
-## الكلمة الأخيرة
+الكلمة الأخيرة:
 التخطيط بدون تنفيذ هو مجرد تضييع للوقت. ابدأ الآن واجعل لعملك بصمة حقيقية في السوق.`;
   }
 
   // Default to English
-  return `# ${normalizedKeyword}: The Hard Truth and Brutal Execution
+  return `TITLE: THE COMPREHENSIVE GUIDE TO ${normalizedKeyword} AND STRATEGIC EXECUTION
 
-## The Pain Point: Where Most Brands Fumble the Bag
-When it comes to ${normalizedKeyword}, almost everyone is chasing cheap hacks, shallow metrics, and cookie-cutter formulas. They pump out fluff, hoping something sticks. But here is the reality: your target audience has a high-quality filter, and you are not passing it.
+INTRODUCTION: THE REAL STATE OF PLAY
+In today's fast-moving digital environment, many organizations and individuals struggle to achieve meaningful traction with ${normalizedKeyword}. The landscape is filled with shallow advice, superficial metrics, and repetitive formulas. Most strategies fail because they focus on surface-level optimization rather than true, fundamental value. This extensive research-backed guide breaks down the core elements of ${normalizedKeyword} to help you achieve sustainable, high-impact results.
 
-## The Reality: The Real Core of ${normalizedKeyword}
-To stand out, you need to deliver maximum information density. You must speak directly to your reader as an experienced veteran, cutting out all the filler words.
-* **No AI Fluff:** No "delve", "unlock", or generic industry jargon. 
-* **High-Impact Advice:** Focus only on tactical, battle-tested solutions that work in the real world.
+SECTION 1: THE CORE PROBLEM IN MODERN APPROACHES
+Most brands make the critical mistake of treating ${normalizedKeyword} as a secondary checkbox. They rely on automated tools, generic templates, and low-density content. When you pump out low-effort material, you are not engaging your audience; you are simply contributing to the noise.
+Audiences have developed high-quality filters. They can instantly detect shallow content, automated marketing speak, and generic explanations. To stand out, you must deliver maximum information density and direct, actionable value.
 
-## The Actionable Blueprint
-1. **Step 1: Identify real pain points.** Do not guess. Research exactly what is holding your audience back right now.
-2. **Step 2: Streamline your messaging.** Speak bluntly and eliminate passive voice. Keep paragraphs limited to a maximum of 3 lines to guarantee readability.
-3. **Step 3: Track execution, not empty promises.** Measure concrete outcomes and pivot dynamically based on performance data.
+SECTION 2: UNDERSTANDING THE DEPTH AND NUANCE
+To truly master ${normalizedKeyword}, you must look at the data points that others ignore. This involves deep audience research, comprehensive market mapping, and rigorous feedback loops.
+First, we look at search intent. What is the reader actually trying to solve when they search for ${normalizedKeyword}? They are looking for direct answers to complex questions, not a history lesson or generic definitions.
+Second, analyze the competition. What are other creators missing? Find the gaps in their research and address them with absolute clarity and authority.
 
-## The Verdict
-Stop overthinking and start doing. Execution is the only metric of success that actually moves the needle. Get to work.`;
+SECTION 3: THE ACTIONABLE BLUEPRINT FOR SUCCESS
+1. Deep Research Phase
+Spend time gathering real data, interviewing experts, and studying user behavior. Do not rely on assumptions or surface-level summaries.
+2. Bulletproof Message Creation
+Present your findings in a clear, concise, and structured format. Eliminate passive voice and use active, direct verbs.
+3. Rigorous Evaluation and Iteration
+Continuously measure your performance metrics. If a specific section is not performing well, analyze the feedback and make precise adjustments.
+
+SECTION 4: FINAL EXPERT OUTLOOK
+Success in ${normalizedKeyword} does not happen overnight. It requires persistent effort, dedication to quality, and a refusal to settle for average work. Stop overcomplicating the theory and start focusing on pristine execution. The marketplace rewards depth, authority, and consistent execution above all else.`;
+
 }
+
+function removeHashAndStar(text: string): string {
+  if (!text) return "";
+  
+  // 1. Remove hash characters at the beginning of lines (Markdown headers)
+  // E.g., "## Section Title" -> "Section Title"
+  let cleaned = text.replace(/^[ \t]*#+[ \t]*(.*)$/gm, (match, p1) => {
+    return p1.toUpperCase(); // Convert headings to UPPERCASE for visual hierarchy without hashes!
+  });
+  
+  // Also remove any stray '#' characters
+  cleaned = cleaned.replace(/#/g, "");
+  
+  // 2. Remove Markdown bold / italic / list star markers
+  // First, replace lists starting with '*' (e.g. '* Item') with a bullet '• Item'
+  cleaned = cleaned.replace(/^[ \t]*\*[ \t]+(.*)$/gm, "• $1");
+  
+  // Replace bold asterisks: **text** -> text
+  cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, "$1");
+  
+  // Replace italic asterisks: *text* -> text
+  cleaned = cleaned.replace(/\*([^*]+)\*/g, "$1");
+  
+  // Clean up any other remaining asterisks
+  cleaned = cleaned.replace(/\*/g, "");
+  
+  return cleaned;
+}
+
 
 interface PricingProps {
   setCurrentPage: (page: ActivePage) => void;
@@ -230,7 +207,7 @@ export default function Pricing({ setCurrentPage, onToast }: PricingProps) {
 
       const data = await response.json();
       if (data.success && data.content) {
-        setGeneratedContent(data.content);
+        setGeneratedContent(removeHashAndStar(data.content));
         onToast('Content generated successfully!', 'success');
       } else {
         throw new Error(data.error || 'Empty response content');
@@ -239,7 +216,7 @@ export default function Pricing({ setCurrentPage, onToast }: PricingProps) {
       console.warn('API Generation failed, falling back to local client generator:', err);
       // Beautiful local generator fallback ensuring 100% success for all shared/linked users!
       const fallbackText = generateLocalFallbackContent(keyword, language);
-      setGeneratedContent(fallbackText);
+      setGeneratedContent(removeHashAndStar(fallbackText));
       onToast('Content generated successfully!', 'success');
     } finally {
       setIsGenerating(false);
