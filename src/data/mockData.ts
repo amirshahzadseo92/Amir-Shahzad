@@ -1,4 +1,4 @@
-import { ArticleBrief, BlogPost, ContentOrder, DownloadedOutline } from '../types';
+import { ArticleBrief, BlogPost, ContentOrder, DownloadedOutline, OutlineItem, ContentItem } from '../types';
 
 export const CATEGORIES = [
   'All',
@@ -237,5 +237,88 @@ export const MOCK_DOWNLOADS: DownloadedOutline[] = [
     title: 'B2B SaaS Link Building Tactics - Premium Framework',
     unlockedAt: 'June 15, 2026',
     size: '288 KB'
+  }
+];
+
+export const MOCK_OUTLINES: OutlineItem[] = [
+  {
+    id: 'out-1',
+    title: 'High-Performance SaaS Product Landing Page Layout',
+    category: 'SaaS Strategy',
+    wordCount: '1,500 - 2,000 words',
+    headings: 8,
+    entities: 24,
+    score: 92,
+    difficulty: 'Medium',
+    sections: ['Hero Headline Optimization', 'Feature Bento Grid Structure', 'Social Proof Integration', 'Technical FAQ Segment'],
+  },
+  {
+    id: 'out-2',
+    title: 'Ultimate Developer Tutorial & Integration Blueprint',
+    category: 'Web Development',
+    wordCount: '2,500 - 3,200 words',
+    headings: 12,
+    entities: 38,
+    score: 95,
+    difficulty: 'Hard',
+    sections: ['Architecture Overview', 'Step-by-Step Code Walkthrough', 'Performance Benchmarks', 'Security Best Practices'],
+  },
+  {
+    id: 'out-3',
+    title: 'B2B Thought Leadership Lead Magnet Outline',
+    category: 'Content Marketing',
+    wordCount: '1,800 - 2,200 words',
+    headings: 6,
+    entities: 18,
+    score: 89,
+    difficulty: 'Medium',
+    sections: ['Industry Pain Points Analysis', 'Statistical Proof points', 'Actionable Strategic Framework', 'Conversion CTA Optimization'],
+  },
+  {
+    id: 'out-4',
+    title: 'E-commerce Category Page SEO Entity Map',
+    category: 'SEO & Growth',
+    wordCount: '1,200 - 1,500 words',
+    headings: 5,
+    entities: 32,
+    score: 88,
+    difficulty: 'Easy',
+    sections: ['User Search Intent Mapping', 'Product Selection Guidelines', 'Value Proposition Callouts', 'Internal Linking Strategy'],
+  }
+];
+
+export const MOCK_CONTENTS: ContentItem[] = [
+  {
+    id: 'cnt-1',
+    title: 'Getting Started with Node.js Multi-Threading & Worker Pools',
+    category: 'Web Development',
+    readTime: '6 min read',
+    gradeLevel: 'Grade 10',
+    density: '1.8%',
+    summary: 'A deep-dive tutorial explaining CPU-bound task optimization in Node.js, implementing custom thread worker pools to scale background processing safely.',
+    keywords: ['Worker Threads', 'CPU Bound', 'Performance Optimization', 'Thread Pool'],
+    content: `# Getting Started with Node.js Multi-Threading & Worker Pools\n\nTraditional Node.js operates on a single-event loop. While this asynchronous design works perfectly for I/O operations, heavy mathematical calculations or data compression can block the main loop.\n\n### Why Worker Threads matter\nBy spawning background threads, we can leverage multi-core processors. Let's see how optimization is handled dynamically:\n\n1. Spawning workers keeps primary loops responsive.\n2. In high-performance systems, worker pools manage queueing overhead.\n\nImplementing this scalable architecture keeps enterprise backends running smoothly.`
+  },
+  {
+    id: 'cnt-2',
+    title: 'Top 10 Marketing Automation Frameworks for Enterprise Scale',
+    category: 'Content Marketing',
+    readTime: '8 min read',
+    gradeLevel: 'Grade 12',
+    density: '2.1%',
+    summary: 'Analyze and compare multi-channel CRM, email delivery networks, and automated funnel triggers to scale lead acquisition seamlessly.',
+    keywords: ['Lead Funnels', 'CRM Automation', 'ROI Metrics', 'Enterprise SaaS'],
+    content: `# Top 10 Marketing Automation Frameworks\n\nEnterprise client acquisition requires flawless integration across disparate funnel systems. By centralizing your CRM metrics, marketing campaigns gain massive compounding leverage.\n\n### Key Pillars of Automation\n- Multi-stage sequence onboarding\n- Real-time attribution routing\n- Automated email workflows\n\nTransitioning to advanced automated flows drives higher user retention and long-term customer life value.`
+  },
+  {
+    id: 'cnt-3',
+    title: 'Ultimate Guide to Headless CMS Architecture and Deployment',
+    category: 'AI & Automation',
+    readTime: '10 min read',
+    gradeLevel: 'Grade 11',
+    density: '1.9%',
+    summary: 'How decoupling content APIs from presentation layers enhances static site rendering speeds, improves core web vitals, and secures user interfaces.',
+    keywords: ['GraphQL APIs', 'Decoupled Architecture', 'Static Site Rendering', 'Core Web Vitals'],
+    content: `# Ultimate Guide to Headless CMS Architecture\n\nDecoupled architectures separate structured database elements from front-end layout presentations. Utilizing GraphQL APIs ensures lightning-fast hydration rates.\n\n### Performance Benchmarks\nStatic rendering speeds up Largest Contentful Paint (LCP) times, raising search results directly. Security is also significantly increased because databases aren't directly exposed on public domains.`
   }
 ];

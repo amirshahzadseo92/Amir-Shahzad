@@ -65,7 +65,7 @@ export default function BriefDetail({
           <span className="text-sm font-mono text-gray-400">{brief.date}</span>
         </div>
 
-        <h1 className="text-3xl font-extrabold tracking-tight text-gray-900 sm:text-4xl leading-tight">
+        <h1 className={`text-3xl font-extrabold tracking-tight sm:text-4xl leading-tight ${brief.titleColor || 'text-gray-900'} ${brief.fontStyle || ''}`}>
           {brief.title}
         </h1>
 

@@ -26,7 +26,7 @@ export default function BriefCard({ brief, onRead }: BriefCardProps) {
   const getCategoryColor = (cat: string) => {
     switch (cat) {
       case 'AI & Automation':
-        return 'bg-purple-50 text-purple-700 border-purple-100';
+        return 'bg-teal-50 text-teal-700 border-teal-100';
       case 'SEO & Growth':
         return 'bg-emerald-50 text-emerald-700 border-emerald-100';
       case 'Web Development':
@@ -73,7 +73,7 @@ export default function BriefCard({ brief, onRead }: BriefCardProps) {
         </div>
 
         {/* Title */}
-        <h3 className="text-lg font-bold tracking-tight text-gray-900 group-hover:text-emerald-700 transition-colors duration-200 line-clamp-2">
+        <h3 className={`text-lg font-bold tracking-tight group-hover:text-emerald-700 transition-colors duration-200 line-clamp-2 ${brief.titleColor || 'text-gray-900'} ${brief.fontStyle || ''}`}>
           {brief.title}
         </h3>
 

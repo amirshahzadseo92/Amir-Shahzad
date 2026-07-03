@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   CheckCircle2, 
   X, 
@@ -14,10 +14,10 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 // Import local types
-import { ActivePage, ArticleBrief, ContentOrder } from './types';
+import { ActivePage, ArticleBrief, ContentOrder, OutlineItem, ContentItem } from './types';
 
 // Import mock datasets
-import { MOCK_BRIEFS, MOCK_ORDERS } from './data/mockData';
+import { MOCK_BRIEFS, MOCK_ORDERS, MOCK_OUTLINES, MOCK_CONTENTS } from './data/mockData';
 
 // Import modular layouts & subpages
 import Header from './components/Header';
@@ -39,15 +39,130 @@ export default function App() {
   const [activeLibraryTab, setActiveLibraryTab] = useState<'brief' | 'outline' | 'content' | 'write'>('brief');
 
   // Authentication states
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
   const [userEmail, setUserEmail] = useState<string>('hafizamirsaifi12345@gmail.com');
   const [tempEmail, setTempEmail] = useState<string>('');
   const [tempPassword, setTempPassword] = useState<string>('');
   const [authModalType, setAuthModalType] = useState<'login' | 'signup' | null>(null);
 
   // Core application transactional states
-  const [orders, setOrders] = useState<ContentOrder[]>(MOCK_ORDERS);
-  const [unlockedBriefIds, setUnlockedBriefIds] = useState<string[]>(['brief-2', 'brief-4']); // Pre-unlocked free briefs
+  const [orders, setOrders] = useState<ContentOrder[]>(() => {
+    const saved = localStorage.getItem('apex_orders');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Error parsing orders:', e);
+      }
+    }
+    return MOCK_ORDERS;
+  });
+
+  const [unlockedBriefIds, setUnlockedBriefIds] = useState<string[]>(() => {
+    const saved = localStorage.getItem('apex_unlocked_briefs');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Error parsing unlockedBriefIds:', e);
+      }
+    }
+    return ['brief-2', 'brief-4']; // Pre-unlocked free briefs
+  });
+
+  // Core application dynamic dataset states
+  const [briefs, setBriefs] = useState<ArticleBrief[]>(() => {
+    const saved = localStorage.getItem('apex_briefs');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Error parsing briefs:', e);
+      }
+    }
+    return MOCK_BRIEFS;
+  });
+
+  const [outlines, setOutlines] = useState<OutlineItem[]>(() => {
+    const saved = localStorage.getItem('apex_outlines');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Error parsing outlines:', e);
+      }
+    }
+    return MOCK_OUTLINES;
+  });
+
+  const [contents, setContents] = useState<ContentItem[]>(() => {
+    const saved = localStorage.getItem('apex_contents');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Error parsing contents:', e);
+      }
+    }
+    return MOCK_CONTENTS;
+  });
+
+  // Sync state modifications to localStorage
+  useEffect(() => {
+    localStorage.setItem('apex_orders', JSON.stringify(orders));
+  }, [orders]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_unlocked_briefs', JSON.stringify(unlockedBriefIds));
+  }, [unlockedBriefIds]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_briefs', JSON.stringify(briefs));
+  }, [briefs]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_outlines', JSON.stringify(outlines));
+  }, [outlines]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_contents', JSON.stringify(contents));
+  }, [contents]);
+
+  const handlePublishBrief = (newBrief: ArticleBrief) => {
+    setBriefs(prev => [newBrief, ...prev]);
+  };
+
+  const handleEditBrief = (updatedBrief: ArticleBrief) => {
+    setBriefs(prev => prev.map(b => b.id === updatedBrief.id ? updatedBrief : b));
+  };
+
+  const handleDeleteBrief = (id: string) => {
+    setBriefs(prev => prev.filter(b => b.id !== id));
+  };
+
+  const handlePublishOutline = (newOutline: OutlineItem) => {
+    setOutlines(prev => [newOutline, ...prev]);
+  };
+
+  const handleEditOutline = (updatedOutline: OutlineItem) => {
+    setOutlines(prev => prev.map(o => o.id === updatedOutline.id ? updatedOutline : o));
+  };
+
+  const handleDeleteOutline = (id: string) => {
+    setOutlines(prev => prev.filter(o => o.id !== id));
+  };
+
+  const handlePublishContent = (newContent: ContentItem) => {
+    setContents(prev => [newContent, ...prev]);
+  };
+
+  const handleEditContent = (updatedContent: ContentItem) => {
+    setContents(prev => prev.map(c => c.id === updatedContent.id ? updatedContent : c));
+  };
+
+  const handleDeleteContent = (id: string) => {
+    setContents(prev => prev.filter(c => c.id !== id));
+  };
 
   // Outline Unlock Transaction state
   const [unlockTargetId, setUnlockTargetId] = useState<string | null>(null);
@@ -146,14 +261,14 @@ export default function App() {
 
   // Filter selected brief metadata for detail page
   const selectedBrief = useMemo(() => {
-    return MOCK_BRIEFS.find(b => b.id === selectedBriefId) || MOCK_BRIEFS[0];
-  }, [selectedBriefId]);
+    return briefs.find(b => b.id === selectedBriefId) || briefs[0];
+  }, [briefs, selectedBriefId]);
 
   // Compute related articles of similar category
   const relatedBriefs = useMemo(() => {
     if (!selectedBrief) return [];
-    return MOCK_BRIEFS.filter(b => b.category === selectedBrief.category && b.id !== selectedBrief.id).slice(0, 2);
-  }, [selectedBrief]);
+    return briefs.filter(b => b.category === selectedBrief.category && b.id !== selectedBrief.id).slice(0, 2);
+  }, [briefs, selectedBrief]);
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
@@ -187,7 +302,7 @@ export default function App() {
           >
             {currentPage === 'home' && (
               <Home
-                briefs={MOCK_BRIEFS}
+                briefs={briefs}
                 setCurrentPage={setCurrentPage}
                 setSelectedBriefId={setSelectedBriefId}
                 setSearchKeyword={setSearchKeyword}
@@ -197,7 +312,9 @@ export default function App() {
 
             {currentPage === 'library' && (
               <BriefLibrary
-                briefs={MOCK_BRIEFS}
+                briefs={briefs}
+                outlines={outlines}
+                contents={contents}
                 setCurrentPage={setCurrentPage}
                 setSelectedBriefId={setSelectedBriefId}
                 searchKeyword={searchKeyword}
@@ -246,7 +363,7 @@ export default function App() {
               <Dashboard
                 userEmail={userEmail}
                 unlockedBriefIds={unlockedBriefIds.filter(id => id !== 'brief-2' && id !== 'brief-4')} // only user-unlocked ones
-                allBriefsCount={MOCK_BRIEFS.filter(b => b.status === 'Premium').length}
+                allBriefsCount={briefs.filter(b => b.status === 'Premium').length}
                 orders={orders}
                 onAddNewOrder={handleAddNewOrder}
                 onToast={triggerToast}
@@ -254,6 +371,18 @@ export default function App() {
                   setCurrentPage('library');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
+                briefs={briefs}
+                outlines={outlines}
+                contents={contents}
+                onPublishBrief={handlePublishBrief}
+                onPublishOutline={handlePublishOutline}
+                onPublishContent={handlePublishContent}
+                onEditBrief={handleEditBrief}
+                onDeleteBrief={handleDeleteBrief}
+                onEditOutline={handleEditOutline}
+                onDeleteOutline={handleDeleteOutline}
+                onEditContent={handleEditContent}
+                onDeleteContent={handleDeleteContent}
               />
             )}
           </motion.div>

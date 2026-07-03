@@ -1,38 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
-  LayoutDashboard, 
-  FileText, 
-  ShoppingBag, 
-  Download, 
-  User, 
-  Settings, 
-  TrendingUp, 
-  Clock, 
-  CheckCircle, 
+  Lock, 
+  Sparkles, 
   Plus, 
-  ArrowUpRight, 
-  Search, 
-  DownloadCloud, 
-  Database,
-  Briefcase,
-  Layers,
-  Award,
-  Globe,
-  BellRing,
-  Sparkles
+  Edit, 
+  Trash2, 
+  Layers, 
+  FileText, 
+  PenTool, 
+  CreditCard,
+  X,
+  PlusCircle,
+  FolderOpen
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { MOCK_ORDERS, MOCK_DOWNLOADS } from '../data/mockData';
-import { ContentOrder, DownloadedOutline } from '../types';
+import { ArticleBrief, OutlineItem, ContentItem, ContentOrder } from '../types';
 
 interface DashboardProps {
   userEmail: string;
   unlockedBriefIds: string[];
   allBriefsCount: number;
   orders: ContentOrder[];
-  onAddNewOrder: (order: ContentOrder) => void;
+  onAddNewOrder: (newOrder: ContentOrder) => void;
   onToast: (msg: string, type: 'success' | 'info') => void;
   onNavigateToLibrary: () => void;
+  briefs: ArticleBrief[];
+  outlines: OutlineItem[];
+  contents: ContentItem[];
+  onPublishBrief: (b: ArticleBrief) => void;
+  onPublishOutline: (o: OutlineItem) => void;
+  onPublishContent: (c: ContentItem) => void;
+  onEditBrief: (b: ArticleBrief) => void;
+  onDeleteBrief: (id: string) => void;
+  onEditOutline: (o: OutlineItem) => void;
+  onDeleteOutline: (id: string) => void;
+  onEditContent: (c: ContentItem) => void;
+  onDeleteContent: (id: string) => void;
 }
 
 export default function Dashboard({
@@ -43,609 +46,886 @@ export default function Dashboard({
   onAddNewOrder,
   onToast,
   onNavigateToLibrary,
+  briefs,
+  outlines,
+  contents,
+  onPublishBrief,
+  onPublishOutline,
+  onPublishContent,
+  onEditBrief,
+  onDeleteBrief,
+  onEditOutline,
+  onDeleteOutline,
+  onEditContent,
+  onDeleteContent,
 }: DashboardProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'outlines' | 'orders' | 'downloads' | 'profile' | 'settings'>('overview');
-  
-  // Custom states
-  const [newOrderTitle, setNewOrderTitle] = useState('');
-  const [newOrderService, setNewOrderService] = useState('Single Expert Article');
-  const [newOrderCost, setNewOrderCost] = useState('$399');
-  const [showOrderForm, setShowOrderForm] = useState(false);
-  const [userProfileName, setUserProfileName] = useState('Enterprise Growth partner');
-  const [userWebsite, setUserWebsite] = useState('https://growthmetric.io');
+  // Password Lock state
+  const [password, setPassword] = useState('');
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
-  // Trigger simulated custom order insertion
-  const handleCreateOrder = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newOrderTitle.trim()) {
-      onToast('Please provide a descriptive article topic.', 'info');
-      return;
+  // Tab State
+  const [activeTab, setActiveTab] = useState<'briefs' | 'outlines' | 'contents' | 'orders'>('briefs');
+
+  // Form Modals states
+  const [editingBrief, setEditingBrief] = useState<ArticleBrief | null>(null);
+  const [isBriefModalOpen, setIsBriefModalOpen] = useState(false);
+  const [briefForm, setBriefForm] = useState({
+    title: '',
+    category: '',
+    previewText: '',
+    fullBrief: '',
+    keywords: '',
+    targetAudience: '',
+    searchVolume: '',
+    difficulty: 'Easy' as 'Easy' | 'Medium' | 'Hard',
+    status: 'Free' as 'Free' | 'Premium',
+  });
+
+  const [editingOutline, setEditingOutline] = useState<OutlineItem | null>(null);
+  const [isOutlineModalOpen, setIsOutlineModalOpen] = useState(false);
+  const [outlineForm, setOutlineForm] = useState({
+    title: '',
+    category: '',
+    wordCount: '',
+    headings: 5,
+    entities: 10,
+    score: 85,
+    difficulty: 'Easy' as 'Easy' | 'Medium' | 'Hard',
+    sections: '',
+  });
+
+  const [editingContent, setEditingContent] = useState<ContentItem | null>(null);
+  const [isContentModalOpen, setIsContentModalOpen] = useState(false);
+  const [contentForm, setContentForm] = useState({
+    title: '',
+    category: '',
+    readTime: '',
+    gradeLevel: '10th Grade',
+    density: '2.5%',
+    summary: '',
+    keywords: '',
+    content: '',
+  });
+
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const [orderForm, setOrderForm] = useState({
+    title: '',
+    serviceType: 'Premium Copywriting Service',
+    amount: '$199',
+    status: 'In Queue' as 'In Queue' | 'In Progress' | 'Under Review' | 'Completed',
+  });
+
+  // Check localStorage for unlock state on mount
+  useEffect(() => {
+    const savedUnlock = localStorage.getItem('apex_admin_unlocked');
+    if (savedUnlock === 'true') {
+      setIsUnlocked(true);
     }
+  }, []);
 
-    const created: ContentOrder = {
-      id: `ord-${Math.floor(100 + Math.random() * 900)}`,
-      title: newOrderTitle,
-      serviceType: newOrderService,
-      status: 'In Queue',
-      amount: newOrderCost,
-      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+  // Password submission logic
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (password === 'Hafiz@9263') {
+      setIsUnlocked(true);
+      setErrorMsg('');
+      localStorage.setItem('apex_admin_unlocked', 'true');
+      onToast('Admin Panel unlocked successfully!', 'success');
+    } else {
+      setErrorMsg('Incorrect password. Please try again.');
+    }
+  };
+
+  const handleLockPanel = () => {
+    setIsUnlocked(false);
+    localStorage.removeItem('apex_admin_unlocked');
+    setPassword('');
+    onToast('Admin Panel locked.', 'info');
+  };
+
+  // ---------------- BRIEF CRUD ----------------
+  const openNewBrief = () => {
+    setEditingBrief(null);
+    setBriefForm({
+      title: '',
+      category: 'SaaS Technology',
+      previewText: '',
+      fullBrief: '',
+      keywords: 'saas, optimization',
+      targetAudience: 'Product Managers',
+      searchVolume: '4,500/mo',
+      difficulty: 'Easy',
+      status: 'Free',
+    });
+    setIsBriefModalOpen(true);
+  };
+
+  const openEditBrief = (brief: ArticleBrief) => {
+    setEditingBrief(brief);
+    setBriefForm({
+      title: brief.title,
+      category: brief.category,
+      previewText: brief.previewText,
+      fullBrief: brief.fullBrief,
+      keywords: brief.keywords.join(', '),
+      targetAudience: brief.targetAudience,
+      searchVolume: brief.searchVolume,
+      difficulty: brief.difficulty,
+      status: brief.status,
+    });
+    setIsBriefModalOpen(true);
+  };
+
+  const saveBrief = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanBrief: ArticleBrief = {
+      id: editingBrief ? editingBrief.id : `brief-${Date.now()}`,
+      title: briefForm.title,
+      category: briefForm.category,
+      previewText: briefForm.previewText,
+      fullBrief: briefForm.fullBrief,
+      keywords: briefForm.keywords.split(',').map(s => s.trim()).filter(Boolean),
+      targetAudience: briefForm.targetAudience,
+      searchVolume: briefForm.searchVolume,
+      difficulty: briefForm.difficulty,
+      status: briefForm.status,
+      date: editingBrief ? editingBrief.date : new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
     };
 
-    onAddNewOrder(created);
-    onToast(`Successfully submitted order: ${newOrderTitle}`, 'success');
-    setNewOrderTitle('');
-    setShowOrderForm(false);
+    if (editingBrief) {
+      onEditBrief(cleanBrief);
+      onToast('Brief updated successfully!', 'success');
+    } else {
+      onPublishBrief(cleanBrief);
+      onToast('New Brief published!', 'success');
+    }
+    setIsBriefModalOpen(false);
   };
 
-  // Adjust cost preview on service type change
-  const handleServiceChange = (service: string) => {
-    setNewOrderService(service);
-    if (service === 'Single Expert Article') setNewOrderCost('$399');
-    else if (service === 'Custom Content Pack') setNewOrderCost('$1,199');
-    else if (service === 'High Authority Whitepaper') setNewOrderCost('$1,899');
+  // ---------------- OUTLINE CRUD ----------------
+  const openNewOutline = () => {
+    setEditingOutline(null);
+    setOutlineForm({
+      title: '',
+      category: 'Technology',
+      wordCount: '1,500 words',
+      headings: 6,
+      entities: 12,
+      score: 88,
+      difficulty: 'Easy',
+      sections: 'Introduction\nCore Concepts\nDetailed Case Studies\nConclusion & Takeaways',
+    });
+    setIsOutlineModalOpen(true);
   };
 
-  const menuItems = [
-    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'outlines', label: 'Purchased Outlines', icon: FileText, badge: unlockedBriefIds.length ? `${unlockedBriefIds.length}` : null },
-    { id: 'orders', label: 'Content Orders', icon: ShoppingBag, badge: orders.filter(o => o.status !== 'Completed').length ? `${orders.filter(o => o.status !== 'Completed').length}` : null },
-    { id: 'downloads', label: 'Downloads', icon: Download },
-    { id: 'profile', label: 'Profile', icon: User },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ];
+  const openEditOutline = (out: OutlineItem) => {
+    setEditingOutline(out);
+    setOutlineForm({
+      title: out.title,
+      category: out.category,
+      wordCount: out.wordCount,
+      headings: out.headings,
+      entities: out.entities,
+      score: out.score,
+      difficulty: out.difficulty,
+      sections: out.sections.join('\n'),
+    });
+    setIsOutlineModalOpen(true);
+  };
 
-  return (
-    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      {/* Workspace Greeting Header */}
-      <div className="mb-8 flex flex-col justify-between gap-4 border-b border-gray-100 pb-6 sm:flex-row sm:items-center">
-        <div>
-          <span className="text-xs font-semibold tracking-wider text-emerald-600 uppercase font-mono">Workspace Overview</span>
-          <h1 className="text-3xl font-bold tracking-tight text-gray-900 mt-1">
-            Welcome, {userProfileName.split(' ')[0]}!
-          </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Account: <span className="font-mono text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-700">{userEmail}</span>
-          </p>
-        </div>
+  const saveOutline = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanOutline: OutlineItem = {
+      id: editingOutline ? editingOutline.id : `outline-${Date.now()}`,
+      title: outlineForm.title,
+      category: outlineForm.category,
+      wordCount: outlineForm.wordCount,
+      headings: Number(outlineForm.headings),
+      entities: Number(outlineForm.entities),
+      score: Number(outlineForm.score),
+      difficulty: outlineForm.difficulty,
+      sections: outlineForm.sections.split('\n').map(s => s.trim()).filter(Boolean),
+    };
 
-        <div className="flex items-center space-x-3">
-          <button
-            onClick={() => {
-              setActiveTab('orders');
-              setShowOrderForm(true);
-            }}
-            className="flex items-center space-x-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-100 hover:bg-emerald-500 transition-all hover:scale-[1.02]"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Order Custom Content</span>
-          </button>
+    if (editingOutline) {
+      onEditOutline(cleanOutline);
+      onToast('Outline updated successfully!', 'success');
+    } else {
+      onPublishOutline(cleanOutline);
+      onToast('New Outline published!', 'success');
+    }
+    setIsOutlineModalOpen(false);
+  };
+
+  // ---------------- CONTENT CRUD ----------------
+  const openNewContent = () => {
+    setEditingContent(null);
+    setContentForm({
+      title: '',
+      category: 'SEO Strategy',
+      readTime: '6 min read',
+      gradeLevel: '11th Grade',
+      density: '2.1%',
+      summary: '',
+      keywords: 'seo, content strategy',
+      content: '',
+    });
+    setIsContentModalOpen(true);
+  };
+
+  const openEditContent = (cnt: ContentItem) => {
+    setEditingContent(cnt);
+    setContentForm({
+      title: cnt.title,
+      category: cnt.category,
+      readTime: cnt.readTime,
+      gradeLevel: cnt.gradeLevel,
+      density: cnt.density,
+      summary: cnt.summary,
+      keywords: cnt.keywords.join(', '),
+      content: cnt.content,
+    });
+    setIsContentModalOpen(true);
+  };
+
+  const saveContent = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanContent: ContentItem = {
+      id: editingContent ? editingContent.id : `content-${Date.now()}`,
+      title: contentForm.title,
+      category: contentForm.category,
+      readTime: contentForm.readTime,
+      gradeLevel: contentForm.gradeLevel,
+      density: contentForm.density,
+      summary: contentForm.summary,
+      keywords: contentForm.keywords.split(',').map(s => s.trim()).filter(Boolean),
+      content: contentForm.content,
+    };
+
+    if (editingContent) {
+      onEditContent(cleanContent);
+      onToast('Content updated successfully!', 'success');
+    } else {
+      onPublishContent(cleanContent);
+      onToast('New Content published!', 'success');
+    }
+    setIsContentModalOpen(false);
+  };
+
+  // ---------------- ORDER CRUD ----------------
+  const saveOrder = (e: React.FormEvent) => {
+    e.preventDefault();
+    const newOrd: ContentOrder = {
+      id: `ord-${Math.floor(100 + Math.random() * 900)}`,
+      title: orderForm.title,
+      serviceType: orderForm.serviceType,
+      amount: orderForm.amount,
+      status: orderForm.status,
+      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+    };
+    onAddNewOrder(newOrd);
+    onToast('Simulated order generated!', 'success');
+    setIsOrderModalOpen(false);
+    setOrderForm({ title: '', serviceType: 'Premium Copywriting Service', amount: '$199', status: 'In Queue' });
+  };
+
+
+  // 1. Password Gate screen
+  if (!isUnlocked) {
+    return (
+      <div className="min-h-[70vh] flex items-center justify-center px-4 bg-zinc-950 text-white rounded-3xl m-4 sm:m-8 border border-zinc-800 shadow-2xl relative overflow-hidden" id="admin-security-gate">
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f2937_1px,transparent_1px),linear-gradient(to_bottom,#1f2937_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] opacity-30" />
+        
+        <div className="w-full max-w-md p-8 bg-zinc-900 rounded-2xl border border-zinc-800 shadow-xl relative z-10 space-y-6">
+          <div className="text-center space-y-2">
+            <div className="mx-auto rounded-full bg-emerald-950 text-emerald-400 p-3.5 w-fit border border-emerald-900">
+              <Lock className="h-6 w-6" />
+            </div>
+            <h2 className="text-xl font-extrabold tracking-tight">Admin Security Gate</h2>
+            <p className="text-xs text-zinc-400">Enter secure password key to access admin parameters</p>
+          </div>
+
+          <form onSubmit={handlePasswordSubmit} className="space-y-4">
+            <div className="space-y-1.5">
+              <label className="text-2xs font-bold text-zinc-400 uppercase tracking-wider block">Admin Key</label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter password"
+                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 px-4 py-3 text-sm text-white focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 font-mono placeholder-zinc-700"
+              />
+            </div>
+
+            {errorMsg && (
+              <p className="text-xs text-red-400 text-center font-medium bg-red-950/20 border border-red-900/30 rounded-lg py-2">
+                {errorMsg}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs py-3.5 shadow-lg shadow-emerald-950/40 transition-all"
+            >
+              Unlock Admin Panel
+            </button>
+          </form>
         </div>
       </div>
+    );
+  }
 
+  // 2. Full Admin Dashboard
+  return (
+    <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 min-h-[600px]" id="dashboard-admin-main">
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-        {/* Sidebar Tabs */}
-        <aside className="lg:col-span-1">
-          <nav className="space-y-1 bg-gray-50/50 p-3 rounded-2xl border border-gray-100">
-            {menuItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = activeTab === item.id;
-              return (
-                <button
-                  key={item.id}
-                  onClick={() => {
-                    setActiveTab(item.id as any);
-                    setShowOrderForm(false);
-                  }}
-                  className={`flex w-full items-center justify-between rounded-xl px-4 py-3 text-sm font-semibold transition-all ${
-                    isActive
-                      ? 'bg-emerald-600 text-white shadow-md shadow-emerald-50'
-                      : 'text-gray-600 hover:bg-white hover:text-emerald-700 hover:shadow-sm'
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <Icon className={`h-4 w-4 ${isActive ? 'text-white' : 'text-gray-400 group-hover:text-emerald-600'}`} />
-                    <span>{item.label}</span>
-                  </div>
-                  {item.badge && (
-                    <span className={`inline-block rounded-full px-2 py-0.5 text-2xs font-bold leading-none ${
-                      isActive ? 'bg-white text-emerald-700' : 'bg-emerald-100 text-emerald-800'
-                    }`}>
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-          </nav>
+        
+        {/* Sidebar */}
+        <aside className="lg:col-span-1" id="admin-sidebar">
+          <div className="bg-zinc-950 rounded-2xl border border-zinc-800 p-4 space-y-3 shadow-lg text-white">
+            <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
+              <span className="text-2xs font-bold uppercase tracking-wider text-emerald-400 font-mono">Admin Control</span>
+              <button 
+                onClick={handleLockPanel}
+                className="text-[10px] bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded px-2.5 py-1 font-bold text-zinc-400 transition-all cursor-pointer"
+              >
+                Lock Panel
+              </button>
+            </div>
+
+            <div className="space-y-1">
+              {/* Briefs Tab button */}
+              <button
+                onClick={() => setActiveTab('briefs')}
+                className={`flex w-full items-center space-x-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+                  activeTab === 'briefs' 
+                    ? 'bg-zinc-900 text-emerald-400 border border-zinc-800' 
+                    : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
+                }`}
+              >
+                <Layers className="h-4 w-4" />
+                <span>Briefs Manager</span>
+              </button>
+
+              {/* Outlines Tab button */}
+              <button
+                onClick={() => setActiveTab('outlines')}
+                className={`flex w-full items-center space-x-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+                  activeTab === 'outlines' 
+                    ? 'bg-zinc-900 text-emerald-400 border border-zinc-800' 
+                    : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
+                }`}
+              >
+                <FileText className="h-4 w-4" />
+                <span>Outlines Manager</span>
+              </button>
+
+              {/* Contents Tab button */}
+              <button
+                onClick={() => setActiveTab('contents')}
+                className={`flex w-full items-center space-x-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+                  activeTab === 'contents' 
+                    ? 'bg-zinc-900 text-emerald-400 border border-zinc-800' 
+                    : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
+                }`}
+              >
+                <PenTool className="h-4 w-4" />
+                <span>Contents Manager</span>
+              </button>
+
+              {/* Orders Tab button */}
+              <button
+                onClick={() => setActiveTab('orders')}
+                className={`flex w-full items-center space-x-3 rounded-xl px-4 py-3 text-sm font-bold transition-all ${
+                  activeTab === 'orders' 
+                    ? 'bg-zinc-900 text-emerald-400 border border-zinc-800' 
+                    : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
+                }`}
+              >
+                <CreditCard className="h-4 w-4" />
+                <span>Orders Database</span>
+              </button>
+            </div>
+
+            <div className="pt-4 border-t border-zinc-900 text-center">
+              <button
+                onClick={onNavigateToLibrary}
+                className="w-full text-2xs font-bold text-zinc-400 hover:text-white flex items-center justify-center space-x-1"
+              >
+                <FolderOpen className="h-3 w-3" />
+                <span>Go to Portfolio Library</span>
+              </button>
+            </div>
+          </div>
         </aside>
 
-        {/* Dynamic Area */}
-        <main className="lg:col-span-3 min-h-[500px]">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 15 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -15 }}
-              transition={{ duration: 0.2 }}
-            >
-              
-              {/* Tab: OVERVIEW */}
-              {activeTab === 'overview' && (
-                <div className="space-y-8">
-                  {/* Stats Row */}
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
-                    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm flex items-center justify-between">
-                      <div className="space-y-1">
-                        <span className="text-xs font-semibold text-gray-400 font-mono">OUTLINES UNLOCKED</span>
-                        <p className="text-3xl font-extrabold text-gray-900">{unlockedBriefIds.length} <span className="text-xs font-normal text-gray-400">/ {allBriefsCount}</span></p>
-                        <div className="w-24 bg-gray-100 rounded-full h-1.5 mt-2">
-                          <div 
-                            className="bg-emerald-500 h-1.5 rounded-full" 
-                            style={{ width: `${Math.min(100, (unlockedBriefIds.length / Math.max(1, allBriefsCount)) * 100)}%` }} 
-                          />
-                        </div>
-                      </div>
-                      <div className="rounded-xl bg-emerald-50 p-3 text-emerald-600">
-                        <Layers className="h-6 w-6" />
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm flex items-center justify-between">
-                      <div className="space-y-1">
-                        <span className="text-xs font-semibold text-gray-400 font-mono">ACTIVE WRITING ORDERS</span>
-                        <p className="text-3xl font-extrabold text-gray-900">{orders.filter(o => o.status !== 'Completed').length}</p>
-                        <span className="text-xs text-emerald-600 flex items-center space-x-1 mt-1 font-semibold">
-                          <CheckCircle className="h-3.5 w-3.5 inline mr-1" />
-                          <span>100% On-time delivery</span>
-                        </span>
-                      </div>
-                      <div className="rounded-xl bg-indigo-50 p-3 text-indigo-600">
-                        <Briefcase className="h-6 w-6" />
-                      </div>
-                    </div>
-
-                    <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm flex items-center justify-between">
-                      <div className="space-y-1">
-                        <span className="text-xs font-semibold text-gray-400 font-mono">SEO DOMAIN RANK GROWTH</span>
-                        <p className="text-3xl font-extrabold text-gray-900">+14.2%</p>
-                        <span className="text-xs text-emerald-600 flex items-center space-x-0.5 mt-1 font-semibold">
-                          <TrendingUp className="h-3.5 w-3.5 inline mr-0.5" />
-                          <span>Standard projection</span>
-                        </span>
-                      </div>
-                      <div className="rounded-xl bg-purple-50 p-3 text-purple-600">
-                        <Award className="h-6 w-6" />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Order Activity */}
-                  <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm">
-                    <div className="flex items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-lg font-bold text-gray-900">Recent Content Campaigns</h3>
-                        <p className="text-xs text-gray-500">Live operational status of your custom written articles</p>
-                      </div>
-                      <button 
-                        onClick={() => setActiveTab('orders')}
-                        className="text-xs font-bold text-emerald-600 hover:text-emerald-700 hover:underline flex items-center space-x-1"
-                      >
-                        <span>Manage All</span>
-                        <ArrowUpRight className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-
-                    <div className="overflow-x-auto">
-                      <table className="w-full text-left border-collapse">
-                        <thead>
-                          <tr className="border-b border-gray-50 text-2xs font-bold text-gray-400 uppercase tracking-wider">
-                            <th className="pb-3 font-semibold">Campaign Topic</th>
-                            <th className="pb-3 font-semibold">Tier Level</th>
-                            <th className="pb-3 font-semibold">Order Status</th>
-                            <th className="pb-3 font-semibold text-right">Investment</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-50 text-sm">
-                          {orders.slice(0, 3).map((ord) => (
-                            <tr key={ord.id} className="hover:bg-gray-50/50 transition-colors">
-                              <td className="py-3 font-semibold text-gray-900 max-w-xs truncate">{ord.title}</td>
-                              <td className="py-3 text-gray-500 text-xs font-medium">{ord.serviceType}</td>
-                              <td className="py-3">
-                                <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-2xs font-bold border ${
-                                  ord.status === 'Completed' 
-                                    ? 'bg-green-50 text-green-700 border-green-100'
-                                    : ord.status === 'Under Review'
-                                    ? 'bg-amber-50 text-amber-700 border-amber-100'
-                                    : 'bg-blue-50 text-blue-700 border-blue-100'
-                                }`}>
-                                  {ord.status}
-                                </span>
-                              </td>
-                              <td className="py-3 text-right font-semibold font-mono text-gray-900">{ord.amount}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-
-                  {/* Instant CTA Grid */}
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-                    <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50/40 via-white to-transparent p-6 flex flex-col justify-between">
-                      <div className="space-y-2">
-                        <span className="text-2xs font-bold tracking-wider text-emerald-600 font-mono uppercase">Premium Research</span>
-                        <h4 className="text-base font-bold text-gray-900">Need more technical outlines?</h4>
-                        <p className="text-xs text-gray-500 leading-relaxed">
-                          Access 50+ master-class frameworks detailing topic entities, target word lengths, and dynamic internal link schemes.
-                        </p>
-                      </div>
-                      <button 
-                        onClick={onNavigateToLibrary}
-                        className="mt-4 inline-flex items-center justify-center space-x-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2.5 shadow transition-all self-start"
-                      >
-                        <span>Launch Brief Library</span>
-                      </button>
-                    </div>
-
-                    <div className="rounded-2xl border border-gray-100 bg-white p-6 flex flex-col justify-between shadow-sm">
-                      <div className="space-y-2">
-                        <span className="text-2xs font-bold tracking-wider text-gray-400 font-mono uppercase">Interactive Tools</span>
-                        <h4 className="text-base font-bold text-gray-900">Configure custom API Hook</h4>
-                        <p className="text-xs text-gray-500 leading-relaxed">
-                          Integrate Apex OS briefs directly with Headless CMS pipelines to automate layout schema setups.
-                        </p>
-                      </div>
-                      <button 
-                        onClick={() => setActiveTab('settings')}
-                        className="mt-4 inline-flex items-center justify-center space-x-1.5 rounded-xl bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 font-semibold text-xs px-4 py-2.5 transition-all self-start"
-                      >
-                        <span>View Settings</span>
-                      </button>
-                    </div>
-                  </div>
-
-                </div>
-              )}
-
-              {/* Tab: PURCHASED OUTLINES */}
-              {activeTab === 'outlines' && (
-                <div className="space-y-6">
+        {/* Content Panel Area */}
+        <main className="lg:col-span-3">
+          <div className="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm min-h-[480px]">
+            
+            {/* --- BRIEFS TAB --- */}
+            {activeTab === 'briefs' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">Unlocked SEO Outlines</h3>
-                    <p className="text-sm text-gray-500">Your unlocked professional guidelines ready for writing teams</p>
+                    <h2 className="text-lg font-bold text-slate-900 font-sans">Article Briefs Database</h2>
+                    <p className="text-xs text-slate-500">Add, edit, and publish topic instructions for writers</p>
                   </div>
-
-                  {unlockedBriefIds.length === 0 ? (
-                    <div className="rounded-2xl border border-dashed border-gray-200 p-12 text-center">
-                      <FileText className="h-10 w-10 text-gray-300 mx-auto mb-4" />
-                      <h4 className="text-base font-bold text-gray-900">No premium outlines unlocked yet</h4>
-                      <p className="text-xs text-gray-400 mt-1 max-w-sm mx-auto">
-                        Once you unlock any premium briefs inside our catalog, the full structured layouts and semantic SEO instructions will appear here.
-                      </p>
-                      <button 
-                        onClick={onNavigateToLibrary}
-                        className="mt-4 inline-flex items-center space-x-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs px-4 py-2"
-                      >
-                        <span>Browse Catalog</span>
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                      {MOCK_DOWNLOADS.map((dl) => (
-                        <div key={dl.id} className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm hover:shadow transition-shadow flex items-start justify-between">
-                          <div className="space-y-1.5">
-                            <span className="inline-block text-2xs font-bold text-emerald-600 bg-emerald-50 rounded px-1.5 py-0.5">UNLOCKED</span>
-                            <h4 className="text-sm font-bold text-gray-900 line-clamp-2 leading-snug">{dl.title}</h4>
-                            <p className="text-2xs text-gray-400 font-mono">Unlocked on {dl.unlockedAt}</p>
-                          </div>
-                          <button 
-                            onClick={() => onToast(`Downloading: ${dl.title}.zip containing SEO outline files, schema specs and keywords.`, 'success')}
-                            className="rounded-lg bg-gray-50 p-2 text-emerald-600 hover:bg-emerald-100 transition-colors"
-                            title="Download Assets"
-                          >
-                            <DownloadCloud className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  )}
+                  <button
+                    onClick={openNewBrief}
+                    className="inline-flex items-center space-x-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 shadow-xs transition-all cursor-pointer"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                    <span>Publish Brief</span>
+                  </button>
                 </div>
-              )}
 
-              {/* Tab: CONTENT ORDERS */}
-              {activeTab === 'orders' && (
-                <div className="space-y-6">
-                  <div className="flex items-center justify-between gap-4 flex-wrap">
-                    <div>
-                      <h3 className="text-xl font-bold text-gray-900">Custom Content Orchestrator</h3>
-                      <p className="text-sm text-gray-500">Submit topics and watch our expert marketing authors create master-class publications</p>
-                    </div>
-                    
-                    {!showOrderForm && (
-                      <button 
-                        onClick={() => setShowOrderForm(true)}
-                        className="flex items-center space-x-1 rounded-xl bg-emerald-600 text-white px-3.5 py-2 text-xs font-semibold shadow hover:bg-emerald-500 transition-all"
-                      >
-                        <Plus className="h-4 w-4" />
-                        <span>Place New Request</span>
-                      </button>
-                    )}
-                  </div>
-
-                  {/* Order Request Form */}
-                  {showOrderForm && (
-                    <motion.div 
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      className="rounded-2xl border border-emerald-100 bg-emerald-50/20 p-6 space-y-4"
-                    >
-                      <h4 className="text-sm font-bold text-gray-900 flex items-center space-x-1.5">
-                        <Sparkles className="h-4 w-4 text-emerald-500" />
-                        <span>Request Custom SEO Copywriting</span>
-                      </h4>
-
-                      <form onSubmit={handleCreateOrder} className="space-y-4">
-                        <div>
-                          <label htmlFor="order-title-input" className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Article Title or Target Keyword</label>
-                          <input 
-                            id="order-title-input"
-                            type="text" 
-                            required
-                            placeholder="e.g. NextJS App Router Advanced Image Optimization Guidelines"
-                            value={newOrderTitle}
-                            onChange={(e) => setNewOrderTitle(e.target.value)}
-                            className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                          />
-                        </div>
-
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                          <div>
-                            <label htmlFor="order-service-select" className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Service Package Tier</label>
-                            <select 
-                              id="order-service-select"
-                              value={newOrderService}
-                              onChange={(e) => handleServiceChange(e.target.value)}
-                              className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                            >
-                              <option value="Single Expert Article">Single Expert Article ($399)</option>
-                              <option value="Custom Content Pack">Custom Content Pack ($1,199)</option>
-                              <option value="High Authority Whitepaper">High Authority Whitepaper ($1,899)</option>
-                            </select>
-                          </div>
-
-                          <div>
-                            <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Estimated Cost</label>
-                            <div className="w-full rounded-xl border border-transparent bg-gray-100/80 px-3 py-2 text-sm font-mono font-bold text-gray-900">
-                              {newOrderCost}
-                            </div>
-                          </div>
-                        </div>
-
-                        <div className="flex space-x-2 pt-2">
-                          <button 
-                            type="submit"
-                            className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 text-xs font-semibold shadow"
-                          >
-                            Confirm & Queue Order
-                          </button>
-                          <button 
-                            type="button"
-                            onClick={() => setShowOrderForm(false)}
-                            className="rounded-xl border border-gray-200 text-gray-600 px-4 py-2.5 text-xs font-semibold hover:bg-gray-50"
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                      </form>
-                    </motion.div>
-                  )}
-
-                  {/* Active Orders List */}
-                  <div className="space-y-4">
-                    {orders.map((ord) => (
-                      <div key={ord.id} className="rounded-xl border border-gray-100 bg-white p-5 shadow-sm flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                        <div className="space-y-1">
-                          <div className="flex items-center space-x-2">
-                            <span className="text-2xs font-mono font-bold text-gray-400">ID: {ord.id}</span>
-                            <span className="text-xs text-emerald-600 font-bold">&#8226;</span>
-                            <span className="text-2xs font-semibold text-gray-500 font-mono">{ord.date}</span>
-                          </div>
-                          <h4 className="text-sm font-bold text-gray-900">{ord.title}</h4>
-                          <p className="text-xs text-gray-500">{ord.serviceType}</p>
-                        </div>
-
-                        <div className="flex items-center space-x-4 justify-between sm:justify-end border-t sm:border-t-0 pt-3 sm:pt-0">
-                          <div className="text-right">
-                            <span className="block text-2xs font-bold text-gray-400 uppercase font-mono">STATUS</span>
-                            <span className={`inline-flex items-center space-x-1 text-xs font-bold ${
-                              ord.status === 'Completed' 
-                                ? 'text-green-600'
-                                : ord.status === 'Under Review'
-                                ? 'text-amber-600'
-                                : 'text-blue-600'
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold">
+                        <th className="py-3 px-2">Title</th>
+                        <th className="py-3 px-2">Category</th>
+                        <th className="py-3 px-2">Access Status</th>
+                        <th className="py-3 px-2">Difficulty</th>
+                        <th className="py-3 px-2 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {briefs.map(b => (
+                        <tr key={b.id} className="hover:bg-slate-50/40 text-slate-700">
+                          <td className="py-3.5 px-2 font-bold text-slate-800">{b.title}</td>
+                          <td className="py-3.5 px-2">{b.category}</td>
+                          <td className="py-3.5 px-2">
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                              b.status === 'Free' ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'
                             }`}>
-                              <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                              <span>{ord.status}</span>
+                              {b.status}
                             </span>
-                          </div>
-
-                          <div className="text-right">
-                            <span className="block text-2xs font-bold text-gray-400 uppercase font-mono">INVESTMENT</span>
-                            <span className="text-sm font-bold font-mono text-gray-900">{ord.amount}</span>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                </div>
-              )}
-
-              {/* Tab: DOWNLOADS */}
-              {activeTab === 'downloads' && (
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-xl font-bold text-gray-900">Document Hub</h3>
-                    <p className="text-sm text-gray-500 font-sans">Locate, preview, or bulk download content blueprints associated with your domains</p>
-                  </div>
-
-                  <div className="rounded-2xl border border-gray-100 bg-white overflow-hidden shadow-sm">
-                    <div className="divide-y divide-gray-100">
-                      {MOCK_DOWNLOADS.map((dl) => (
-                        <div key={dl.id} className="p-5 flex items-center justify-between hover:bg-gray-50/50 transition-all">
-                          <div className="flex items-center space-x-3.5">
-                            <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-600">
-                              <Download className="h-5 w-5" />
+                          </td>
+                          <td className="py-3.5 px-2">{b.difficulty}</td>
+                          <td className="py-3.5 px-2 text-right">
+                            <div className="flex items-center justify-end space-x-2">
+                              <button onClick={() => openEditBrief(b)} className="p-1 hover:text-emerald-600" title="Edit">
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button onClick={() => onDeleteBrief(b.id)} className="p-1 hover:text-red-600" title="Delete">
+                                <Trash2 className="h-4 w-4" />
+                              </button>
                             </div>
-                            <div className="space-y-0.5">
-                              <h4 className="text-sm font-bold text-gray-900">{dl.title}</h4>
-                              <div className="flex items-center space-x-2 text-2xs text-gray-400 font-mono">
-                                <span>{dl.size}</span>
-                                <span>&#8226;</span>
-                                <span>ZIP Archive</span>
-                                <span>&#8226;</span>
-                                <span>Unlocked {dl.unlockedAt}</span>
-                              </div>
-                            </div>
-                          </div>
-
-                          <button 
-                            onClick={() => onToast(`Initiating system download for: ${dl.title}.zip`, 'success')}
-                            className="flex items-center space-x-1 rounded-xl bg-gray-50 hover:bg-gray-100 border border-gray-200 text-gray-700 px-3 py-1.5 text-xs font-semibold"
-                          >
-                            <DownloadCloud className="h-3.5 w-3.5" />
-                            <span>Download</span>
-                          </button>
-                        </div>
+                          </td>
+                        </tr>
                       ))}
-                    </div>
-                  </div>
+                    </tbody>
+                  </table>
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Tab: PROFILE */}
-              {activeTab === 'profile' && (
-                <div className="space-y-6">
+            {/* --- OUTLINES TAB --- */}
+            {activeTab === 'outlines' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">Profile Details</h3>
-                    <p className="text-sm text-gray-500">Manage owner settings and website domain verification details</p>
+                    <h2 className="text-lg font-bold text-slate-900 font-sans">Article Outlines Database</h2>
+                    <p className="text-xs text-slate-500">Manage structure parameters and heading elements</p>
                   </div>
-
-                  <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm space-y-6">
-                    <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                      <div>
-                        <label htmlFor="profile-name-input" className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Profile Full Name</label>
-                        <input 
-                          id="profile-name-input"
-                          type="text" 
-                          value={userProfileName}
-                          onChange={(e) => setUserProfileName(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Registered Email</label>
-                        <div className="w-full rounded-xl bg-gray-100 px-3 py-2.5 text-sm text-gray-500 font-mono">
-                          {userEmail}
-                        </div>
-                      </div>
-
-                      <div>
-                        <label htmlFor="profile-website-input" className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Verified Corporate Domain</label>
-                        <input 
-                          id="profile-website-input"
-                          type="url" 
-                          value={userWebsite}
-                          onChange={(e) => setUserWebsite(e.target.value)}
-                          className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-1.5">Plan Level</label>
-                        <div className="w-full rounded-xl bg-emerald-50 border border-emerald-100 px-3 py-2.5 text-sm text-emerald-800 font-semibold flex items-center justify-between">
-                          <span>Team Professional Growth</span>
-                          <span className="text-2xs font-bold bg-emerald-600 text-white px-1.5 py-0.5 rounded uppercase font-mono">Active</span>
-                        </div>
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={() => onToast('Profile configurations updated successfully.', 'success')}
-                      className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 text-xs font-semibold shadow"
-                    >
-                      Save Profile Changes
-                    </button>
-                  </div>
+                  <button
+                    onClick={openNewOutline}
+                    className="inline-flex items-center space-x-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 shadow-xs transition-all cursor-pointer"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                    <span>Publish Outline</span>
+                  </button>
                 </div>
-              )}
 
-              {/* Tab: SETTINGS */}
-              {activeTab === 'settings' && (
-                <div className="space-y-6">
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold">
+                        <th className="py-3 px-2">Title</th>
+                        <th className="py-3 px-2">Category</th>
+                        <th className="py-3 px-2">Headings Count</th>
+                        <th className="py-3 px-2">Content Score</th>
+                        <th className="py-3 px-2 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {outlines.map(o => (
+                        <tr key={o.id} className="hover:bg-slate-50/40 text-slate-700">
+                          <td className="py-3.5 px-2 font-bold text-slate-800">{o.title}</td>
+                          <td className="py-3.5 px-2">{o.category}</td>
+                          <td className="py-3.5 px-2">{o.headings} headings</td>
+                          <td className="py-3.5 px-2">
+                            <span className="font-semibold text-emerald-600">{o.score}% SEO Match</span>
+                          </td>
+                          <td className="py-3.5 px-2 text-right">
+                            <div className="flex items-center justify-end space-x-2">
+                              <button onClick={() => openEditOutline(o)} className="p-1 hover:text-emerald-600" title="Edit">
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button onClick={() => onDeleteOutline(o.id)} className="p-1 hover:text-red-600" title="Delete">
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* --- CONTENTS TAB --- */}
+            {activeTab === 'contents' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900">Developer Settings</h3>
-                    <p className="text-sm text-gray-500">Configure notifications, system alerts, and toggle client credentials</p>
+                    <h2 className="text-lg font-bold text-slate-900 font-sans">Full Content Articles</h2>
+                    <p className="text-xs text-slate-500">Write, edit, and store finalized copies for indexation</p>
                   </div>
-
-                  <div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-sm space-y-6">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between border-b border-gray-50 pb-4">
-                        <div className="space-y-0.5 pr-4">
-                          <h4 className="text-sm font-bold text-gray-900 flex items-center space-x-1.5">
-                            <BellRing className="h-4 w-4 text-emerald-600" />
-                            <span>Notify on custom drafts under review</span>
-                          </h4>
-                          <p className="text-xs text-gray-400 leading-relaxed">
-                            Receive alert notices directly on your designated emails when editorial writers request outlines evaluation.
-                          </p>
-                        </div>
-                        <input type="checkbox" defaultChecked className="h-4.5 w-4.5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer" />
-                      </div>
-
-                      <div className="flex items-center justify-between border-b border-gray-50 pb-4">
-                        <div className="space-y-0.5 pr-4">
-                          <h4 className="text-sm font-bold text-gray-900 flex items-center space-x-1.5">
-                            <Database className="h-4 w-4 text-purple-600" />
-                            <span>Mock database synchronization mode</span>
-                          </h4>
-                          <p className="text-xs text-gray-400 leading-relaxed">
-                            Automatically refresh user statistics and download logs using local caching states dynamically.
-                          </p>
-                        </div>
-                        <input type="checkbox" defaultChecked className="h-4.5 w-4.5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer" />
-                      </div>
-
-                      <div className="flex items-center justify-between pb-2">
-                        <div className="space-y-0.5 pr-4">
-                          <h4 className="text-sm font-bold text-gray-900 flex items-center space-x-1.5">
-                            <Globe className="h-4 w-4 text-indigo-600" />
-                            <span>Simulated high performance CDN acceleration</span>
-                          </h4>
-                          <p className="text-xs text-gray-400 leading-relaxed">
-                            Cache asset delivery to speed up PDF content outlines render on mobile browsers.
-                          </p>
-                        </div>
-                        <input type="checkbox" defaultChecked className="h-4.5 w-4.5 text-emerald-600 rounded border-gray-300 focus:ring-emerald-500 cursor-pointer" />
-                      </div>
-                    </div>
-
-                    <button 
-                      onClick={() => onToast('System configurations updated successfully.', 'success')}
-                      className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 text-xs font-semibold shadow"
-                    >
-                      Apply Global Settings
-                    </button>
-                  </div>
+                  <button
+                    onClick={openNewContent}
+                    className="inline-flex items-center space-x-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2.5 shadow-xs transition-all cursor-pointer"
+                  >
+                    <PlusCircle className="h-4 w-4" />
+                    <span>Publish Copy</span>
+                  </button>
                 </div>
-              )}
 
-            </motion.div>
-          </AnimatePresence>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold">
+                        <th className="py-3 px-2">Title</th>
+                        <th className="py-3 px-2">Category</th>
+                        <th className="py-3 px-2">Reading Time</th>
+                        <th className="py-3 px-2">Keyword Density</th>
+                        <th className="py-3 px-2 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {contents.map(c => (
+                        <tr key={c.id} className="hover:bg-slate-50/40 text-slate-700">
+                          <td className="py-3.5 px-2 font-bold text-slate-800">{c.title}</td>
+                          <td className="py-3.5 px-2">{c.category}</td>
+                          <td className="py-3.5 px-2">{c.readTime}</td>
+                          <td className="py-3.5 px-2">{c.density}</td>
+                          <td className="py-3.5 px-2 text-right">
+                            <div className="flex items-center justify-end space-x-2">
+                              <button onClick={() => openEditContent(c)} className="p-1 hover:text-emerald-600" title="Edit">
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button onClick={() => onDeleteContent(c.id)} className="p-1 hover:text-red-600" title="Delete">
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* --- ORDERS TAB --- */}
+            {activeTab === 'orders' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900 font-sans">Active Copywriting Orders</h2>
+                    <p className="text-xs text-slate-500">Track client transactional order metrics and delivery statuses</p>
+                  </div>
+                  <button
+                    onClick={() => setIsOrderModalOpen(true)}
+                    className="inline-flex items-center space-x-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-4 py-2.5 shadow-xs transition-all cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>Create Order</span>
+                  </button>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="border-b border-slate-100 text-slate-400 uppercase tracking-wider font-semibold">
+                        <th className="py-3 px-2">Order ID</th>
+                        <th className="py-3 px-2">Title</th>
+                        <th className="py-3 px-2">Service Line</th>
+                        <th className="py-3 px-2">Investment</th>
+                        <th className="py-3 px-2">Status</th>
+                        <th className="py-3 px-2">Date</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-50">
+                      {orders.map(o => (
+                        <tr key={o.id} className="hover:bg-slate-50/40 text-slate-700">
+                          <td className="py-3.5 px-2 font-mono text-slate-500 text-[11px]">{o.id}</td>
+                          <td className="py-3.5 px-2 font-bold text-slate-800">{o.title}</td>
+                          <td className="py-3.5 px-2">{o.serviceType}</td>
+                          <td className="py-3.5 px-2 font-mono font-semibold text-slate-900">{o.amount}</td>
+                          <td className="py-3.5 px-2">
+                            <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                              o.status === 'Completed' ? 'bg-emerald-50 text-emerald-700' :
+                              o.status === 'In Progress' ? 'bg-indigo-50 text-indigo-700' :
+                              o.status === 'Under Review' ? 'bg-amber-50 text-amber-700' : 'bg-slate-50 text-slate-700'
+                            }`}>
+                              {o.status}
+                            </span>
+                          </td>
+                          <td className="py-3.5 px-2 text-slate-400">{o.date}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+          </div>
         </main>
       </div>
+
+      {/* --- MODAL: BRIEF WRITE/EDIT --- */}
+      <AnimatePresence>
+        {isBriefModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsBriefModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" />
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-2xl bg-white rounded-2xl border border-slate-100 p-6 shadow-2xl z-10 space-y-4 max-h-[85vh] overflow-y-auto">
+              <div className="flex justify-between items-center border-b border-slate-150 pb-3">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-mono">{editingBrief ? 'Modify Existing Brief' : 'Publish New Content Brief'}</h3>
+                <button onClick={() => setIsBriefModalOpen(false)}><X className="h-4 w-4 text-slate-400 hover:text-slate-600" /></button>
+              </div>
+              <form onSubmit={saveBrief} className="space-y-4 text-xs text-slate-700">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Topic Title</label>
+                    <input type="text" required value={briefForm.title} onChange={e => setBriefForm({ ...briefForm, title: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2.5 text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Category Tag</label>
+                    <input type="text" required value={briefForm.category} onChange={e => setBriefForm({ ...briefForm, category: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2.5 text-xs focus:ring-1 focus:ring-emerald-500 focus:outline-none" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Search Volume</label>
+                    <input type="text" value={briefForm.searchVolume} onChange={e => setBriefForm({ ...briefForm, searchVolume: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Target Audience</label>
+                    <input type="text" value={briefForm.targetAudience} onChange={e => setBriefForm({ ...briefForm, targetAudience: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Keywords (Comma split)</label>
+                    <input type="text" value={briefForm.keywords} onChange={e => setBriefForm({ ...briefForm, keywords: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Difficulty Parameter</label>
+                    <select value={briefForm.difficulty} onChange={e => setBriefForm({ ...briefForm, difficulty: e.target.value as any })} className="w-full border border-slate-200 rounded-lg p-2 text-xs">
+                      <option value="Easy">Easy</option>
+                      <option value="Medium">Medium</option>
+                      <option value="Hard">Hard</option>
+                    </select>
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">License Access Level</label>
+                    <select value={briefForm.status} onChange={e => setBriefForm({ ...briefForm, status: e.target.value as any })} className="w-full border border-slate-200 rounded-lg p-2 text-xs">
+                      <option value="Free">Free</option>
+                      <option value="Premium">Premium</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-500">Brief Preview Paragraph</label>
+                  <textarea rows={2} required value={briefForm.previewText} onChange={e => setBriefForm({ ...briefForm, previewText: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-500">Full Copywriter Outline Instructions</label>
+                  <textarea rows={5} required value={briefForm.fullBrief} onChange={e => setBriefForm({ ...briefForm, fullBrief: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-6 rounded-lg shadow-sm cursor-pointer">
+                    {editingBrief ? 'Save Modifications' : 'Publish to Catalog'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* --- MODAL: OUTLINE WRITE/EDIT --- */}
+      <AnimatePresence>
+        {isOutlineModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsOutlineModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" />
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-lg bg-white rounded-2xl border border-slate-100 p-6 shadow-2xl z-10 space-y-4">
+              <div className="flex justify-between items-center border-b border-slate-150 pb-3">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-mono">{editingOutline ? 'Edit Core Outline' : 'Publish Core Outline'}</h3>
+                <button onClick={() => setIsOutlineModalOpen(false)}><X className="h-4 w-4 text-slate-400 hover:text-slate-600" /></button>
+              </div>
+              <form onSubmit={saveOutline} className="space-y-4 text-xs text-slate-700">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-500">Outline Article Title</label>
+                  <input type="text" required value={outlineForm.title} onChange={e => setOutlineForm({ ...outlineForm, title: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2.5 text-xs" />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Category Tag</label>
+                    <input type="text" required value={outlineForm.category} onChange={e => setOutlineForm({ ...outlineForm, category: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Target Wordcount</label>
+                    <input type="text" required value={outlineForm.wordCount} onChange={e => setOutlineForm({ ...outlineForm, wordCount: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs text-slate-700" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Headings</label>
+                    <input type="number" required value={outlineForm.headings} onChange={e => setOutlineForm({ ...outlineForm, headings: Number(e.target.value) })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">SEO Entities</label>
+                    <input type="number" required value={outlineForm.entities} onChange={e => setOutlineForm({ ...outlineForm, entities: Number(e.target.value) })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">SEO Score Match</label>
+                    <input type="number" required value={outlineForm.score} onChange={e => setOutlineForm({ ...outlineForm, score: Number(e.target.value) })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-500">Sections Hierarchy (One per line)</label>
+                  <textarea rows={5} required value={outlineForm.sections} onChange={e => setOutlineForm({ ...outlineForm, sections: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs font-sans" />
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-6 rounded-lg cursor-pointer">Publish Outline</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* --- MODAL: CONTENT WRITE/EDIT --- */}
+      <AnimatePresence>
+        {isContentModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsContentModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" />
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-2xl bg-white rounded-2xl border border-slate-100 p-6 shadow-2xl z-10 space-y-4 max-h-[85vh] overflow-y-auto">
+              <div className="flex justify-between items-center border-b border-slate-150 pb-3">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-mono">{editingContent ? 'Edit Copy Article' : 'Publish Completed Copy'}</h3>
+                <button onClick={() => setIsContentModalOpen(false)}><X className="h-4 w-4 text-slate-400 hover:text-slate-600" /></button>
+              </div>
+              <form onSubmit={saveContent} className="space-y-4 text-xs text-slate-700">
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Article Title</label>
+                    <input type="text" required value={contentForm.title} onChange={e => setContentForm({ ...contentForm, title: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2.5 text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Category Tag</label>
+                    <input type="text" required value={contentForm.category} onChange={e => setContentForm({ ...contentForm, category: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2.5 text-xs" />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-4 gap-2">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Read Time</label>
+                    <input type="text" required value={contentForm.readTime} onChange={e => setContentForm({ ...contentForm, readTime: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Grade Score</label>
+                    <input type="text" required value={contentForm.gradeLevel} onChange={e => setContentForm({ ...contentForm, gradeLevel: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Keyword Density</label>
+                    <input type="text" required value={contentForm.density} onChange={e => setContentForm({ ...contentForm, density: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Keywords</label>
+                    <input type="text" required value={contentForm.keywords} onChange={e => setContentForm({ ...contentForm, keywords: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                  </div>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-500">Executive Summary</label>
+                  <textarea rows={2} required value={contentForm.summary} onChange={e => setContentForm({ ...contentForm, summary: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-500">Main Core Markdown / Text Article Copy</label>
+                  <textarea rows={8} required value={contentForm.content} onChange={e => setContentForm({ ...contentForm, content: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs font-sans" />
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 px-6 rounded-lg cursor-pointer">Publish Copy</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* --- MODAL: ORDER ADD --- */}
+      <AnimatePresence>
+        {isOrderModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsOrderModalOpen(false)} className="absolute inset-0 bg-slate-900/60 backdrop-blur-xs" />
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative w-full max-w-md bg-white rounded-2xl border border-slate-100 p-6 shadow-2xl z-10 space-y-4">
+              <div className="flex justify-between items-center border-b border-slate-150 pb-3">
+                <h3 className="text-sm font-bold text-slate-900 uppercase tracking-wider font-mono">Create Simulated Order</h3>
+                <button onClick={() => setIsOrderModalOpen(false)}><X className="h-4 w-4 text-slate-400 hover:text-slate-600" /></button>
+              </div>
+              <form onSubmit={saveOrder} className="space-y-4 text-xs text-slate-700">
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-500">Order/Campaign Title</label>
+                  <input type="text" required value={orderForm.title} onChange={e => setOrderForm({ ...orderForm, title: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2.5 text-xs" />
+                </div>
+                <div className="space-y-1">
+                  <label className="font-bold text-slate-500">Service Line Type</label>
+                  <input type="text" required value={orderForm.serviceType} onChange={e => setOrderForm({ ...orderForm, serviceType: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2.5 text-xs" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Investment Amount</label>
+                    <input type="text" required value={orderForm.amount} onChange={e => setOrderForm({ ...orderForm, amount: e.target.value })} className="w-full border border-slate-200 rounded-lg p-2 text-xs" />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="font-bold text-slate-500">Current Status</label>
+                    <select value={orderForm.status} onChange={e => setOrderForm({ ...orderForm, status: e.target.value as any })} className="w-full border border-slate-200 rounded-lg p-2 text-xs">
+                      <option value="In Queue">In Queue</option>
+                      <option value="In Progress">In Progress</option>
+                      <option value="Under Review">Under Review</option>
+                      <option value="Completed">Completed</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <button type="submit" className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 px-6 rounded-lg cursor-pointer">Generate Order Record</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
     </div>
   );
 }

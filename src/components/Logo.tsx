@@ -68,7 +68,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
                 "rgba(45, 212, 191, 0.8)", // teal-400
                 "rgba(56, 189, 248, 0.8)", // sky-400
                 "rgba(251, 191, 36, 0.8)", // amber-400
-                "rgba(139, 92, 246, 0.8)", // violet-400
+                "rgba(34, 197, 94, 0.8)", // green-400
                 "rgba(52, 211, 153, 0.8)"  // emerald-400
               ]
             }}
@@ -86,7 +86,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
                 "#0d9488", // teal-600
                 "#0284c7", // sky-600
                 "#d97706", // amber-600
-                "#7c3aed", // violet-600
+                "#16a34a", // green-600
                 "#10b981"  // emerald-500
               ]
             }}
@@ -106,7 +106,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
                 "rgba(20, 184, 166, 0.6)",  // teal-500
                 "rgba(6, 182, 212, 0.6)",   // cyan-500
                 "rgba(245, 158, 11, 0.6)",  // amber-500
-                "rgba(139, 92, 246, 0.6)",  // violet-500
+                "rgba(34, 197, 94, 0.6)",  // green-500
                 "rgba(16, 185, 129, 0.6)",  // emerald-500
                 "rgba(20, 184, 166, 0.6)"   // teal-500
               ]
@@ -125,7 +125,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
                 "#14b8a6", // teal-500
                 "#06b6d4", // cyan-500
                 "#f59e0b", // amber-500
-                "#8b5cf6", // violet-500
+                "#22c55e", // green-500
                 "#10b981", // emerald-500
                 "#14b8a6"  // teal-500
               ]

@@ -11,6 +11,8 @@ export interface ArticleBrief {
   status: 'Free' | 'Premium';
   unlocked?: boolean;
   date: string;
+  titleColor?: string;
+  fontStyle?: string;
 }
 
 export interface BlogPost {
@@ -39,6 +41,34 @@ export interface DownloadedOutline {
   title: string;
   unlockedAt: string;
   size: string;
+}
+
+export interface OutlineItem {
+  id: string;
+  title: string;
+  category: string;
+  wordCount: string;
+  headings: number;
+  entities: number;
+  score: number;
+  difficulty: 'Easy' | 'Medium' | 'Hard';
+  sections: string[];
+  titleColor?: string;
+  fontStyle?: string;
+}
+
+export interface ContentItem {
+  id: string;
+  title: string;
+  category: string;
+  readTime: string;
+  gradeLevel: string;
+  density: string;
+  summary: string;
+  keywords: string[];
+  content: string;
+  titleColor?: string;
+  fontStyle?: string;
 }
 
 export type ActivePage = 'home' | 'library' | 'detail' | 'pricing' | 'blog' | 'contact' | 'dashboard';

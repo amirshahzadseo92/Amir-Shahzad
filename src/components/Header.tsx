@@ -80,7 +80,7 @@ export default function Header({
                 currentPage === 'dashboard' ? 'text-emerald-400' : 'text-zinc-400'
               }`}
             >
-              Dashboard
+              Admin Panel
               {currentPage === 'dashboard' && (
                 <motion.div
                   layoutId="activeNavIndicator"
@@ -94,40 +94,13 @@ export default function Header({
 
         {/* Right side CTA buttons */}
         <div className="hidden md:flex items-center space-x-4">
-          {isLoggedIn ? (
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={() => handleNavClick('dashboard')}
-                className="flex items-center space-x-1.5 rounded-full bg-emerald-950/40 px-4 py-2 text-sm font-medium text-emerald-400 hover:bg-emerald-900/40 transition-all border border-emerald-900"
-              >
-                <LayoutDashboard className="h-4 w-4" />
-                <span>My Workspace</span>
-              </button>
-              <button
-                onClick={onLoginToggle}
-                className="rounded-full p-2 text-zinc-400 hover:text-white hover:bg-zinc-900 transition-colors"
-                title="Log Out"
-              >
-                <LogOut className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <>
-              <button
-                onClick={onLoginToggle}
-                className="text-sm font-medium text-zinc-400 hover:text-white transition-colors px-3 py-2"
-              >
-                Login
-              </button>
-              <button
-                onClick={onSignUpOpen}
-                className="flex items-center space-x-1 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 text-sm font-medium transition-all shadow-sm hover:shadow shadow-emerald-950/30"
-              >
-                <span>Sign Up</span>
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </>
-          )}
+          <button
+            onClick={() => handleNavClick('dashboard')}
+            className="flex items-center space-x-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white px-4.5 py-2 text-sm font-semibold transition-all shadow-sm shadow-emerald-950/20"
+          >
+            <LayoutDashboard className="h-4 w-4" />
+            <span>Admin Panel</span>
+          </button>
         </div>
 
         {/* Mobile menu trigger */}
@@ -166,58 +139,24 @@ export default function Header({
                   {item.label}
                 </button>
               ))}
-              {isLoggedIn && (
+              <button
+                onClick={() => handleNavClick('dashboard')}
+                className={`flex w-full items-center py-2.5 text-base font-medium rounded-lg px-3 ${
+                  currentPage === 'dashboard'
+                    ? 'bg-emerald-950/40 text-emerald-400'
+                    : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
+                }`}
+              >
+                Admin Panel
+              </button>
+              <div className="pt-4 border-t border-zinc-900 flex flex-col space-y-2 px-3">
                 <button
                   onClick={() => handleNavClick('dashboard')}
-                  className={`flex w-full items-center py-2.5 text-base font-medium rounded-lg px-3 ${
-                    currentPage === 'dashboard'
-                      ? 'bg-emerald-950/40 text-emerald-400'
-                      : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
-                  }`}
+                  className="flex items-center justify-center space-x-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-500"
                 >
-                  Dashboard
+                  <LayoutDashboard className="h-4 w-4" />
+                  <span>Admin Panel</span>
                 </button>
-              )}
-              <div className="pt-4 border-t border-zinc-900 flex flex-col space-y-2 px-3">
-                {isLoggedIn ? (
-                  <div className="flex flex-col space-y-2">
-                    <button
-                      onClick={() => handleNavClick('dashboard')}
-                      className="flex items-center justify-center space-x-2 rounded-xl bg-emerald-950/40 px-4 py-2.5 text-sm font-medium text-emerald-400 border border-emerald-900"
-                    >
-                      <LayoutDashboard className="h-4 w-4" />
-                      <span>My Workspace</span>
-                    </button>
-                    <button
-                      onClick={onLoginToggle}
-                      className="flex items-center justify-center space-x-2 rounded-xl border border-zinc-800 px-4 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-900"
-                    >
-                      <LogOut className="h-4 w-4" />
-                      <span>Sign Out</span>
-                    </button>
-                  </div>
-                ) : (
-                  <div className="flex flex-col space-y-2">
-                    <button
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        onLoginToggle();
-                      }}
-                      className="flex items-center justify-center rounded-xl border border-zinc-800 py-2.5 text-sm font-medium text-zinc-300 hover:bg-zinc-900"
-                    >
-                      Login
-                    </button>
-                    <button
-                      onClick={() => {
-                        setMobileMenuOpen(false);
-                        onSignUpOpen();
-                      }}
-                      className="flex items-center justify-center rounded-xl bg-emerald-600 py-2.5 text-sm font-medium text-white hover:bg-emerald-500"
-                    >
-                      Sign Up
-                    </button>
-                  </div>
-                )}
               </div>
             </div>
           </motion.div>
