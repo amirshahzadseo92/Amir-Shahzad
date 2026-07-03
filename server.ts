@@ -1025,20 +1025,41 @@ Stop overthinking and start doing. Execution is the only metric of success that 
 
 Task: Write a complete piece of content about "${keyword}". You must strictly follow all of the 5 rules above. Format using Markdown. Do not include any meta comments, thoughts, or introductory pleasantries, just return the complete article directly.`;
 
-      const response = await generateContentWithRetry(
-        ai,
-        "gemini-3.5-flash",
-        prompt,
-        {} // config
-      );
+      let generatedText = "";
+      try {
+        const response = await generateContentWithRetry(
+          ai,
+          "gemini-3.5-flash",
+          prompt,
+          {} // config
+        );
+        generatedText = response.text || "";
+      } catch (geminiError: any) {
+        console.warn("[BOT] Gemini call failed, falling back to local generator:", geminiError.message || geminiError);
+        generatedText = generateLocalFallbackContent(keyword, language);
+      }
+
+      if (!generatedText) {
+        generatedText = generateLocalFallbackContent(keyword, language);
+      }
 
       return res.json({
         success: true,
-        content: response.text || "No content generated."
+        content: generatedText
       });
     } catch (error: any) {
       console.error("Content generation error:", error);
-      return res.status(500).json({ error: error.message || "An error occurred during content generation." });
+      // Even in the outermost catch, try to return a fallback so the user never gets an error screen
+      try {
+        const { keyword, language } = req.body;
+        const generated = generateLocalFallbackContent(keyword || "SEO Content", language || "English");
+        return res.json({
+          success: true,
+          content: generated
+        });
+      } catch (innerError) {
+        return res.status(500).json({ error: error.message || "An error occurred during content generation." });
+      }
     }
   });
 
