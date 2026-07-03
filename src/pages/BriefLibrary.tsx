@@ -214,7 +214,7 @@ export default function BriefLibrary({
                             onClick={() => setExpandedId(isExpanded ? null : out.id)}
                             className="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors"
                           >
-                            <span className="text-base font-bold text-slate-800 font-sans">{out.title}</span>
+                            <span className={`text-base font-bold ${out.titleColor || 'text-slate-800'} ${out.fontStyle || 'font-sans'}`}>{out.title}</span>
                             <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest font-mono shrink-0 ml-4">
                               {isExpanded ? 'Hide' : 'Show'}
                             </span>
@@ -276,7 +276,7 @@ export default function BriefLibrary({
                             onClick={() => setExpandedId(isExpanded ? null : cnt.id)}
                             className="w-full text-left px-5 py-4 flex items-center justify-between hover:bg-slate-50/50 transition-colors"
                           >
-                            <span className="text-base font-bold text-slate-800 font-sans">{cnt.title}</span>
+                            <span className={`text-base font-bold ${cnt.titleColor || 'text-slate-800'} ${cnt.fontStyle || 'font-sans'}`}>{cnt.title}</span>
                             <span className="text-xs font-bold text-emerald-600 uppercase tracking-widest font-mono shrink-0 ml-4">
                               {isExpanded ? 'Hide' : 'Show'}
                             </span>
