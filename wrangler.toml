@@ -1,5 +1,5 @@
 # Wrangler configuration file for deploying static Vite React app to Cloudflare
-name = "apexos"
+name = "2"
 compatibility_date = "2024-04-03"
 
 # Define the build command to compile our Vite application
