@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Search, Compass, BookOpen, PenTool, CheckCircle, TrendingUp, Sparkles, ArrowRight, Star, ArrowUpRight, Cpu, Database, Activity } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArticleBrief, ActivePage } from '../types';
+import { ArticleBrief, ActivePage, HomeConfig } from '../types';
 import BriefCard from '../components/BriefCard';
 
 interface HomeProps {
@@ -10,6 +10,7 @@ interface HomeProps {
   setSelectedBriefId: (id: string | null) => void;
   setSearchKeyword: (keyword: string) => void;
   onToast: (msg: string, type: 'success' | 'info') => void;
+  homeConfig?: HomeConfig;
 }
 
 const LIVE_CRAWLS = [
@@ -59,6 +60,7 @@ export default function Home({
   setSelectedBriefId,
   setSearchKeyword,
   onToast,
+  homeConfig,
 }: HomeProps) {
   const [localSearch, setLocalSearch] = useState('');
   const [crawlIndex, setCrawlIndex] = useState(0);
@@ -108,19 +110,19 @@ export default function Home({
           <div className="lg:col-span-7 space-y-6">
             <div className="inline-flex items-center space-x-2 rounded-full bg-emerald-50 border border-emerald-100 px-3.5 py-1 text-xs font-semibold text-emerald-800 shadow-sm">
               <Sparkles className="h-4 w-4 text-emerald-600" />
-              <span>Smart SEO & Copywriting Redefined</span>
+              <span>{homeConfig?.badgeText || "Smart SEO & Copywriting Redefined"}</span>
             </div>
 
             <h1 className="text-4xl font-extrabold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl leading-tight">
-              Create Content That <br />
+              {homeConfig?.heroTitle || "Create Content That"} <br />
               <span className="bg-gradient-to-r from-emerald-600 via-emerald-500 to-emerald-700 bg-clip-text text-transparent">
-                Dominates Search Engine
+                {homeConfig?.heroTitleGradient || "Dominates Search Engine"}
               </span>{' '}
               Indexes
             </h1>
 
             <p className="max-w-2xl text-lg text-gray-500 leading-relaxed">
-              Browse professional-grade article briefs, unlock semantic SEO outlines, or order complete ready-to-publish custom content verified by organic keyword experts.
+              {homeConfig?.heroSubtitle || "Browse professional-grade article briefs, unlock semantic SEO outlines, or order complete ready-to-publish custom content verified by organic keyword experts."}
             </p>
 
             {/* CTAs */}

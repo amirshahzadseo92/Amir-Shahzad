@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Calendar, User, Clock, ArrowRight, BookOpen, Layers, Check } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { MOCK_BLOG_POSTS } from '../data/mockData';
@@ -6,13 +6,35 @@ import { BlogPost } from '../types';
 
 interface BlogProps {
   onToast: (msg: string, type: 'success' | 'info') => void;
+  blogs?: BlogPost[];
+  selectedPostId?: string | null;
+  onSelectPostId?: (id: string | null) => void;
 }
 
-export default function Blog({ onToast }: BlogProps) {
-  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(null);
+export default function Blog({ onToast, blogs, selectedPostId, onSelectPostId }: BlogProps) {
+  const [selectedPost, setSelectedPost] = useState<BlogPost | null>(() => {
+    if (selectedPostId && blogs) {
+      return blogs.find(b => b.id === selectedPostId) || null;
+    }
+    return null;
+  });
+
+  useEffect(() => {
+    if (selectedPostId && blogs) {
+      const found = blogs.find(b => b.id === selectedPostId);
+      if (found) {
+        setSelectedPost(found);
+      }
+    } else if (selectedPostId === null) {
+      setSelectedPost(null);
+    }
+  }, [selectedPostId, blogs]);
 
   const handleReadFull = (post: BlogPost) => {
     setSelectedPost(post);
+    if (onSelectPostId) {
+      onSelectPostId(post.id);
+    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -40,7 +62,12 @@ export default function Blog({ onToast }: BlogProps) {
           >
             {/* Back Button */}
             <button
-              onClick={() => setSelectedPost(null)}
+              onClick={() => {
+                setSelectedPost(null);
+                if (onSelectPostId) {
+                  onSelectPostId(null);
+                }
+              }}
               className="inline-flex items-center space-x-1.5 text-sm font-semibold text-gray-500 hover:text-emerald-600 transition-colors"
             >
               <span>&larr; Back to blog catalog</span>
@@ -113,7 +140,7 @@ export default function Blog({ onToast }: BlogProps) {
             exit={{ opacity: 0 }}
             className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3"
           >
-            {MOCK_BLOG_POSTS.map((post) => (
+            {(blogs || MOCK_BLOG_POSTS).map((post) => (
               <motion.div
                 key={post.id}
                 whileHover={{ y: -4 }}

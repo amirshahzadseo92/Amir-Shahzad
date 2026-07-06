@@ -1,4 +1,4 @@
-import { ArticleBrief, BlogPost, ContentOrder, DownloadedOutline, OutlineItem, ContentItem } from '../types';
+import { ArticleBrief, BlogPost, ContentOrder, DownloadedOutline, OutlineItem, ContentItem, HomeConfig, AboutConfig, ServiceItem, ExperienceItem, TestimonialItem, ContactSubmission, EducationItem, CertificationItem, SkillItem } from '../types';
 
 export const CATEGORIES = [
   'All',
@@ -322,3 +322,227 @@ export const MOCK_CONTENTS: ContentItem[] = [
     content: `# Ultimate Guide to Headless CMS Architecture\n\nDecoupled architectures separate structured database elements from front-end layout presentations. Utilizing GraphQL APIs ensures lightning-fast hydration rates.\n\n### Performance Benchmarks\nStatic rendering speeds up Largest Contentful Paint (LCP) times, raising search results directly. Security is also significantly increased because databases aren't directly exposed on public domains.`
   }
 ];
+
+export const DEFAULT_HOME_CONFIG: HomeConfig = {
+  heroTitle: "Create Content That",
+  heroTitleGradient: "Dominates Search Engine",
+  heroSubtitle: "Browse professional-grade article briefs, unlock semantic SEO outlines, or order complete ready-to-publish custom content verified by organic keyword experts.",
+  badgeText: "Smart SEO & Copywriting Redefined"
+};
+
+export const DEFAULT_ABOUT_CONFIG: AboutConfig = {
+  fullName: "Hafiz Amir Saifi",
+  roleTitle: "SEO Specialist, Content Architect & Automation Developer",
+  bio: "I design and develop enterprise-grade organic growth systems. By pairing deep technical SEO execution with custom-built automation dashboards (like Apex OS), I help content teams save thousands of manual research hours and secure long-term, high-intent ranking stability.",
+  philosophyTitle: "Organic Campaign Philosophy",
+  philosophyText: "Organic search is no longer just about filling pages with target search keys. True sustainable growth comes from establishing robust Topical Authority, ensuring frictionless crawler accessibility, and structuring templates around exact search intents.",
+  missionText: "My core mission is to bridge the gap between technical search engines and high-performing copywriting teams. By analyzing semantic search patterns, I configure pristine blueprints, clear header distributions, and strict internal siloing schemas that search engines can easily parse and index."
+};
+
+export const DEFAULT_SERVICES: ServiceItem[] = [
+  {
+    id: 'srv-1',
+    title: 'Topical Authority & Semantic Strategy',
+    shortDesc: 'Establish unbreakable authority nodes through semantic content siloing and NLP-optimized intent clustering.',
+    iconName: 'Layers',
+    color: 'emerald',
+    bgGradient: 'from-emerald-500/10 to-teal-500/10',
+    highlights: [
+      'Semantic Keyword Clustering (up to 5,000 entities)',
+      'NLP-based Competitor Content Gap Analysis',
+      'Topical Authority Silo Maps & Interlinking Schemas',
+      'Intent-First Search Layout Models'
+    ]
+  },
+  {
+    id: 'srv-2',
+    title: 'Technical On-Page & Schema Engineering',
+    shortDesc: 'Tune your site codebase for frictionless indexability, rapid rendering speed, and deep crawl efficiency.',
+    iconName: 'Cpu',
+    color: 'blue',
+    bgGradient: 'from-blue-500/10 to-indigo-500/10',
+    highlights: [
+      'Advanced JSON-LD Rich Snippet Schemas',
+      'Core Web Vitals & Loading Performance Audits',
+      'Crawl Budget Tuning & Sitemaps/Robots Optimization',
+      'Mobile-First Rendering & Crawler Behavior Logs'
+    ]
+  },
+  {
+    id: 'srv-3',
+    title: 'SEO Dashboard & Automation Tools',
+    shortDesc: 'Eliminate manual research hours. Build tailor-made scraping, outline-generating, and metrics tracking dashboards.',
+    iconName: 'Gauge',
+    color: 'indigo',
+    bgGradient: 'from-indigo-500/10 to-purple-500/10',
+    highlights: [
+      'Custom React & TypeScript Dashboard Design',
+      'SEO API Connectors (Ahrefs, Semrush, Search Console)',
+      'Automated AI-Driven Brief Generator Logic',
+      'Crawl and Scrape Data Analysis Pipelines'
+    ]
+  },
+  {
+    id: 'srv-4',
+    title: 'Content Brief & Layout Planning',
+    shortDesc: 'Generate detailed writing briefs structured with pristine headings, target entities, and exact intent parameters.',
+    iconName: 'FileText',
+    color: 'amber',
+    bgGradient: 'from-amber-500/10 to-orange-500/10',
+    highlights: [
+      'Premium Layout Schemes (SEO Core Silo)',
+      'Strict H1-H4 Structural Heading Blueprinting',
+      'Secondary Entity Distributions & Word Count Directives',
+      'Reader Experience (UX) Conversion Optimization'
+    ]
+  }
+];
+
+export const DEFAULT_EXPERIENCE: ExperienceItem[] = [
+  {
+    id: 'exp-1',
+    role: 'Lead SEO Content Architect & Automation Developer',
+    company: 'Apex Organic Solutions (Self-Employed / Freelance)',
+    period: '2023 - Present',
+    location: 'Remote / Global',
+    achievements: [
+      'Built custom outline-generation dashboards and NLP metrics scraper pipelines reducing manual content research overhead by 68%.',
+      'Engineered dynamic semantic entity distributions for client websites, consistently achieving sub-24h Google index rates.',
+      'Managed a portfolio of 25+ active content hubs, resulting in an average organic search impression increase of 145% within 90 days.',
+      'Standardized programmatic schema markup implementations across diverse CMS frameworks (React, Webflow, WordPress).'
+    ],
+    skillsUsed: ['SEO Automation', 'React', 'TypeScript', 'NLP Analysis', 'Entity Optimization']
+  },
+  {
+    id: 'exp-2',
+    role: 'Senior SEO Technical Analyst',
+    company: 'Digital Horizon Growth',
+    period: '2021 - 2023',
+    location: 'Hybrid',
+    achievements: [
+      'Audited and re-structured sitemaps, interlinking loops, and canonical schemas for complex enterprise portals (10k+ pages).',
+      'Optimized site-wide Core Web Vitals (LCP, FID, CLS), improving baseline mobile search CTR by 22%.',
+      'Coached a team of 12 content copywriters on utilizing semantic silos and structuring editorial headers (H1-H4) around user search intent.',
+      'Analyzed crawl budgets and server-side rendering logs to eliminate duplicate indexation paths.'
+    ],
+    skillsUsed: ['Crawl Budget', 'Core Web Vitals', 'Schema.org', 'Sitemap Tuning', 'Ahrefs / Semrush']
+  },
+  {
+    id: 'exp-3',
+    role: 'Organic Search Consultant',
+    company: 'WebSphere Marketing Studio',
+    period: '2019 - 2021',
+    location: 'In-office',
+    achievements: [
+      'Developed end-to-end keyword clustering blueprints matching localized intents for multi-region retail portals.',
+      'Executed competitor gap analyses focusing on Google Knowledge Graph entities and rich-snippet feature triggers.',
+      'Successfully migrated 4 high-traffic web apps without losing legacy backlink equity or organic search impressions.'
+    ],
+    skillsUsed: ['Keyword Clustering', 'SEO Migration', 'Competitor Gap Analysis', 'Google Analytics']
+  }
+];
+
+export const DEFAULT_EDUCATION: EducationItem[] = [
+  {
+    id: 'edu-1',
+    degree: 'Master of Science in Computer Science & Automation Systems',
+    school: 'Global University of Technology',
+    period: '2017 - 2019',
+    details: 'Specialization in Data Scraping, NLP (Natural Language Processing), and Semantic Web Architecture.'
+  },
+  {
+    id: 'edu-2',
+    degree: 'Bachelor of Science in Information Technology',
+    school: 'State Institute of Engineering',
+    period: '2013 - 2017',
+    details: 'Core focus on Algorithms, Web Development, Databases, and Software Engineering Principles.'
+  }
+];
+
+export const DEFAULT_CERTIFICATIONS: CertificationItem[] = [
+  { id: 'cert-1', title: 'Google Analytics Individual Qualification (GAIQ)', issuer: 'Google', date: '2025' },
+  { id: 'cert-2', title: 'Advanced Technical SEO Certification', issuer: 'Semrush Academy', date: '2024' },
+  { id: 'cert-3', title: 'Enterprise Content Architecture & NLP Standard', issuer: 'SEO Certified Institute', date: '2024' }
+];
+
+export const DEFAULT_SKILLS: SkillItem[] = [
+  { id: 'skill-1', name: 'Semantic Silos & Architecture', level: 98 },
+  { id: 'skill-2', name: 'Crawl Audit & Index Tuning', level: 95 },
+  { id: 'skill-3', name: 'React & TypeScript Development', level: 90 },
+  { id: 'skill-4', name: 'Automated Brief Generation Pipelines', level: 92 },
+  { id: 'skill-5', name: 'Advanced JSON-LD Structured Data', level: 96 }
+];
+
+export const DEFAULT_TESTIMONIALS: TestimonialItem[] = [
+  {
+    id: 'test-1',
+    name: 'Sarah Jenkins',
+    role: 'VP of Growth',
+    company: 'ScribeSaaS Platforms',
+    category: 'saas',
+    rating: 5,
+    metric: '+180% Organic Leads',
+    quote: 'Hafiz Amir Saifi transformed how our editing team approaches topic outlines. The semantic silos he designed eliminated our keyword cannibalization problems within weeks. True expertise.',
+    logoBg: 'bg-emerald-50 text-emerald-700'
+  },
+  {
+    id: 'test-2',
+    name: 'David Kael',
+    role: 'Director of Content',
+    company: 'TechFlow Systems',
+    category: 'automation',
+    rating: 5,
+    metric: '-50 Hours Manual Work / Mo',
+    quote: 'The outline automation pipeline Hafiz engineered for our dashboard is phenomenal. It takes our primary seed entities and generates clean, structurally correct content outlines ready for our writing team in seconds.',
+    logoBg: 'bg-blue-50 text-blue-700'
+  },
+  {
+    id: 'test-3',
+    name: 'Elena Rostova',
+    role: 'Founder',
+    company: 'LearnSphere Education',
+    category: 'seo',
+    rating: 5,
+    metric: 'Sub-24h Index Coverage',
+    quote: 'Our site struggled to get indexed after our migration. Hafiz audited our schema structures, resolved crawler budget bottlenecks, and got our vital hub pages ranking in record time. Exceeded expectations.',
+    logoBg: 'bg-indigo-50 text-indigo-700'
+  },
+  {
+    id: 'test-4',
+    name: 'Marcus Brody',
+    role: 'Head of SEO Strategy',
+    company: 'FinTech Capital',
+    category: 'seo',
+    rating: 5,
+    metric: 'Top 3 rankings for 42 core phrases',
+    quote: 'His grasp of Topical Authority is exceptional. Instead of telling us to write more blogs, Hafiz configured beautiful interlinking pathways that mapped directly to consumer search intent. Our visibility has never been better.',
+    logoBg: 'bg-amber-50 text-amber-700'
+  },
+  {
+    id: 'test-5',
+    name: 'Amiya Gupta',
+    role: 'Product Manager',
+    company: 'Veloce Logistics Corp',
+    category: 'automation',
+    rating: 5,
+    metric: '100% Schema accuracy rate',
+    quote: 'We hired Hafiz to inject pristine JSON-LD markup on our service pages. Not only is our structured data now error-free, but we have unlocked rich FAQ listings that boosted search CTR on day one.',
+    logoBg: 'bg-purple-50 text-purple-700'
+  }
+];
+
+export const DEFAULT_CONTACT_SUBMISSIONS: ContactSubmission[] = [
+  {
+    id: 'sub-1',
+    fullName: 'Jonathan Stark',
+    businessName: 'Stark Growth Inbound',
+    email: 'jonathan@starkgrowth.io',
+    phoneNumber: '+1 (555) 321-4567',
+    websiteUrl: 'https://starkgrowth.io',
+    serviceRequired: 'Technical SEO',
+    subject: 'Core Web Vitals & Index Coverage Audit',
+    message: 'Hello Hafiz, we are seeing major indexing drops since our React platform hydration update last month. We would love for you to audit our site architecture and schema setup as soon as possible.',
+    date: '2026-07-04'
+  }
+];
+

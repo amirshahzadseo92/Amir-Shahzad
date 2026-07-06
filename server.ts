@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import dotenv from "dotenv";
@@ -806,10 +807,181 @@ Respond ONLY with the JSON object. No other conversational text.`;
     }
   });
 
-  function generateLocalFallbackContent(keyword: string, language: string): string {
+  function generateLocalFallbackContent(keyword: string, language: string, type: string = 'content'): string {
     const normalizedKeyword = keyword.trim();
     const cleanLang = (language || 'English').trim();
-    
+    const normalizedType = (type || 'content').trim().toLowerCase();
+
+    // 1. BRIEF FALLBACKS
+    if (normalizedType === 'brief') {
+      if (cleanLang === 'Urdu') {
+        return `موضوع: ${normalizedKeyword} کے لیے مواد کا تفصیلی خلاصہ (Brief)
+
+تفسیری جائزہ اور ہدف:
+• ہدف قارئین: کاروباری مالکان، مارکیٹرز، اور عام صارفین جو ${normalizedKeyword} میں دلچسپی رکھتے ہیں۔
+• مضمون کا بنیادی مقصد: موضوع کی بنیادی اہمیت، فوائد اور عملی حل پیش کرنا۔
+
+اہم موضوعات اور گائیڈ لائنز:
+• موضوع 1: ${normalizedKeyword} کا تعارف اور موجودہ دور میں اس کی ضرورت۔
+• موضوع 2: اہم مسائل اور ان کا بہترین اور آسان حل۔
+• موضوع 3: مستقبل کی حکمت عملی اور عملی اقدامات۔
+
+اہم الفاظ (Keywords):
+• ${normalizedKeyword}, بہترین طریقہ کار, ریسرچ گائیڈ, عملی حل`;
+      }
+      if (cleanLang === 'Punjabi') {
+        return `موضوع: ${normalizedKeyword} لئی تفصیلی خلاصہ (Brief)
+
+ہدف تے مقصد:
+• ہدف قارئین: ہر اوہ بندہ جو ${normalizedKeyword} نوں سمجھنا چاہندا اے۔
+• بنیادی مقصد: گل نوں سدھا تے صاف طریقے نال سمجھانا۔
+
+اہم موضوعات:
+• موضوع 1: ${normalizedKeyword} دا تعارف تے لوڑ۔
+• موضوع 2: وڈے مسئلے تے اوہناں دا پکا حل۔
+• موضوع 3: کامیابی دا نقشہ۔
+
+خاص لفظ (Keywords):
+• ${normalizedKeyword}, اصلی سچائی, کامیابی دی راہ`;
+      }
+      if (cleanLang === 'Hindi') {
+        return `विषय: ${normalizedKeyword} के लिए सामग्री का विस्तृत विवरण (Brief)
+
+लक्षित पाठक और उद्देश्य:
+• लक्षित पाठक: व्यावसायिक लीडर, सामग्री लेखक और ${normalizedKeyword} के बारे में जानने के इच्छुक लोग।
+• मुख्य उद्देश्य: विषय के विभिन्न पहलुओं, लाभों और व्यावहारिक उपायों को स्पष्ट करना।
+
+प्रमुख विषय और रणनीतियाँ:
+• विषय 1: ${normalizedKeyword} की बुनियादी समझ और इसकी आवश्यकता।
+• विषय 2: सामान्य चुनौतियाँ और उनके व्यावहारिक समाधान।
+• विषय 3: सफलता के लिए मार्गदर्शिका और अंतिम कदम।
+
+मुख्य शब्द (Keywords):
+• ${normalizedKeyword}, सर्वोत्तम अभ्यास, व्यावहारिक समाधान, गाइड`;
+      }
+      if (cleanLang === 'Arabic') {
+        return `موضوع: ملخص المحتوى والتوجيه الاستراتيجي لـ ${normalizedKeyword}
+
+الجمهور المستهدف والأهداف:
+• الجمهور: أصحاب الأعمال والمسوقون المهتمون بـ ${normalizedKeyword}.
+• الهدف الأساسي: تقديم مراجعة شاملة وحلول عملية تخدم القارئ مباشرة.
+
+المحاور التحريرية الرئيسية:
+• المحور الأول: مقدمة وأهمية ${normalizedKeyword} في السوق الحالي.
+• المحور الثاني: التحديات الشائعة وكيفية التغلب عليها.
+• المحور الثالث: خطوات التنفيذ والمراقبة المستمرة.
+
+الكلمات المفتاحية:
+• ${normalizedKeyword}, أفضل الممارسات, دليل التنفيذ, حلول عملية`;
+      }
+      // Default English / Spanish / French / German Brief
+      return `TITLE: CONTENT BRIEF FOR ${normalizedKeyword.toUpperCase()}
+
+TARGET AUDIENCE:
+• Professionals, enthusiasts, and decision-makers looking to understand the fundamentals and advanced strategies of ${normalizedKeyword}.
+
+KEY EDITORIAL THEMES:
+• Core Concepts: Introduction and current relevance of ${normalizedKeyword} in the industry.
+• Challenges & Pitfalls: Identifying why traditional methods fail and how to avoid them.
+• Step-by-Step Blueprint: Practical implementation guidelines to achieve positive outcomes.
+
+TARGET KEYWORDS:
+• ${normalizedKeyword}, Best Practices, Implementation Guide, Practical Solutions`;
+    }
+
+    // 2. OUTLINE FALLBACKS
+    if (normalizedType === 'outline') {
+      if (cleanLang === 'Urdu') {
+        return `عنوان: ${normalizedKeyword} کا تفصیلی خاکہ (Outline)
+
+حصہ 1: تعارف اور بنیادی مسئلہ
+• موضوع کا پس منظر اور موجودہ اہمیت۔
+• عام غلطیاں اور ان کے منفی اثرات۔
+
+حصہ 2: حقیقی حل اور اہم راز
+• کامیابی حاصل کرنے کے بنیادی فلسفے۔
+• پوشیدہ حقائق جن پر عمل کرنا ضروری ہے۔
+
+حصہ 3: عملی منصوبہ بندی اور اقدامات
+• مرحلہ وار گائیڈ اور کام کرنے کا طریقہ۔
+• نتائج کا تجزیہ اور مسلسل بہتری۔
+
+حصہ 4: آخری فیصلہ اور اہم پیغام
+• مستقبل کی حکمت عملی اور عملی اقدام کی دعوت۔`;
+      }
+      if (cleanLang === 'Punjabi') {
+        return `عنوان: ${normalizedKeyword} دا پورا سٹرکچر (Outline)
+
+حصہ 1: مڈھلی گل تے وڈا رولا
+• موضوع دی اہمیت تے پس منظر۔
+• عام لوکاں دی وڈی غلطیاں۔
+
+حصہ 2: اصلی سچائی تے گہرائی
+• کم کرن دا اصل طریقہ۔
+• اوہ گلاں جو لوک چھپاندے نیں۔
+
+حصہ 3: عملی کامیابی دی راہ
+• قدم بہ قدم گائیڈ۔
+• محنت تے کامیابی دا نقشہ۔
+
+حصہ 4: آخری نچوڑ
+• ہن سوچنا چھڈو تے عمل کرو۔`;
+      }
+      if (cleanLang === 'Hindi') {
+        return `शीर्षक: ${normalizedKeyword} का विस्तृत आउटलाइन (Outline)
+
+भाग 1: प्रस्तावना और मुख्य समस्या
+• विषय की पृष्ठभूमि और इसका महत्व।
+• सामान्य गलतियाँ और उनका प्रभाव।
+
+भाग 2: वास्तविक समाधान और गहरे रहस्य
+• सफलता के मुख्य सिद्धांत और मार्ग।
+• छिपे हुए रणनीतिक पहलू जिन्हें जानना आवश्यक है।
+
+भाग 3: कार्य योजना और व्यावहारिक कदम
+• चरण-दर-चरण रणनीतिक कार्यान्वयन।
+• प्रदर्शन का मूल्यांकन और निरंतर सुधार।
+
+भाग 4: अंतिम निष्कर्ष और मार्गदर्शिका
+• भविष्य की योजना और सफलता के लिए अंतिम विचार।`;
+      }
+      if (cleanLang === 'Arabic') {
+        return `عنوان: الهيكل التنظيمي ومخطط الأفكار لـ ${normalizedKeyword}
+
+الجزء الأول: المقدمة والمشكلة الأساسية
+• خلفية عن الموضوع وأهميته الحالية.
+• الأخطاء الشائعة والآثار السلبية المترتبة عليها.
+
+الجزء الثاني: الحلول الحقيقية والعمق الاستراتيجي
+• الفلسفة الأساسية لتحقيق النجاح.
+• الحقائق الخفية التي يجب مراعاتها.
+
+الجزء الثالث: خطة العمل وخطوات التنفيذ
+• دليل عملي خطوة بخطوة للبدء الفعلي.
+• مراقبة مؤشرات الأداء والتحسين المستمر.
+
+الجزء الرابع: التوجه النهائي والتوصيات
+• الخاتمة والخطوات الفورية الموصى بها.`;
+      }
+      return `TITLE: CONTENT OUTLINE FOR ${normalizedKeyword.toUpperCase()}
+
+I. INTRODUCTION & THE CORE CHALLENGE
+• Historical context and contemporary relevance of ${normalizedKeyword}.
+• Identifying the key obstacles and standard pain points.
+
+II. THE UNDERLYING STRATEGY & INSIGHTS
+• Fundamental principles that govern successful execution.
+• Gaps in existing approaches and how to bridge them.
+
+III. THE STEP-BY-STEP EXECUTION PLAYBOOK
+• Actionable phases for deployment and implementation.
+• Tracking key performance indicators and iteration.
+
+IV. CONCLUDING OUTLOOK
+• Strategic summary and immediate next steps for action.`;
+    }
+
+    // 3. FULL ARTICLE CONTENT FALLBACKS
     if (cleanLang === 'Urdu') {
       return `عنوان: ${normalizedKeyword} کا مکمل اور گہرا تحقیقی جائزہ
 
@@ -866,7 +1038,7 @@ Respond ONLY with the JSON object. No other conversational text.`;
 चरण 2: अपने संदेश को संक्षिप्त, सीधा और प्रभावशाली बनाएं।
 चरण 3: नियमित रूप से प्रदर्शन का मूल्यांकन करें और अपनी रणनीति को अपडेट करें।
 
-अंतिम विचार:
+ अंतिम विचार:
 योजनाएं बनाना बंद करें और आज से ही काम शुरू करें। वास्तविक दुनिया में परिणाम केवल सही और ठोस काम करने से ही आते हैं।`;
     }
 
@@ -950,8 +1122,8 @@ Hören Sie auf zu zögern. Machen Sie den ersten Schritt und setzen Sie diese St
 التخطيط بدون تنفيذ هو مجرد تضييع للوقت. ابدأ الآن واجعل لعملك بصمة حقيقية في السوق.`;
     }
 
-    // Default to English
-    return `TITLE: THE COMPREHENSIVE GUIDE TO ${normalizedKeyword} AND STRATEGIC EXECUTION
+    // Default to English Content
+    return `TITLE: THE COMPREHENSIVE GUIDE TO ${normalizedKeyword.toUpperCase()} AND STRATEGIC EXECUTION
 
 INTRODUCTION: THE REAL STATE OF PLAY
 In today's fast-moving digital environment, many organizations and individuals struggle to achieve meaningful traction with ${normalizedKeyword}. The landscape is filled with shallow advice, superficial metrics, and repetitive formulas. Most strategies fail because they focus on surface-level optimization rather than true, fundamental value. This extensive research-backed guide breaks down the core elements of ${normalizedKeyword} to help you achieve sustainable, high-impact results.
@@ -1008,15 +1180,16 @@ Success in ${normalizedKeyword} does not happen overnight. It requires persisten
   // API route for content generation
   app.post("/api/generate-content", async (req: any, res: any) => {
     try {
-      const { keyword, language } = req.body || {};
+      const { keyword, language, type } = req.body || {};
+      const generationType = type || 'content';
       if (!keyword) {
         return res.status(400).json({ error: "Keyword is required" });
       }
 
       const geminiKey = process.env.GEMINI_API_KEY;
       if (!geminiKey || geminiKey === "MY_GEMINI_API_KEY" || geminiKey.trim() === "" || geminiKey.includes("PLACEHOLDER")) {
-        console.log(`[BOT] GEMINI_API_KEY is not configured or is a placeholder. Returning high-quality local fallback content for "${keyword}" in ${language}`);
-        const generated = generateLocalFallbackContent(keyword, language);
+        console.log(`[BOT] GEMINI_API_KEY is not configured or is a placeholder. Returning high-quality local fallback content for "${keyword}" in ${language} (type: ${generationType})`);
+        const generated = generateLocalFallbackContent(keyword, language, generationType);
         return res.json({
           success: true,
           content: removeHashAndStar(generated)
@@ -1032,35 +1205,86 @@ Success in ${normalizedKeyword} does not happen overnight. It requires persisten
         }
       });
 
-      const prompt = `Role: You are a world-class content researcher and expert writer with 10 years of industry experience. Your goal is to produce elite-level, gritty, real, and direct content that is indistinguishable from a top-tier human expert.
+      let prompt = "";
 
-1. The "VIP Content" Standard:
-- Whether the requested content is 1,000 words or 10,000 words, you must maintain maximum density of information. Never dilute the content just to reach a word count.
-- Provide "VIP-level" depth: Include industry secrets, nuanced analysis, logical arguments, and practical execution steps. No fluff, no filler, only high-value insights.
+      if (generationType === 'brief') {
+        prompt = `Role: You are an elite content researcher and strategist. Your goal is to produce a W3C WAI compliance conforming content brief for the topic "${keyword}".
+The output language MUST be strictly in ${language}.
 
-2. Writing Philosophy (Gritty & Direct):
-- Write as if you are a seasoned industry veteran speaking to a peer.
-- Be blunt and honest. Call out bad strategies. Focus on what actually works in the real world.
-- Zero AI Fluff: Absolutely no robotic phrases like "delve," "unlock," "in today's landscape," "tapestry," or "essential."
-- Language: Use simple, punchy, conversational English. Keep sentences short. Always use active voice. The language of the content MUST be strictly in ${language}.
+Follow this structural format:
+TITLE: CONTENT BRIEF FOR ${keyword.toUpperCase()}
 
-3. Advanced Content Execution:
-- Research Depth: Go beyond surface-level facts. Identify the "meat" of the topic—the nuances others miss.
-- Structure: Build a narrative that moves from "The Problem" (the pain point) to "The Reality" (the truth) and finally to "The Execution" (how to actually get results).
+TARGET AUDIENCE:
+[Provide 2-3 sentences in ${language} detailing the specific reader segment, their pain points, and why they search for this]
 
-4. STRICT FORMATTING CONSTRAINT (NO HASH '#' OR STAR '*' CHARACTERS):
-- NEVER use the character '#' (hash) anywhere in your response. For headings and sections, write them in plain UPPERCASE on a separate line with a blank line before and after (e.g., 'THE REALITY: WHERE WE STAND' instead of '## The Reality: Where We Stand').
-- NEVER use the character '*' (star or asterisk) anywhere in your response. For emphasis or bold text, write them normally inside sentences without any markdown tags. For lists, use a bullet dot like '•' or dashes '-' or numbering '1.', '2.', '3.'.
+KEY EDITORIAL THEMES:
+• Theme 1: [Short name and actionable description of the first core theme]
+• Theme 2: [Short name and actionable description of the second core theme]
+• Theme 3: [Short name and actionable description of the third core theme]
 
-5. Strict "No-Go" Rules:
-- Never start with "In this article..."
-- Never end with "In conclusion..." or "In summary..."
-- No summaries. Just end with a sharp, actionable final thought.
-- Never mention you are an AI. You are an expert. Act like one.
+TARGET KEYWORDS:
+• [Primary Keyword]
+• [LSI Entity 1]
+• [LSI Entity 2]
 
-6. Commitment: Every piece of content you produce must be the best in its category. If the user asks for 5,000 words, provide 5,000 words of high-impact, actionable, expert-level content.
+STRICT FORMATTING CONSTRAINT (NO HASH '#' OR STAR '*' CHARACTERS):
+- NEVER use the character '#' (hash) anywhere in your response. For headings, write them in plain UPPERCASE on a separate line.
+- NEVER use the character '*' (star or asterisk) anywhere in your response. For lists, use the bullet character '•' or numbering.
+- Do NOT include any unrequested advice, image suggestions, or systems telemetry. Respond with ONLY the brief content text.`;
+      } else if (generationType === 'outline') {
+        prompt = `Role: You are a senior content architect and SEO strategist. Your goal is to produce a W3C WAI compliance conforming content outline for the topic "${keyword}".
+The output language MUST be strictly in ${language}.
 
-Task: Write a complete piece of content about "${keyword}". You must strictly follow all of the rules above, especially the absolute constraint of NOT USING ANY HASH '#' OR STAR '*' CHARACTERS anywhere in your response. Return the complete article directly.`;
+Follow this structural format:
+TITLE: CONTENT OUTLINE FOR ${keyword.toUpperCase()}
+
+I. INTRODUCTION & PRIMARY PROBLEM
+• Background details about ${keyword}
+• Standard issues and why traditional strategies fail
+
+II. CORE BLUEPRINTS & DETAILED SOLUTION
+• The hidden truths and tactical approaches
+• Vital guidelines to achieve desired outcomes
+
+III. STEP-BY-STEP STRATEGIC EXECUTION
+• Step 1: Detailed action phase
+• Step 2: Implementation and measurement
+• Step 3: Performance tracking and scaling
+
+IV. ACTION-ORIENTED CONCLUDING OUTLOOK
+• Strategic summary and immediate next steps
+
+STRICT FORMATTING CONSTRAINT (NO HASH '#' OR STAR '*' CHARACTERS):
+- NEVER use the character '#' (hash) anywhere in your response. For headings, write them in plain UPPERCASE on a separate line.
+- NEVER use the character '*' (star or asterisk) anywhere in your response. For lists, use the bullet character '•'.
+- Do NOT include any unrequested advice, image suggestions, or systems telemetry. Respond with ONLY the outline text.`;
+      } else {
+        // Full Article Content
+        prompt = `Role: You are a world-class content writer with 10 years of industry experience. Write an extensive, elite-level, direct and professional article about "${keyword}".
+The output language MUST be strictly in ${language}.
+
+Follow this structural format:
+TITLE: THE DEFINITIVE GUIDE TO ${keyword.toUpperCase()}
+
+THE CRITICAL PROBLEM: WHERE OTHERS FAIL
+[Provide detailed paragraphs in ${language} call out real-world pain points and common misconceptions on ${keyword}]
+
+THE DEEP REALITY: WHAT TRULY WORKS
+[Provide detailed paragraphs in ${language} detailing industry secrets, core principles, and what actually achieves results]
+
+STEP-BY-STEP ACTIONABLE EXECUTION
+• Phase 1: Actionable setup and research
+• Phase 2: Implementation blueprint
+• Phase 3: Measuring performance and optimization
+
+SHARP FINAL OUTLOOK
+[A blunt, action-oriented final thought encouraging immediate action]
+
+STRICT FORMATTING CONSTRAINT (NO HASH '#' OR STAR '*' CHARACTERS):
+- NEVER use the character '#' (hash) anywhere in your response. For headings, write them in plain UPPERCASE on a separate line.
+- NEVER use the character '*' (star or asterisk) anywhere in your response. For lists, use the bullet character '•' or dashes.
+- Do NOT append any image recommendations, '===IMAGE_GUIDANCE===', or systems telemetry. Respond with ONLY the article text itself.`;
+      }
 
       let generatedText = "";
       try {
@@ -1073,11 +1297,11 @@ Task: Write a complete piece of content about "${keyword}". You must strictly fo
         generatedText = response.text || "";
       } catch (geminiError: any) {
         console.warn("[BOT] Gemini call failed, falling back to local generator:", geminiError.message || geminiError);
-        generatedText = generateLocalFallbackContent(keyword, language);
+        generatedText = generateLocalFallbackContent(keyword, language, generationType);
       }
 
       if (!generatedText) {
-        generatedText = generateLocalFallbackContent(keyword, language);
+        generatedText = generateLocalFallbackContent(keyword, language, generationType);
       }
 
       return res.json({
@@ -1086,10 +1310,9 @@ Task: Write a complete piece of content about "${keyword}". You must strictly fo
       });
     } catch (error: any) {
       console.error("Content generation error:", error);
-      // Even in the outermost catch, try to return a fallback so the user never gets an error screen
       try {
-        const { keyword, language } = (req.body || {});
-        const generated = generateLocalFallbackContent(keyword || "SEO Content", language || "English");
+        const { keyword, language, type } = (req.body || {});
+        const generated = generateLocalFallbackContent(keyword || "SEO Content", language || "English", type || 'content');
         return res.json({
           success: true,
           content: removeHashAndStar(generated)
@@ -1101,6 +1324,130 @@ Task: Write a complete piece of content about "${keyword}". You must strictly fo
         });
       }
     }
+  });
+
+  // Helper to load dynamic sitemap lists or fall back
+  function loadDynamicData<T>(filePath: string, fallback: T[]): T[] {
+    try {
+      const absPath = path.resolve(filePath);
+      if (fs.existsSync(absPath)) {
+        const raw = fs.readFileSync(absPath, "utf-8");
+        return JSON.parse(raw);
+      }
+    } catch (err) {
+      console.warn(`[SITEMAP SYNC] Could not read ${filePath}, using fallback.`);
+    }
+    return fallback;
+  }
+
+  // Helper to save dynamic list
+  function saveDynamicData<T>(filePath: string, data: T[]): boolean {
+    try {
+      const absPath = path.resolve(filePath);
+      const dir = path.dirname(absPath);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(absPath, JSON.stringify(data, null, 2), "utf-8");
+      return true;
+    } catch (err) {
+      console.error(`[SITEMAP SYNC] Failed to save dynamic data to ${filePath}:`, err);
+      return false;
+    }
+  }
+
+  // Synchronized API routes for dynamic content tracking
+  app.post("/api/sync-briefs", express.json({ limit: "10mb" }), (req: any, res: any) => {
+    const { briefs, outlines, contents } = req.body || {};
+    let success = true;
+    if (briefs) success = success && saveDynamicData("./src/data/briefs_dynamic.json", briefs);
+    if (outlines) success = success && saveDynamicData("./src/data/outlines_dynamic.json", outlines);
+    if (contents) success = success && saveDynamicData("./src/data/contents_dynamic.json", contents);
+    return res.json({ success });
+  });
+
+  app.post("/api/sync-blogs", express.json({ limit: "10mb" }), (req: any, res: any) => {
+    const { blogs } = req.body || {};
+    let success = true;
+    if (blogs) success = success && saveDynamicData("./src/data/blogs_dynamic.json", blogs);
+    return res.json({ success });
+  });
+
+  // Dynamic XML Sitemap Generator Route
+  app.get("/sitemap.xml", (req: any, res: any) => {
+    const protocol = req.secure || req.headers["x-forwarded-proto"] === "https" ? "https" : "http";
+    const host = req.headers.host || "localhost:3000";
+    const baseUrl = `${protocol}://${host}`;
+    const today = new Date().toISOString().split("T")[0];
+
+    // Static site pages
+    const staticPages = [
+      { loc: `${baseUrl}/`, priority: "1.0", changefreq: "daily" },
+      { loc: `${baseUrl}/?page=about`, priority: "0.8", changefreq: "monthly" },
+      { loc: `${baseUrl}/?page=services`, priority: "0.9", changefreq: "weekly" },
+      { loc: `${baseUrl}/?page=library`, priority: "0.9", changefreq: "daily" },
+      { loc: `${baseUrl}/?page=resume`, priority: "0.7", changefreq: "monthly" },
+      { loc: `${baseUrl}/?page=testimonials`, priority: "0.7", changefreq: "monthly" },
+      { loc: `${baseUrl}/?page=pricing`, priority: "0.8", changefreq: "weekly" },
+      { loc: `${baseUrl}/?page=blog`, priority: "0.9", changefreq: "daily" },
+      { loc: `${baseUrl}/?page=contact`, priority: "0.8", changefreq: "monthly" }
+    ];
+
+    // Fetch dynamic briefs
+    const briefsFallback = [
+      { id: "brief-1" }, { id: "brief-2" }, { id: "brief-3" },
+      { id: "brief-4" }, { id: "brief-5" }, { id: "brief-6" }
+    ];
+    const activeBriefs = loadDynamicData("./src/data/briefs_dynamic.json", briefsFallback);
+
+    // Fetch dynamic blogs
+    const blogsFallback = [
+      { id: "blog-1" }, { id: "blog-2" }, { id: "blog-3" }
+    ];
+    const activeBlogs = loadDynamicData("./src/data/blogs_dynamic.json", blogsFallback);
+
+    // Generate XML
+    let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
+    xml += `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n`;
+
+    // Append static pages
+    for (const page of staticPages) {
+      xml += `  <url>\n`;
+      xml += `    <loc>${page.loc}</loc>\n`;
+      xml += `    <lastmod>${today}</lastmod>\n`;
+      xml += `    <changefreq>${page.changefreq}</changefreq>\n`;
+      xml += `    <priority>${page.priority}</priority>\n`;
+      xml += `  </url>\n`;
+    }
+
+    // Append dynamic briefs
+    for (const brief of activeBriefs) {
+      if (brief && brief.id) {
+        xml += `  <url>\n`;
+        xml += `    <loc>${baseUrl}/?brief=${encodeURIComponent(brief.id)}</loc>\n`;
+        xml += `    <lastmod>${today}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n`;
+        xml += `    <priority>0.8</priority>\n`;
+        xml += `  </url>\n`;
+      }
+    }
+
+    // Append dynamic blog posts
+    for (const post of activeBlogs) {
+      if (post && post.id) {
+        xml += `  <url>\n`;
+        xml += `    <loc>${baseUrl}/?page=blog&amp;post=${encodeURIComponent(post.id)}</loc>\n`;
+        xml += `    <lastmod>${today}</lastmod>\n`;
+        xml += `    <changefreq>weekly</changefreq>\n`;
+        xml += `    <priority>0.8</priority>\n`;
+        xml += `  </url>\n`;
+      }
+    }
+
+    xml += `</urlset>`;
+
+    res.header("Content-Type", "application/xml");
+    return res.status(200).send(xml);
   });
 
   // Vite middleware and static asset serving

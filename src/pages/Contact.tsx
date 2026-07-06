@@ -2,12 +2,15 @@ import React, { useState } from 'react';
 import { Mail, ShieldAlert, Sparkles, Send, CheckCircle2, Globe, FileText, User, Building, Phone, Briefcase } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
+import { ContactSubmission } from '../types';
+
 interface ContactProps {
   initialSubject?: string;
   onToast: (msg: string, type: 'success' | 'info') => void;
+  onAddSubmission?: (submission: ContactSubmission) => void;
 }
 
-export default function Contact({ initialSubject = '', onToast }: ContactProps) {
+export default function Contact({ initialSubject = '', onToast, onAddSubmission }: ContactProps) {
   const [fullName, setFullName] = useState('');
   const [businessName, setBusinessName] = useState('');
   const [email, setEmail] = useState('');
@@ -50,6 +53,22 @@ export default function Contact({ initialSubject = '', onToast }: ContactProps) 
           "_captcha": "false"
         })
       });
+
+      const newSub: ContactSubmission = {
+        id: 'sub-' + Date.now(),
+        fullName,
+        businessName: businessName || 'Not provided',
+        email,
+        phoneNumber: phoneNumber || 'Not provided',
+        websiteUrl: websiteUrl || 'Not provided',
+        serviceRequired,
+        subject,
+        message,
+        date: new Date().toISOString().split('T')[0]
+      };
+      if (onAddSubmission) {
+        onAddSubmission(newSub);
+      }
 
       if (response.ok) {
         setSubmitted(true);

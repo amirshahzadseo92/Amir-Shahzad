@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeft, 
   Lock, 
@@ -18,6 +18,113 @@ import {
 import { motion } from 'motion/react';
 import { ArticleBrief, ActivePage } from '../types';
 import BriefCard from '../components/BriefCard';
+
+// Automation status bar for each detailed section
+function AutomationStatus({ type }: { type: 'brief' | 'outline' }) {
+  const [dots, setDots] = useState('...');
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots(prev => prev.length >= 3 ? '.' : prev + '.');
+    }, 600);
+    return () => clearInterval(interval);
+  }, []);
+
+  const getStatusText = () => {
+    switch (type) {
+      case 'brief':
+        return 'Indexing semantic topic brief & search intents';
+      case 'outline':
+        return 'Drafting SEO structural hierarchy & word density';
+      default:
+        return 'Optimizing article assets';
+    }
+  };
+
+  return (
+    <div className="mb-4 flex flex-wrap items-center justify-between gap-2 bg-emerald-50/70 border border-emerald-100/80 rounded-xl px-4 py-2.5 text-xs font-medium text-emerald-800 shadow-3xs">
+      <div className="flex items-center space-x-2">
+        <span className="relative flex h-2.5 w-2.5">
+          <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+          <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+        </span>
+        <span className="font-extrabold font-mono tracking-wider uppercase text-[10px] text-emerald-700">
+          APEX ENGINE ACTIVE
+        </span>
+      </div>
+      <div className="flex items-center space-x-1.5 text-slate-600 text-[11px] font-mono">
+        <span className="font-semibold">{getStatusText()}{dots}</span>
+      </div>
+      <div className="flex items-center space-x-1 font-mono text-[10px] bg-emerald-100/60 text-emerald-900 px-2 py-1 rounded-md font-bold border border-emerald-200/50">
+        <Sparkles className="w-3 h-3 text-emerald-600 animate-spin" style={{ animationDuration: '3s' }} />
+        <span>NLP SCORE: 98.7%</span>
+      </div>
+    </div>
+  );
+}
+
+// Sparkle/Automation background visualizer around and inside the box
+function AutomationDecorator() {
+  const [particles, setParticles] = useState<{ id: number; x: number; y: number; delay: number; scale: number }[]>([]);
+
+  useEffect(() => {
+    // Generate some random particles with unique positions and delays
+    const newParticles = Array.from({ length: 12 }).map((_, i) => ({
+      id: i,
+      x: Math.random() * 100, // percentage x-axis
+      y: Math.random() * 30 + 70, // bottom area
+      delay: Math.random() * 1.5,
+      scale: Math.random() * 0.4 + 0.6,
+    }));
+    setParticles(newParticles);
+  }, []);
+
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-b-xl">
+      {/* 1. Laser scanning line with real green glow effect */}
+      <motion.div
+        initial={{ y: "-10%" }}
+        animate={{ y: "110%" }}
+        transition={{
+          duration: 3.5,
+          repeat: Infinity,
+          ease: "easeInOut",
+        }}
+        className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/80 to-transparent shadow-[0_0_12px_4px_rgba(16,185,129,0.5)] z-20"
+      />
+
+      {/* 2. Tech corner grid outlines */}
+      <div className="absolute top-2 left-2 w-3 h-3 border-t-2 border-l-2 border-emerald-500/30" />
+      <div className="absolute top-2 right-2 w-3 h-3 border-t-2 border-r-2 border-emerald-500/30" />
+      <div className="absolute bottom-2 left-2 w-3 h-3 border-b-2 border-l-2 border-emerald-500/30" />
+      <div className="absolute bottom-2 right-2 w-3 h-3 border-b-2 border-r-2 border-emerald-500/30" />
+
+      {/* 3. Floating particle entities */}
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          initial={{ opacity: 0, x: `${p.x}%`, y: `${p.y}%`, scale: 0 }}
+          animate={{
+            opacity: [0, 0.8, 0.8, 0],
+            y: [`${p.y}%`, `${p.y - 85}%`],
+            scale: [0, p.scale, p.scale, 0],
+            rotate: [0, 180 + Math.random() * 180],
+          }}
+          transition={{
+            duration: 4.5,
+            repeat: Infinity,
+            delay: p.delay,
+            ease: "easeOut",
+          }}
+          className="absolute text-emerald-400/40"
+          style={{ width: '12px', height: '12px' }}
+        >
+          <Sparkles className="w-2.5 h-2.5 fill-emerald-300/20" />
+        </motion.div>
+      ))}
+    </div>
+  );
+}
+
 
 interface BriefDetailProps {
   brief: ArticleBrief;
@@ -108,28 +215,35 @@ export default function BriefDetail({
       <div className="py-10 grid grid-cols-1 gap-10 lg:grid-cols-12 items-start">
         
         {/* Editorial Brief Body */}
-        <article className="lg:col-span-8 space-y-6">
-          <div className="prose prose-emerald max-w-none">
-            <h2 className="text-xl font-bold text-gray-900 flex items-center space-x-2 border-b border-gray-50 pb-2 mb-4">
-              <BookOpen className="h-5 w-5 text-emerald-600" />
-              <span>Core Editorial Brief</span>
-            </h2>
-            
-            {/* Split paragraphs/headers on mock markdown data */}
-            <div className="text-gray-600 space-y-4 leading-relaxed whitespace-pre-line text-sm">
-              {brief.fullBrief}
-            </div>
+        <article className="lg:col-span-8 rounded-2xl overflow-hidden relative shadow-[0_4px_25px_0_rgba(16,185,129,0.18)] p-[1.5px] bg-transparent">
+          <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+            <div className="absolute inset-[-400%] animate-[spin_5s_linear_infinite] bg-[conic-gradient(from_0deg,#10b981,#34d399,#059669,transparent,transparent,#10b981)]" />
           </div>
+          <div className="w-full h-full bg-white rounded-[15px] p-6 relative z-10 bg-emerald-50/5 overflow-hidden">
+            <div className="relative z-10 space-y-6">
+              <div className="prose prose-emerald max-w-none">
+                <h2 className="text-xl font-bold text-gray-900 flex items-center space-x-2 border-b border-gray-50 pb-2 mb-4">
+                  <BookOpen className="h-5 w-5 text-emerald-600" />
+                  <span>Core Editorial Brief</span>
+                </h2>
+                
+                {/* Split paragraphs/headers on mock markdown data */}
+                <div className="text-gray-600 space-y-4 leading-relaxed whitespace-pre-line text-sm">
+                  {brief.fullBrief}
+                </div>
+              </div>
 
-          {/* Keywords Tagging Block */}
-          <div className="pt-6 border-t border-gray-100">
-            <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 font-mono">Target Semantic Keywords</h3>
-            <div className="flex flex-wrap gap-2">
-              {brief.keywords.map((key, index) => (
-                <span key={index} className="rounded-lg bg-gray-50 border border-gray-100 text-xs font-mono text-gray-600 px-3 py-1.5">
-                  {key}
-                </span>
-              ))}
+              {/* Keywords Tagging Block */}
+              <div className="pt-6 border-t border-gray-100">
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2 font-mono">Target Semantic Keywords</h3>
+                <div className="flex flex-wrap gap-2">
+                  {brief.keywords.map((key, index) => (
+                    <span key={index} className="rounded-lg bg-gray-50 border border-gray-100 text-xs font-mono text-gray-600 px-3 py-1.5">
+                      {key}
+                    </span>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
         </article>
@@ -190,55 +304,62 @@ export default function BriefDetail({
           <motion.div 
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-2xl border border-emerald-100 bg-emerald-50/10 p-6 sm:p-8 space-y-6"
+            className="rounded-2xl overflow-hidden relative shadow-[0_4px_25px_0_rgba(16,185,129,0.18)] p-[1.5px] bg-transparent"
           >
-            <div className="flex items-center space-x-2 text-emerald-700">
-              <LockOpen className="h-5 w-5" />
-              <span className="text-sm font-semibold">Premium SEO Layout Scheme Active</span>
+            <div className="absolute inset-0 pointer-events-none overflow-hidden rounded-2xl">
+              <div className="absolute inset-[-400%] animate-[spin_5s_linear_infinite] bg-[conic-gradient(from_0deg,#10b981,#34d399,#059669,transparent,transparent,#10b981)]" />
             </div>
+            <div className="w-full h-full bg-white rounded-[15px] p-6 sm:p-8 space-y-6 relative z-10 bg-emerald-50/5 overflow-hidden">
+              <div className="relative z-10">
+                <div className="flex items-center space-x-2 text-emerald-700">
+                  <LockOpen className="h-5 w-5" />
+                  <span className="text-sm font-semibold">Premium SEO Layout Scheme Active</span>
+                </div>
 
-            <div className="space-y-4 text-sm text-gray-700 leading-relaxed">
-              <div className="border-l-4 border-emerald-500 pl-4 py-1">
-                <h4 className="font-bold text-gray-900 text-base">H1: {brief.title}</h4>
-                <p className="text-xs text-gray-400 font-mono mt-0.5">Intent: Informational & Authoritative | Primary keyword placement</p>
+                <div className="space-y-4 text-sm text-gray-700 leading-relaxed">
+                  <div className="border-l-4 border-emerald-500 pl-4 py-1">
+                    <h4 className="font-bold text-gray-900 text-base">H1: {brief.title}</h4>
+                    <p className="text-xs text-gray-400 font-mono mt-0.5">Intent: Informational & Authoritative | Primary keyword placement</p>
+                  </div>
+
+                  <div className="pl-6 space-y-4">
+                    <div className="border-l-2 border-gray-200 pl-3">
+                      <h5 className="font-bold text-gray-900">H2: Introduction to {brief.category} Challenges</h5>
+                      <p className="text-xs text-gray-500">Suggested length: 250 words. Target latent entity: market metrics.</p>
+                    </div>
+
+                    <div className="border-l-2 border-gray-200 pl-3">
+                      <h5 className="font-bold text-gray-900">H2: Deep-Dive Core Strategy</h5>
+                      <p className="text-xs text-gray-500">Suggested length: 600 words. Target semantic entities: {brief.keywords.join(', ')}.</p>
+                      <p className="text-xs text-gray-400 italic mt-1">&#8226; Key Action Checklist for writing teams included in zip download assets.</p>
+                    </div>
+
+                    <div className="border-l-2 border-gray-200 pl-3">
+                      <h5 className="font-bold text-gray-900">H2: Tactical Case Study & Practical Implementation</h5>
+                      <p className="text-xs text-gray-500">Suggested length: 450 words. Introduce interactive element or diagnostic layout tool.</p>
+                    </div>
+
+                    <div className="border-l-2 border-gray-200 pl-3">
+                      <h5 className="font-bold text-gray-900">H2: Conclusion & Strategic Summary</h5>
+                      <p className="text-xs text-gray-500">Suggested length: 150 words. Include structured FAQ JSON-LD markup blocks.</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Custom Content Direct CTA */}
+                <div className="pt-6 border-t border-emerald-100 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+                  <div>
+                    <h4 className="text-sm font-bold text-gray-900">Ready for elite production?</h4>
+                    <p className="text-xs text-gray-500">Hire our professional agency experts to draft this article flawlessly.</p>
+                  </div>
+                  <button 
+                    onClick={() => onOrderContent(brief.title)}
+                    className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 text-xs font-semibold shadow self-start sm:self-auto"
+                  >
+                    Order Expert Copywriting
+                  </button>
+                </div>
               </div>
-
-              <div className="pl-6 space-y-4">
-                <div className="border-l-2 border-gray-200 pl-3">
-                  <h5 className="font-bold text-gray-900">H2: Introduction to {brief.category} Challenges</h5>
-                  <p className="text-xs text-gray-500">Suggested length: 250 words. Target latent entity: market metrics.</p>
-                </div>
-
-                <div className="border-l-2 border-gray-200 pl-3">
-                  <h5 className="font-bold text-gray-900">H2: Deep-Dive Core Strategy</h5>
-                  <p className="text-xs text-gray-500">Suggested length: 600 words. Target semantic entities: {brief.keywords.join(', ')}.</p>
-                  <p className="text-xs text-gray-400 italic mt-1">&#8226; Key Action Checklist for writing teams included in zip download assets.</p>
-                </div>
-
-                <div className="border-l-2 border-gray-200 pl-3">
-                  <h5 className="font-bold text-gray-900">H2: Tactical Case Study & Practical Implementation</h5>
-                  <p className="text-xs text-gray-500">Suggested length: 450 words. Introduce interactive element or diagnostic layout tool.</p>
-                </div>
-
-                <div className="border-l-2 border-gray-200 pl-3">
-                  <h5 className="font-bold text-gray-900">H2: Conclusion & Strategic Summary</h5>
-                  <p className="text-xs text-gray-500">Suggested length: 150 words. Include structured FAQ JSON-LD markup blocks.</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Custom Content Direct CTA */}
-            <div className="pt-6 border-t border-emerald-100 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-              <div>
-                <h4 className="text-sm font-bold text-gray-900">Ready for elite production?</h4>
-                <p className="text-xs text-gray-500">Hire our professional agency experts to draft this article flawlessly.</p>
-              </div>
-              <button 
-                onClick={() => onOrderContent(brief.title)}
-                className="rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 text-xs font-semibold shadow self-start sm:self-auto"
-              >
-                Order Expert Copywriting
-              </button>
             </div>
           </motion.div>
         ) : (

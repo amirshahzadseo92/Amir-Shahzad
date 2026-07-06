@@ -10,10 +10,19 @@ import {
   FolderOpen,
   X,
   Palette,
-  Check
+  Check,
+  Home,
+  User,
+  GraduationCap,
+  MessageSquare,
+  BookOpen,
+  Inbox,
+  Plus,
+  Eye,
+  Briefcase
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArticleBrief, OutlineItem, ContentItem, ContentOrder } from '../types';
+import { ArticleBrief, OutlineItem, ContentItem, ContentOrder, HomeConfig, AboutConfig, ServiceItem, ExperienceItem, TestimonialItem, BlogPost, ContactSubmission, EducationItem, CertificationItem, SkillItem } from '../types';
 
 interface DashboardProps {
   userEmail: string;
@@ -35,6 +44,29 @@ interface DashboardProps {
   onDeleteOutline: (id: string) => void;
   onEditContent: (c: ContentItem) => void;
   onDeleteContent: (id: string) => void;
+
+  homeConfig: HomeConfig;
+  onUpdateHomeConfig: (cfg: HomeConfig) => void;
+  aboutConfig: AboutConfig;
+  onUpdateAboutConfig: (cfg: AboutConfig) => void;
+  services: ServiceItem[];
+  onUpdateServices: (items: ServiceItem[]) => void;
+  experiences: ExperienceItem[];
+  onUpdateExperiences: (items: ExperienceItem[]) => void;
+  education: EducationItem[];
+  onUpdateEducation: (items: EducationItem[]) => void;
+  certifications: CertificationItem[];
+  onUpdateCertifications: (items: CertificationItem[]) => void;
+  coreSkills: SkillItem[];
+  onUpdateCoreSkills: (items: SkillItem[]) => void;
+  resumeImage?: string;
+  onUpdateResumeImage?: (img: string) => void;
+  testimonials: TestimonialItem[];
+  onUpdateTestimonials: (items: TestimonialItem[]) => void;
+  blogs: BlogPost[];
+  onUpdateBlogs: (items: BlogPost[]) => void;
+  contactSubmissions: ContactSubmission[];
+  onUpdateContactSubmissions: (items: ContactSubmission[]) => void;
 }
 
 const PRESET_COLORS = [
@@ -181,13 +213,37 @@ export default function Dashboard({
   onDeleteOutline,
   onEditContent,
   onDeleteContent,
+
+  homeConfig,
+  onUpdateHomeConfig,
+  aboutConfig,
+  onUpdateAboutConfig,
+  services,
+  onUpdateServices,
+  experiences,
+  onUpdateExperiences,
+  education,
+  onUpdateEducation,
+  certifications,
+  onUpdateCertifications,
+  coreSkills,
+  onUpdateCoreSkills,
+  resumeImage,
+  onUpdateResumeImage,
+  testimonials,
+  onUpdateTestimonials,
+  blogs,
+  onUpdateBlogs,
+  contactSubmissions,
+  onUpdateContactSubmissions,
 }: DashboardProps) {
   // Password Lock state
   const [password, setPassword] = useState('');
   const [isUnlocked, setIsUnlocked] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
 
-  // Tab State - Only Brief Outline Content
+  // Tab State - Expanded for all sections
+  const [adminTab, setAdminTab] = useState<'home' | 'about' | 'services' | 'portfolio' | 'resume' | 'testimonials' | 'blog' | 'contact'>('portfolio');
   const [activeTab, setActiveTab] = useState<'briefs'>('briefs');
   const [adminView, setAdminView] = useState<'clean' | 'brief' | 'outline' | 'content'>('clean');
 
@@ -197,6 +253,107 @@ export default function Dashboard({
   const [editingBriefId, setEditingBriefId] = useState<string | null>(null);
   const [selectedBriefColor, setSelectedBriefColor] = useState('text-slate-800');
   const [selectedBriefFont, setSelectedBriefFont] = useState('font-sans font-bold');
+
+  // --- Dynamic Sections Edit States ---
+
+  // Home Config State
+  const [homeBadge, setHomeBadge] = useState(homeConfig?.badgeText || '');
+  const [homeHeadline, setHomeHeadline] = useState(homeConfig?.heroTitle || '');
+  const [homeGradientWord, setHomeGradientWord] = useState(homeConfig?.heroTitleGradient || '');
+  const [homeSubtitle, setHomeSubtitle] = useState(homeConfig?.heroSubtitle || '');
+
+  useEffect(() => {
+    if (homeConfig) {
+      setHomeBadge(homeConfig.badgeText);
+      setHomeHeadline(homeConfig.heroTitle);
+      setHomeGradientWord(homeConfig.heroTitleGradient);
+      setHomeSubtitle(homeConfig.heroSubtitle);
+    }
+  }, [homeConfig]);
+
+  // About Config State
+  const [aboutName, setAboutName] = useState(aboutConfig?.fullName || '');
+  const [aboutRole, setAboutRole] = useState(aboutConfig?.roleTitle || '');
+  const [aboutBio, setAboutBio] = useState(aboutConfig?.bio || '');
+  const [aboutPhilTitle, setAboutPhilTitle] = useState(aboutConfig?.philosophyTitle || '');
+  const [aboutPhilText, setAboutPhilText] = useState(aboutConfig?.philosophyText || '');
+  const [aboutMissionText, setAboutMissionText] = useState(aboutConfig?.missionText || '');
+
+  useEffect(() => {
+    if (aboutConfig) {
+      setAboutName(aboutConfig.fullName);
+      setAboutRole(aboutConfig.roleTitle);
+      setAboutBio(aboutConfig.bio);
+      setAboutPhilTitle(aboutConfig.philosophyTitle);
+      setAboutPhilText(aboutConfig.philosophyText);
+      setAboutMissionText(aboutConfig.missionText);
+    }
+  }, [aboutConfig]);
+
+  // Service editing state
+  const [editingServiceId, setEditingServiceId] = useState<string | number | null>(null);
+  const [serviceTitle, setServiceTitle] = useState('');
+  const [serviceShortDesc, setServiceShortDesc] = useState('');
+  const [serviceIconName, setServiceIconName] = useState('Layers');
+  const [serviceColor, setServiceColor] = useState('emerald');
+  const [serviceHighlights, setServiceHighlights] = useState('');
+  const [isAddingService, setIsAddingService] = useState(false);
+
+  // Experience editing state
+  const [editingExpId, setEditingExpId] = useState<string | number | null>(null);
+  const [expRole, setExpRole] = useState('');
+  const [expCompany, setExpCompany] = useState('');
+  const [expPeriod, setExpPeriod] = useState('');
+  const [expLocation, setExpLocation] = useState('');
+  const [expAchievements, setExpAchievements] = useState('');
+  const [expSkills, setExpSkills] = useState('');
+  const [isAddingExp, setIsAddingExp] = useState(false);
+
+  // Resume Sub-Tab state
+  const [resumeSubTab, setResumeSubTab] = useState<'experience' | 'education' | 'certifications' | 'skills'>('experience');
+
+  // Education editing state
+  const [isAddingEdu, setIsAddingEdu] = useState(false);
+  const [editingEduId, setEditingEduId] = useState<string | null>(null);
+  const [eduDegree, setEduDegree] = useState('');
+  const [eduSchool, setEduSchool] = useState('');
+  const [eduPeriod, setEduPeriod] = useState('');
+  const [eduDetails, setEduDetails] = useState('');
+
+  // Certifications editing state
+  const [isAddingCert, setIsAddingCert] = useState(false);
+  const [editingCertId, setEditingCertId] = useState<string | null>(null);
+  const [certTitle, setCertTitle] = useState('');
+  const [certIssuer, setCertIssuer] = useState('');
+  const [certDate, setCertDate] = useState('');
+
+  // Skills editing state
+  const [isAddingSkill, setIsAddingSkill] = useState(false);
+  const [editingSkillId, setEditingSkillId] = useState<string | null>(null);
+  const [skillName, setSkillName] = useState('');
+  const [skillLevel, setSkillLevel] = useState(90);
+
+  // Testimonial editing state
+  const [editingTestId, setEditingTestId] = useState<string | number | null>(null);
+  const [testName, setTestName] = useState('');
+  const [testRole, setTestRole] = useState('');
+  const [testCompany, setTestCompany] = useState('');
+  const [testCategory, setTestCategory] = useState('seo');
+  const [testRating, setTestRating] = useState(5);
+  const [testMetric, setTestMetric] = useState('');
+  const [testQuote, setTestQuote] = useState('');
+  const [isAddingTest, setIsAddingTest] = useState(false);
+
+  // Blog editing state
+  const [editingBlogId, setEditingBlogId] = useState<string | number | null>(null);
+  const [blogTitle, setBlogTitle] = useState('');
+  const [blogPreview, setBlogPreview] = useState('');
+  const [blogContent, setBlogContent] = useState('');
+  const [blogImage, setBlogImage] = useState('');
+  const [blogCategory, setBlogCategory] = useState('');
+  const [blogReadTime, setBlogReadTime] = useState('');
+  const [blogAuthor, setBlogAuthor] = useState('');
+  const [isAddingBlog, setIsAddingBlog] = useState(false);
 
   // Check localStorage for unlock state on mount
   useEffect(() => {
@@ -310,6 +467,372 @@ export default function Dashboard({
     onToast('Admin Panel locked.', 'info');
   };
 
+  // ---------------- DYNAMIC SECTIONS ACTIONS ----------------
+  const handleSaveHome = (e: React.FormEvent) => {
+    e.preventDefault();
+    onUpdateHomeConfig({
+      badgeText: homeBadge,
+      heroTitle: homeHeadline,
+      heroTitleGradient: homeGradientWord,
+      heroSubtitle: homeSubtitle
+    });
+    onToast('Home Page configuration saved!', 'success');
+  };
+
+  const handleSaveAbout = (e: React.FormEvent) => {
+    e.preventDefault();
+    onUpdateAboutConfig({
+      fullName: aboutName,
+      roleTitle: aboutRole,
+      bio: aboutBio,
+      philosophyTitle: aboutPhilTitle,
+      philosophyText: aboutPhilText,
+      missionText: aboutMissionText
+    });
+    onToast('About Me configuration saved!', 'success');
+  };
+
+  const handleEditService = (srv: ServiceItem) => {
+    setEditingServiceId(srv.id);
+    setServiceTitle(srv.title);
+    setServiceShortDesc(srv.shortDesc);
+    setServiceIconName(srv.iconName || 'Layers');
+    setServiceColor(srv.color || 'emerald');
+    setServiceHighlights(srv.highlights.join('\n'));
+    setIsAddingService(true);
+  };
+
+  const handleDeleteService = (id: string | number) => {
+    onUpdateServices(services.filter(s => s.id !== id));
+    onToast('Service deleted successfully!', 'success');
+  };
+
+  const handleSaveService = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!serviceTitle || !serviceShortDesc) {
+      onToast('Title and short description are required', 'info');
+      return;
+    }
+
+    const item: ServiceItem = {
+      id: editingServiceId || 'srv-' + Date.now(),
+      title: serviceTitle,
+      shortDesc: serviceShortDesc,
+      iconName: serviceIconName,
+      color: serviceColor,
+      bgGradient: 'from-emerald-500/10 to-teal-500/10',
+      highlights: serviceHighlights.split('\n').map(l => l.trim()).filter(Boolean)
+    };
+
+    if (editingServiceId) {
+      onUpdateServices(services.map(s => s.id === editingServiceId ? item : s));
+      onToast('Service updated successfully!', 'success');
+    } else {
+      onUpdateServices([...services, item]);
+      onToast('New Service added successfully!', 'success');
+    }
+
+    setIsAddingService(false);
+    setEditingServiceId(null);
+    setServiceTitle('');
+    setServiceShortDesc('');
+    setServiceIconName('Layers');
+    setServiceColor('emerald');
+    setServiceHighlights('');
+  };
+
+  const handleEditExp = (exp: ExperienceItem) => {
+    setEditingExpId(exp.id || '');
+    setExpRole(exp.role);
+    setExpCompany(exp.company);
+    setExpPeriod(exp.period);
+    setExpLocation(exp.location);
+    setExpAchievements(exp.achievements.join('\n'));
+    setExpSkills(exp.skillsUsed.join(', '));
+    setIsAddingExp(true);
+  };
+
+  const handleDeleteExp = (id: string | number) => {
+    onUpdateExperiences(experiences.filter(e => e.id !== id));
+    onToast('Experience item deleted successfully!', 'success');
+  };
+
+  const handleSaveExp = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!expRole || !expCompany) {
+      onToast('Role and company are required', 'info');
+      return;
+    }
+
+    const item: ExperienceItem = {
+      id: editingExpId || 'exp-' + Date.now(),
+      role: expRole,
+      company: expCompany,
+      period: expPeriod,
+      location: expLocation,
+      achievements: expAchievements.split('\n').map(l => l.trim()).filter(Boolean),
+      skillsUsed: expSkills.split(',').map(s => s.trim()).filter(Boolean)
+    };
+
+    if (editingExpId) {
+      onUpdateExperiences(experiences.map(e => e.id === editingExpId ? item : e));
+      onToast('Experience updated successfully!', 'success');
+    } else {
+      onUpdateExperiences([...experiences, item]);
+      onToast('New Experience added successfully!', 'success');
+    }
+
+    setIsAddingExp(false);
+    setEditingExpId(null);
+    setExpRole('');
+    setExpCompany('');
+    setExpPeriod('');
+    setExpLocation('');
+    setExpAchievements('');
+    setExpSkills('');
+  };
+
+  // --- Education Handlers ---
+  const handleEditEdu = (edu: EducationItem) => {
+    setEditingEduId(edu.id);
+    setEduDegree(edu.degree);
+    setEduSchool(edu.school);
+    setEduPeriod(edu.period);
+    setEduDetails(edu.details || '');
+    setIsAddingEdu(true);
+  };
+
+  const handleDeleteEdu = (id: string) => {
+    onUpdateEducation(education.filter(edu => edu.id !== id));
+    onToast('Education entry deleted successfully!', 'success');
+  };
+
+  const handleSaveEdu = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!eduDegree || !eduSchool) {
+      onToast('Degree and School are required', 'info');
+      return;
+    }
+    const item: EducationItem = {
+      id: editingEduId || 'edu-' + Date.now(),
+      degree: eduDegree,
+      school: eduSchool,
+      period: eduPeriod,
+      details: eduDetails
+    };
+
+    if (editingEduId) {
+      onUpdateEducation(education.map(edu => edu.id === editingEduId ? item : edu));
+      onToast('Education entry updated successfully!', 'success');
+    } else {
+      onUpdateEducation([...education, item]);
+      onToast('New Education entry added successfully!', 'success');
+    }
+
+    setIsAddingEdu(false);
+    setEditingEduId(null);
+    setEduDegree('');
+    setEduSchool('');
+    setEduPeriod('');
+    setEduDetails('');
+  };
+
+  // --- Certification Handlers ---
+  const handleEditCert = (cert: CertificationItem) => {
+    setEditingCertId(cert.id);
+    setCertTitle(cert.title);
+    setCertIssuer(cert.issuer);
+    setCertDate(cert.date);
+    setIsAddingCert(true);
+  };
+
+  const handleDeleteCert = (id: string) => {
+    onUpdateCertifications(certifications.filter(c => c.id !== id));
+    onToast('Certification deleted successfully!', 'success');
+  };
+
+  const handleSaveCert = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!certTitle || !certIssuer) {
+      onToast('Title and Issuer are required', 'info');
+      return;
+    }
+    const item: CertificationItem = {
+      id: editingCertId || 'cert-' + Date.now(),
+      title: certTitle,
+      issuer: certIssuer,
+      date: certDate
+    };
+
+    if (editingCertId) {
+      onUpdateCertifications(certifications.map(c => c.id === editingCertId ? item : c));
+      onToast('Certification updated successfully!', 'success');
+    } else {
+      onUpdateCertifications([...certifications, item]);
+      onToast('New Certification added successfully!', 'success');
+    }
+
+    setIsAddingCert(false);
+    setEditingCertId(null);
+    setCertTitle('');
+    setCertIssuer('');
+    setCertDate('');
+  };
+
+  // --- Skills Handlers ---
+  const handleEditSkill = (skill: SkillItem) => {
+    setEditingSkillId(skill.id);
+    setSkillName(skill.name);
+    setSkillLevel(skill.level);
+    setIsAddingSkill(true);
+  };
+
+  const handleDeleteSkill = (id: string) => {
+    onUpdateCoreSkills(coreSkills.filter(s => s.id !== id));
+    onToast('Skill deleted successfully!', 'success');
+  };
+
+  const handleSaveSkill = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!skillName) {
+      onToast('Skill Name is required', 'info');
+      return;
+    }
+    const item: SkillItem = {
+      id: editingSkillId || 'skill-' + Date.now(),
+      name: skillName,
+      level: Number(skillLevel)
+    };
+
+    if (editingSkillId) {
+      onUpdateCoreSkills(coreSkills.map(s => s.id === editingSkillId ? item : s));
+      onToast('Skill updated successfully!', 'success');
+    } else {
+      onUpdateCoreSkills([...coreSkills, item]);
+      onToast('New Skill added successfully!', 'success');
+    }
+
+    setIsAddingSkill(false);
+    setEditingSkillId(null);
+    setSkillName('');
+    setSkillLevel(90);
+  };
+
+  const handleEditTest = (test: TestimonialItem) => {
+    setEditingTestId(test.id);
+    setTestName(test.name);
+    setTestRole(test.role);
+    setTestCompany(test.company);
+    setTestCategory(test.category);
+    setTestRating(test.rating);
+    setTestMetric(test.metric || '');
+    setTestQuote(test.quote);
+    setIsAddingTest(true);
+  };
+
+  const handleDeleteTest = (id: string | number) => {
+    onUpdateTestimonials(testimonials.filter(t => t.id !== id));
+    onToast('Testimonial deleted successfully!', 'success');
+  };
+
+  const handleSaveTest = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!testName || !testQuote) {
+      onToast('Name and testimonial quote are required', 'info');
+      return;
+    }
+
+    const item: TestimonialItem = {
+      id: editingTestId || 'test-' + Date.now(),
+      name: testName,
+      role: testRole,
+      company: testCompany,
+      category: testCategory as any,
+      rating: testRating,
+      metric: testMetric || 'Verified Client',
+      quote: testQuote,
+      logoBg: 'bg-emerald-50 text-emerald-700'
+    };
+
+    if (editingTestId) {
+      onUpdateTestimonials(testimonials.map(t => t.id === editingTestId ? item : t));
+      onToast('Testimonial updated successfully!', 'success');
+    } else {
+      onUpdateTestimonials([item, ...testimonials]);
+      onToast('New Testimonial added successfully!', 'success');
+    }
+
+    setIsAddingTest(false);
+    setEditingTestId(null);
+    setTestName('');
+    setTestRole('');
+    setTestCompany('');
+    setTestCategory('seo');
+    setTestRating(5);
+    setTestMetric('');
+    setTestQuote('');
+  };
+
+  const handleEditBlog = (post: BlogPost) => {
+    setEditingBlogId(post.id);
+    setBlogTitle(post.title);
+    setBlogPreview(post.preview);
+    setBlogContent(post.content);
+    setBlogImage(post.image);
+    setBlogCategory(post.category);
+    setBlogReadTime(post.readTime);
+    setBlogAuthor(post.author || 'Hafiz Amir Saifi');
+    setIsAddingBlog(true);
+  };
+
+  const handleDeleteBlog = (id: string | number) => {
+    onUpdateBlogs(blogs.filter(b => b.id !== id));
+    onToast('Blog post deleted successfully!', 'success');
+  };
+
+  const handleSaveBlog = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!blogTitle || !blogPreview || !blogContent) {
+      onToast('Title, preview, and full content are required', 'info');
+      return;
+    }
+
+    const item: BlogPost = {
+      id: editingBlogId || 'post-' + Date.now(),
+      title: blogTitle,
+      preview: blogPreview,
+      content: blogContent,
+      image: blogImage || 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
+      category: blogCategory || 'SEO Strategy',
+      readTime: blogReadTime || '5 min read',
+      date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      author: blogAuthor || 'Hafiz Amir Saifi'
+    };
+
+    if (editingBlogId) {
+      onUpdateBlogs(blogs.map(b => b.id === editingBlogId ? item : b));
+      onToast('Blog post updated successfully!', 'success');
+    } else {
+      onUpdateBlogs([item, ...blogs]);
+      onToast('New Blog post published successfully!', 'success');
+    }
+
+    setIsAddingBlog(false);
+    setEditingBlogId(null);
+    setBlogTitle('');
+    setBlogPreview('');
+    setBlogContent('');
+    setBlogImage('');
+    setBlogCategory('');
+    setBlogReadTime('');
+    setBlogAuthor('');
+  };
+
+  const handleDeleteSub = (id: string | number) => {
+    onUpdateContactSubmissions(contactSubmissions.filter(s => s.id !== id));
+    onToast('Submission deleted successfully!', 'success');
+  };
+
   // ---------------- BRIEF ACTIONS ----------------
   const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
@@ -323,8 +846,15 @@ export default function Dashboard({
       let cleanBrief: ArticleBrief;
 
       if (editingBriefId) {
-        const original = briefs.find(b => b.id === editingBriefId);
+        const original = briefs.find(b => b.id === editingBriefId) || {};
         cleanBrief = {
+          category: 'AI & Automation',
+          keywords: ['seo', 'optimized'],
+          targetAudience: 'General Audience',
+          searchVolume: '1,500/mo',
+          difficulty: 'Easy',
+          status: 'Premium',
+          date: new Date().toLocaleDateString('en-US', { month: 'short', year: 'numeric' }),
           ...original,
           id: editingBriefId,
           title: briefTitle,
@@ -364,8 +894,13 @@ export default function Dashboard({
       let cleanOutline: OutlineItem;
 
       if (editingBriefId) {
-        const original = outlines.find(o => o.id === editingBriefId);
+        const original = outlines.find(o => o.id === editingBriefId) || {};
         cleanOutline = {
+          category: 'Technology',
+          wordCount: '1,500 words',
+          entities: 10,
+          score: 90,
+          difficulty: 'Easy',
           ...original,
           id: editingBriefId,
           title: briefTitle,
@@ -402,8 +937,13 @@ export default function Dashboard({
       let cleanContent: ContentItem;
 
       if (editingBriefId) {
-        const original = contents.find(c => c.id === editingBriefId);
+        const original = contents.find(c => c.id === editingBriefId) || {};
         cleanContent = {
+          category: 'General Copy',
+          readTime: '5 min read',
+          gradeLevel: '10th Grade',
+          density: '2.5%',
+          keywords: ['article', 'content'],
           ...original,
           id: editingBriefId,
           title: briefTitle,
@@ -442,13 +982,15 @@ export default function Dashboard({
     setBriefData('');
     setSelectedBriefColor('text-slate-800');
     setSelectedBriefFont('font-sans font-bold');
-    setAdminView('clean');
+    // Keep the current adminView (brief / outline / content) so they can instantly see their saved post in the list below the form!
+    // They can click the "Back" button if they want to return to the admin panel home.
+    // Do NOT set setAdminView('clean');
   };
 
   const handleTriggerEditBrief = (b: ArticleBrief) => {
     setEditingBriefId(b.id);
-    setBriefTitle(b.title);
-    setBriefData(b.fullBrief);
+    setBriefTitle(b.title || '');
+    setBriefData(b.fullBrief || b.previewText || '');
     setSelectedBriefColor(b.titleColor || 'text-slate-800');
     setSelectedBriefFont(b.fontStyle || 'font-sans font-bold');
     setAdminView('brief');
@@ -466,8 +1008,8 @@ export default function Dashboard({
 
   const handleTriggerEditOutline = (o: OutlineItem) => {
     setEditingBriefId(o.id);
-    setBriefTitle(o.title);
-    setBriefData(o.sections.join('\n'));
+    setBriefTitle(o.title || '');
+    setBriefData((o.sections || []).join('\n'));
     setSelectedBriefColor(o.titleColor || 'text-slate-800');
     setSelectedBriefFont(o.fontStyle || 'font-sans font-bold');
     setAdminView('outline');
@@ -485,8 +1027,8 @@ export default function Dashboard({
 
   const handleTriggerEditContent = (c: ContentItem) => {
     setEditingBriefId(c.id);
-    setBriefTitle(c.title);
-    setBriefData(c.content);
+    setBriefTitle(c.title || '');
+    setBriefData(c.content || c.summary || '');
     setSelectedBriefColor(c.titleColor || 'text-slate-800');
     setSelectedBriefFont(c.fontStyle || 'font-sans font-bold');
     setAdminView('content');
@@ -559,13 +1101,17 @@ export default function Dashboard({
 
   // 2. Full Simplified Admin Dashboard
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6 min-h-[600px]" id="dashboard-admin-main">
-      <div className="bg-white rounded-3xl border border-slate-100 p-8 sm:p-12 shadow-xs relative overflow-hidden transition-all duration-300">
+    <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 min-h-[600px]" id="dashboard-admin-main">
+      <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-10 shadow-xs relative overflow-hidden transition-all duration-300">
         
         {/* Top Control Header - Minimal Back / Lock */}
         <div className="flex justify-between items-center pb-6 border-b border-slate-100/80 mb-8 text-xs text-slate-400">
-          <span className="font-mono tracking-wider uppercase text-[10px] font-bold text-slate-300">Admin Session Active</span>
+          <div className="flex items-center space-x-2">
+            <span className="font-mono tracking-wider uppercase text-[10px] font-bold text-slate-300">Admin Session Active</span>
+            <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded font-mono">SECURE</span>
+          </div>
           <button 
+            type="button"
             onClick={handleLockPanel}
             className="bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-xl px-3 py-1.5 font-bold text-slate-600 transition-all cursor-pointer font-sans"
             id="btn-lock-admin"
@@ -574,7 +1120,95 @@ export default function Dashboard({
           </button>
         </div>
 
-        {adminView === 'clean' ? (
+        {/* Sidebar & Active Workspace Content Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* Left Navigation: Tabs List */}
+          <div className="lg:col-span-3 space-y-2 bg-slate-50/50 p-4 rounded-2xl border border-slate-100">
+            <span className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2.5 mb-3 font-mono">Control Panel</span>
+            
+            {/* Desktop Navigation list */}
+            <div className="hidden lg:flex flex-col space-y-1 text-left">
+              {[
+                { id: 'portfolio', label: 'Portfolio Library', icon: FolderOpen, desc: 'Briefs, Outlines, Content' },
+                { id: 'home', label: 'Home Page', icon: Home, desc: 'Hero headers & badges' },
+                { id: 'about', label: 'About Me', icon: User, desc: 'Bio & work philosophy' },
+                { id: 'services', label: 'Services', icon: Layers, desc: 'Your offerings catalog' },
+                { id: 'resume', label: 'Resume & Exp', icon: GraduationCap, desc: 'Work history timeline' },
+                { id: 'testimonials', label: 'Testimonials', icon: MessageSquare, desc: 'Client reviews & metrics' },
+                { id: 'blog', label: 'Blog Posts', icon: BookOpen, desc: 'Manage strategic articles' },
+                { id: 'contact', label: 'Inquiries', icon: Inbox, desc: 'Client form submissions' },
+              ].map((tab) => {
+                const isSelected = adminTab === tab.id;
+                const IconComponent = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => {
+                      setAdminTab(tab.id as any);
+                      setAdminView('clean');
+                    }}
+                    className={`w-full flex items-center space-x-3 px-3 py-2 rounded-xl text-left transition-all group cursor-pointer ${
+                      isSelected 
+                        ? 'bg-emerald-600 text-white font-semibold shadow-xs' 
+                        : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
+                    }`}
+                  >
+                    <IconComponent className={`h-4 w-4 shrink-0 transition-colors ${isSelected ? 'text-white' : 'text-slate-400 group-hover:text-slate-600'}`} />
+                    <div className="min-w-0 flex-1">
+                      <div className="text-xs leading-none font-medium">{tab.label}</div>
+                      <div className={`text-[9px] leading-tight mt-1 truncate ${isSelected ? 'text-emerald-100' : 'text-slate-400'}`}>
+                        {tab.desc}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Mobile Navigation list */}
+            <div className="flex lg:hidden overflow-x-auto gap-2 pb-1 scrollbar-none snap-x">
+              {[
+                { id: 'portfolio', label: 'Portfolio', icon: FolderOpen },
+                { id: 'home', label: 'Home', icon: Home },
+                { id: 'about', label: 'About', icon: User },
+                { id: 'services', label: 'Services', icon: Layers },
+                { id: 'resume', label: 'Resume', icon: GraduationCap },
+                { id: 'testimonials', label: 'Reviews', icon: MessageSquare },
+                { id: 'blog', label: 'Blog', icon: BookOpen },
+                { id: 'contact', label: 'Inquiries', icon: Inbox },
+              ].map((tab) => {
+                const isSelected = adminTab === tab.id;
+                const IconComponent = tab.icon;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => {
+                      setAdminTab(tab.id as any);
+                      setAdminView('clean');
+                    }}
+                    className={`flex items-center space-x-2 px-3.5 py-2 rounded-xl text-xs whitespace-nowrap snap-align-start transition-all cursor-pointer shrink-0 ${
+                      isSelected 
+                        ? 'bg-emerald-600 text-white font-semibold shadow-xs' 
+                        : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'
+                    }`}
+                  >
+                    <IconComponent className="h-4 w-4 shrink-0" />
+                    <span>{tab.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Right Active Workspace panel */}
+          <div className="lg:col-span-9 bg-white border border-slate-100/50 rounded-2xl p-6 shadow-2xs">
+            {adminTab === 'portfolio' ? (
+              /* ================= PORTFOLIO MANAGEMENT TAB ================= */
+              <div>
+                {adminView === 'clean' ? (
           /* Clean View: Only Brief, Outline, and Content are shown separately, rest is clean */
           <div className="flex flex-col items-center justify-center py-28 space-y-8" id="view-admin-clean">
             <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-12" id="admin-options-row">
@@ -946,8 +1580,366 @@ export default function Dashboard({
             )}
           </div>
         )}
+      </div>
+    ) : (
+          /* ================= OTHER TABS WORKSPACES ================= */
+          <div className="space-y-6">
+            {adminTab === 'home' && (
+              <form onSubmit={handleSaveHome} className="space-y-6 animate-fadeIn">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Configure Home Page</h3>
+                  <p className="text-xs text-slate-500">Update hero headings, subtitles, and badges</p>
+                </div>
+                <div className="space-y-4 text-left">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Hero Badge Text</label>
+                    <input type="text" value={homeBadge} onChange={(e) => setHomeBadge(e.target.value)} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-emerald-500" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Hero Headline (Plain Text)</label>
+                    <input type="text" value={homeHeadline} onChange={(e) => setHomeHeadline(e.target.value)} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-emerald-500" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Headline Gradient Word</label>
+                    <input type="text" value={homeGradientWord} onChange={(e) => setHomeGradientWord(e.target.value)} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-emerald-500" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Hero Subtitle</label>
+                    <textarea rows={3} value={homeSubtitle} onChange={(e) => setHomeSubtitle(e.target.value)} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-emerald-500 leading-relaxed" />
+                  </div>
+                </div>
+                <button type="submit" className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 cursor-pointer">Save Home Configuration</button>
+              </form>
+            )}
 
+            {adminTab === 'about' && (
+              <form onSubmit={handleSaveAbout} className="space-y-6 animate-fadeIn">
+                <div>
+                  <h3 className="text-lg font-bold text-slate-900">Configure About Me</h3>
+                  <p className="text-xs text-slate-500">Update biography, philosophy, and mission</p>
+                </div>
+                <div className="space-y-4 text-left">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-600 block">Full Name</label>
+                      <input type="text" value={aboutName} onChange={(e) => setAboutName(e.target.value)} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-emerald-500" />
+                    </div>
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-slate-600 block">Role Title</label>
+                      <input type="text" value={aboutRole} onChange={(e) => setAboutRole(e.target.value)} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-emerald-500" />
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Bio Details</label>
+                    <textarea rows={4} value={aboutBio} onChange={(e) => setAboutBio(e.target.value)} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-emerald-500 leading-relaxed" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Philosophy Title</label>
+                    <input type="text" value={aboutPhilTitle} onChange={(e) => setAboutPhilTitle(e.target.value)} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-emerald-500" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Philosophy Text</label>
+                    <textarea rows={3} value={aboutPhilText} onChange={(e) => setAboutPhilText(e.target.value)} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-emerald-500 leading-relaxed" />
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Mission Statement</label>
+                    <textarea rows={3} value={aboutMissionText} onChange={(e) => setAboutMissionText(e.target.value)} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-emerald-500 leading-relaxed" />
+                  </div>
+                </div>
+                <button type="submit" className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs py-3.5 cursor-pointer">Save About Configuration</button>
+              </form>
+            )}
+
+            {adminTab === 'services' && (
+              <div className="animate-fadeIn text-left">
+                {isAddingService ? (
+                  <form onSubmit={handleSaveService} className="space-y-4">
+                    <h4 className="text-sm font-bold text-slate-800">{editingServiceId ? 'Edit Service' : 'Add Service'}</h4>
+                    <input type="text" required placeholder="Service Title" value={serviceTitle} onChange={(e) => setServiceTitle(e.target.value)} className="w-full border rounded-xl p-3 text-sm" />
+                    <textarea required placeholder="Description" value={serviceShortDesc} onChange={(e) => setServiceShortDesc(e.target.value)} className="w-full border rounded-xl p-3 text-sm" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <select value={serviceIconName} onChange={(e) => setServiceIconName(e.target.value)} className="border rounded-xl p-3 text-sm bg-white">
+                        <option value="Layers">Layers</option>
+                        <option value="FileText">FileText</option>
+                        <option value="PenTool">PenTool</option>
+                        <option value="Sparkles">Sparkles</option>
+                        <option value="Cpu">Cpu</option>
+                      </select>
+                      <select value={serviceColor} onChange={(e) => setServiceColor(e.target.value)} className="border rounded-xl p-3 text-sm bg-white">
+                        <option value="emerald">Emerald</option>
+                        <option value="blue">Blue</option>
+                        <option value="indigo">Indigo</option>
+                        <option value="amber">Amber</option>
+                      </select>
+                    </div>
+                    <textarea placeholder="Bullet Highlights (One per line)" value={serviceHighlights} onChange={(e) => setServiceHighlights(e.target.value)} className="w-full border rounded-xl p-3 text-sm font-mono" />
+                    <div className="flex gap-2">
+                      <button type="submit" className="flex-1 bg-emerald-600 text-white text-xs font-bold py-3 rounded-xl">{editingServiceId ? 'Update' : 'Add'}</button>
+                      <button type="button" onClick={() => { setIsAddingService(false); setEditingServiceId(null); }} className="px-4 bg-slate-100 text-slate-600 text-xs font-bold rounded-xl">Cancel</button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-bold text-slate-900">Services Catalog</h3>
+                      <button onClick={() => { setIsAddingService(true); setEditingServiceId(null); setServiceTitle(''); setServiceShortDesc(''); setServiceIconName('Layers'); setServiceColor('emerald'); setServiceHighlights(''); }} className="bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1"><Plus className="h-3.5 w-3.5" /> Add Service</button>
+                    </div>
+                    <div className="space-y-2">
+                      {services.map(s => (
+                        <div key={s.id} className="flex justify-between items-start p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
+                          <div>
+                            <h4 className="font-bold text-xs text-slate-800">{s.title}</h4>
+                            <p className="text-[11px] text-slate-500 truncate max-w-[400px]">{s.shortDesc}</p>
+                          </div>
+                          <div className="flex gap-1">
+                            <button onClick={() => handleEditService(s)} className="p-1 text-slate-400 hover:text-emerald-600"><Edit className="h-3.5 w-3.5" /></button>
+                            <button onClick={() => handleDeleteService(s.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {adminTab === 'resume' && (
+              <div className="animate-fadeIn text-left space-y-6">
+                <div className="border-b border-slate-100 pb-4">
+                  <h3 className="text-lg font-black text-slate-900">Direct Resume Image Sync</h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Upload your official curriculum vitae image. It will instantly replace the public interactive resume timeline with your customized visual sheet.
+                  </p>
+                </div>
+
+                {resumeImage ? (
+                  <div className="space-y-6">
+                    {/* Visual Card containing preview & actions */}
+                    <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6">
+                      <div className="w-full md:w-1/3 bg-white border border-slate-100 rounded-xl overflow-hidden shadow-md group relative">
+                        <img 
+                          src={resumeImage} 
+                          alt="Resume Thumbnail Preview" 
+                          className="w-full h-auto max-h-[220px] object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                        <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Eye className="text-white h-6 w-6" />
+                        </div>
+                      </div>
+
+                      <div className="flex-1 space-y-4 text-center md:text-left">
+                        <div>
+                          <span className="inline-flex items-center gap-1.5 bg-emerald-50 text-emerald-700 border border-emerald-100 px-3 py-1 rounded-full text-3xs font-extrabold uppercase tracking-wider font-mono shadow-3xs">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            Live on Public Profile
+                          </span>
+                          <h4 className="font-bold text-sm text-slate-800 mt-2">Active Resume CV Graphic</h4>
+                          <p className="text-xs text-slate-400 mt-0.5 leading-relaxed">
+                            A high-resolution image is actively hosted. Visitors will see this exact image when clicking the "Resume" tab.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2.5 justify-center md:justify-start">
+                          <label className="bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-sm flex items-center gap-1.5">
+                            <Plus className="h-4 w-4" />
+                            Replace Image
+                            <input 
+                              type="file" 
+                              accept="image/*" 
+                              className="hidden" 
+                              onChange={(e) => {
+                                const file = e.target.files?.[0];
+                                if (file) {
+                                  const reader = new FileReader();
+                                  reader.onloadend = () => {
+                                    if (typeof reader.result === 'string' && onUpdateResumeImage) {
+                                      onUpdateResumeImage(reader.result);
+                                      onToast('Resume image updated successfully!', 'success');
+                                    }
+                                  };
+                                  reader.readAsDataURL(file);
+                                }
+                              }}
+                            />
+                          </label>
+
+                          <button 
+                            onClick={() => {
+                              if (onUpdateResumeImage) {
+                                onUpdateResumeImage('');
+                                onToast('Custom resume image removed. Restored default timeline.', 'info');
+                              }
+                            }}
+                            className="bg-white border border-slate-200 hover:bg-slate-50 text-red-600 font-bold text-xs px-4 py-2.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                            Delete Resume Image
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {/* Large visual drop/upload zone */}
+                    <label className="border-2 border-dashed border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/5 transition-all rounded-2xl p-12 flex flex-col items-center justify-center text-center cursor-pointer group min-h-[300px]">
+                      <div className="h-14 w-14 rounded-full bg-emerald-50 group-hover:bg-emerald-100 transition-colors flex items-center justify-center mb-4 border border-emerald-100">
+                        <Plus className="h-7 w-7 text-emerald-600 group-hover:scale-110 transition-transform" />
+                      </div>
+                      <h4 className="font-extrabold text-slate-800 text-sm">Upload Resume Graphic</h4>
+                      <p className="text-xs text-slate-400 max-w-sm mt-1 mb-6 leading-relaxed">
+                        Drag and drop your resume file here, or click to browse. Supports PNG, JPG, JPEG. Max file size: 5MB recommended.
+                      </p>
+                      
+                      <span className="bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs px-5 py-3 rounded-xl transition-all shadow-md group-hover:-translate-y-0.5">
+                        Browse Image File
+                      </span>
+                      
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            const reader = new FileReader();
+                            reader.onloadend = () => {
+                              if (typeof reader.result === 'string' && onUpdateResumeImage) {
+                                onUpdateResumeImage(reader.result);
+                                onToast('Resume image uploaded successfully!', 'success');
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {adminTab === 'testimonials' && (
+              <div className="animate-fadeIn text-left">
+                {isAddingTest ? (
+                  <form onSubmit={handleSaveTest} className="space-y-4">
+                    <h4 className="text-sm font-bold text-slate-800">{editingTestId ? 'Edit Testimonial' : 'Add Testimonial'}</h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <input type="text" required placeholder="Name" value={testName} onChange={(e) => setTestName(e.target.value)} className="border rounded-xl p-3 text-sm" />
+                      <input type="text" placeholder="Role/Title" value={testRole} onChange={(e) => setTestRole(e.target.value)} className="border rounded-xl p-3 text-sm" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <input type="text" placeholder="Company" value={testCompany} onChange={(e) => setTestCompany(e.target.value)} className="border rounded-xl p-3 text-sm" />
+                      <input type="text" placeholder="Metric Highlight" value={testMetric} onChange={(e) => setTestMetric(e.target.value)} className="border rounded-xl p-3 text-sm" />
+                    </div>
+                    <textarea required placeholder="Quote" value={testQuote} onChange={(e) => setTestQuote(e.target.value)} className="w-full border rounded-xl p-3 text-sm" />
+                    <div className="flex gap-2">
+                      <button type="submit" className="flex-1 bg-emerald-600 text-white text-xs font-bold py-3 rounded-xl">Save</button>
+                      <button type="button" onClick={() => { setIsAddingTest(false); setEditingTestId(null); }} className="px-4 bg-slate-100 text-slate-600 text-xs font-bold rounded-xl">Cancel</button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-bold text-slate-900">Client Testimonials</h3>
+                      <button onClick={() => { setIsAddingTest(true); setEditingTestId(null); setTestName(''); setTestRole(''); setTestCompany(''); setTestCategory('seo'); setTestRating(5); setTestMetric(''); setTestQuote(''); }} className="bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1"><Plus className="h-3.5 w-3.5" /> Add Testimonial</button>
+                    </div>
+                    <div className="space-y-2">
+                      {testimonials.map(t => (
+                        <div key={t.id} className="flex justify-between items-start p-3.5 bg-slate-50 border border-slate-100 rounded-xl">
+                          <div>
+                            <h4 className="font-bold text-xs text-slate-800">{t.name}</h4>
+                            <p className="text-[11px] text-slate-500">{t.role} | {t.company} ({t.metric})</p>
+                          </div>
+                          <div className="flex gap-1">
+                            <button onClick={() => handleEditTest(t)} className="p-1 text-slate-400 hover:text-emerald-600"><Edit className="h-3.5 w-3.5" /></button>
+                            <button onClick={() => handleDeleteTest(t.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {adminTab === 'blog' && (
+              <div className="animate-fadeIn text-left">
+                {isAddingBlog ? (
+                  <form onSubmit={handleSaveBlog} className="space-y-4">
+                    <h4 className="text-sm font-bold text-slate-800">{editingBlogId ? 'Edit Post' : 'Add Post'}</h4>
+                    <input type="text" required placeholder="Title" value={blogTitle} onChange={(e) => setBlogTitle(e.target.value)} className="w-full border rounded-xl p-3 text-sm" />
+                    <input type="text" required placeholder="Preview Snippet" value={blogPreview} onChange={(e) => setBlogPreview(e.target.value)} className="w-full border rounded-xl p-3 text-sm" />
+                    <div className="grid grid-cols-2 gap-4">
+                      <input type="text" placeholder="Category" value={blogCategory} onChange={(e) => setBlogCategory(e.target.value)} className="border rounded-xl p-3 text-sm" />
+                      <input type="text" placeholder="Read Time (e.g. 6 min read)" value={blogReadTime} onChange={(e) => setBlogReadTime(e.target.value)} className="border rounded-xl p-3 text-sm" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <input type="text" placeholder="Image URL" value={blogImage} onChange={(e) => setBlogImage(e.target.value)} className="border rounded-xl p-3 text-sm font-mono text-xs" />
+                      <input type="text" placeholder="Author" value={blogAuthor} onChange={(e) => setBlogAuthor(e.target.value)} className="border rounded-xl p-3 text-sm" />
+                    </div>
+                    <textarea required placeholder="Full Article Body (Double return for paragraph breaks)" value={typeof blogContent === 'string' ? blogContent : (Array.isArray(blogContent) ? blogContent.join('\n\n') : '')} onChange={(e) => setBlogContent(e.target.value)} className="w-full border rounded-xl p-4 text-sm font-sans" rows={8} />
+                    <div className="flex gap-2">
+                      <button type="submit" className="flex-1 bg-emerald-600 text-white text-xs font-bold py-3 rounded-xl">Publish</button>
+                      <button type="button" onClick={() => { setIsAddingBlog(false); setEditingBlogId(null); }} className="px-4 bg-slate-100 text-slate-600 text-xs font-bold rounded-xl">Cancel</button>
+                    </div>
+                  </form>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <h3 className="font-bold text-slate-900">Blog Publications</h3>
+                      <button onClick={() => { setIsAddingBlog(true); setEditingBlogId(null); setBlogTitle(''); setBlogPreview(''); setBlogContent(''); setBlogImage(''); setBlogCategory(''); setBlogReadTime(''); setBlogAuthor(''); }} className="bg-emerald-600 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1"><Plus className="h-3.5 w-3.5" /> Add Post</button>
+                    </div>
+                    <div className="space-y-2">
+                      {blogs.map(post => (
+                        <div key={post.id} className="flex justify-between items-start p-3.5 bg-slate-50 border border-slate-100 rounded-2xl">
+                          <div>
+                            <h4 className="font-bold text-xs text-slate-800">{post.title}</h4>
+                            <p className="text-[11px] text-slate-400 font-sans">Published {post.date} by {post.author}</p>
+                          </div>
+                          <div className="flex gap-1">
+                            <button onClick={() => handleEditBlog(post)} className="p-1 text-slate-400 hover:text-emerald-600"><Edit className="h-4 w-4" /></button>
+                            <button onClick={() => handleDeleteBlog(post.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {adminTab === 'contact' && (
+              <div className="space-y-4 text-left">
+                <h3 className="font-bold text-slate-900">Client Inquiries ({contactSubmissions.length})</h3>
+                <div className="space-y-3">
+                  {contactSubmissions.length === 0 ? (
+                    <p className="text-xs text-slate-400 italic">No inquiries received yet.</p>
+                  ) : (
+                    contactSubmissions.map(sub => (
+                      <div key={sub.id} className="p-4 bg-slate-50 border border-slate-150 rounded-xl">
+                        <div className="flex justify-between items-start border-b border-slate-200/60 pb-2 mb-2">
+                          <div>
+                            <h4 className="font-bold text-xs text-slate-800">{sub.fullName}</h4>
+                            <p className="text-[10px] text-slate-400">{sub.businessName} | {sub.email}</p>
+                          </div>
+                          <button onClick={() => handleDeleteSub(sub.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+                        </div>
+                        <p className="text-xs font-semibold text-slate-700">Subject: {sub.subject}</p>
+                        <p className="text-xs text-slate-600 mt-1.5 whitespace-pre-wrap bg-white p-3.5 rounded-lg border border-slate-100">{sub.message}</p>
+                        <p className="text-[10px] text-slate-400 mt-2 font-mono">Date: {sub.date}</p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
+  </div>
+</div>
   );
 }

@@ -60,8 +60,28 @@ export default function Footer({ setCurrentPage, onToast }: FooterProps) {
                 <h3 className="text-sm font-semibold tracking-wider text-gray-900 uppercase">Solutions</h3>
                 <ul className="mt-4 space-y-2.5">
                   <li>
+                    <button onClick={() => navigateTo('about')} className="text-sm text-gray-500 hover:text-emerald-600 transition-colors text-left font-semibold">
+                      About Me
+                    </button>
+                  </li>
+                  <li>
+                    <button onClick={() => navigateTo('services')} className="text-sm text-gray-500 hover:text-emerald-600 transition-colors text-left font-semibold">
+                      Growth Services
+                    </button>
+                  </li>
+                  <li>
                     <button onClick={() => navigateTo('library')} className="text-sm text-gray-500 hover:text-emerald-600 transition-colors text-left">
                       Portfolio
+                    </button>
+                  </li>
+                  <li>
+                    <button onClick={() => navigateTo('resume')} className="text-sm text-gray-500 hover:text-emerald-600 transition-colors text-left font-semibold">
+                      My Resume
+                    </button>
+                  </li>
+                  <li>
+                    <button onClick={() => navigateTo('testimonials')} className="text-sm text-gray-500 hover:text-emerald-600 transition-colors text-left font-semibold">
+                      Client Testimonials
                     </button>
                   </li>
                   <li>

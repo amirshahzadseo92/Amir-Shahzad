@@ -71,4 +71,87 @@ export interface ContentItem {
   fontStyle?: string;
 }
 
-export type ActivePage = 'home' | 'library' | 'detail' | 'pricing' | 'blog' | 'contact' | 'dashboard';
+export type ActivePage = 'home' | 'library' | 'detail' | 'pricing' | 'blog' | 'contact' | 'dashboard' | 'about' | 'services' | 'resume' | 'testimonials';
+
+export interface HomeConfig {
+  heroTitle: string;
+  heroTitleGradient: string;
+  heroSubtitle: string;
+  badgeText: string;
+}
+
+export interface AboutConfig {
+  fullName: string;
+  roleTitle: string;
+  bio: string;
+  philosophyTitle: string;
+  philosophyText: string;
+  missionText: string;
+}
+
+export interface ServiceItem {
+  id: string;
+  title: string;
+  shortDesc: string;
+  highlights: string[];
+  iconName: string;
+  color: string;
+  bgGradient: string;
+}
+
+export interface ExperienceItem {
+  id: string;
+  role: string;
+  company: string;
+  period: string;
+  location: string;
+  achievements: string[];
+  skillsUsed: string[];
+}
+
+export interface EducationItem {
+  id: string;
+  degree: string;
+  school: string;
+  period: string;
+  details: string;
+}
+
+export interface CertificationItem {
+  id: string;
+  title: string;
+  issuer: string;
+  date: string;
+}
+
+export interface SkillItem {
+  id: string;
+  name: string;
+  level: number;
+}
+
+export interface TestimonialItem {
+  id: string;
+  name: string;
+  role: string;
+  company: string;
+  category: 'all' | 'seo' | 'saas' | 'automation';
+  rating: number;
+  metric: string;
+  quote: string;
+  logoBg: string;
+}
+
+export interface ContactSubmission {
+  id: string;
+  fullName: string;
+  businessName: string;
+  email: string;
+  phoneNumber: string;
+  websiteUrl: string;
+  serviceRequired: string;
+  subject: string;
+  message: string;
+  date: string;
+}
+

@@ -1,6 +1,6 @@
 {
   "name": "Apex OS",
-  "description": "Smart SEO & Content Solutions",
+  "description": "Premium automation suite for generating and managing content briefs, structural outlines, and professional articles.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

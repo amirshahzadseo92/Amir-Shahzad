@@ -14,10 +14,25 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 // Import local types
-import { ActivePage, ArticleBrief, ContentOrder, OutlineItem, ContentItem } from './types';
+import { ActivePage, ArticleBrief, ContentOrder, OutlineItem, ContentItem, BlogPost, HomeConfig, AboutConfig, ServiceItem, ExperienceItem, TestimonialItem, ContactSubmission, EducationItem, CertificationItem, SkillItem } from './types';
 
 // Import mock datasets
-import { MOCK_BRIEFS, MOCK_ORDERS, MOCK_OUTLINES, MOCK_CONTENTS } from './data/mockData';
+import { 
+  MOCK_BRIEFS, 
+  MOCK_ORDERS, 
+  MOCK_OUTLINES, 
+  MOCK_CONTENTS, 
+  MOCK_BLOG_POSTS, 
+  DEFAULT_HOME_CONFIG, 
+  DEFAULT_ABOUT_CONFIG, 
+  DEFAULT_SERVICES, 
+  DEFAULT_EXPERIENCE, 
+  DEFAULT_TESTIMONIALS, 
+  DEFAULT_CONTACT_SUBMISSIONS,
+  DEFAULT_EDUCATION,
+  DEFAULT_CERTIFICATIONS,
+  DEFAULT_SKILLS
+} from './data/mockData';
 
 // Import modular layouts & subpages
 import Header from './components/Header';
@@ -30,13 +45,18 @@ import BriefDetail from './pages/BriefDetail';
 import Pricing from './pages/Pricing';
 import Blog from './pages/Blog';
 import Contact from './pages/Contact';
+import About from './pages/About';
+import Services from './pages/Services';
+import Resume from './pages/Resume';
+import Testimonials from './pages/Testimonials';
 
 export default function App() {
   // Navigation & Details Routing states
   const [currentPage, setCurrentPage] = useState<ActivePage>('home');
   const [selectedBriefId, setSelectedBriefId] = useState<string | null>(null);
+  const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState<string>('');
-  const [activeLibraryTab, setActiveLibraryTab] = useState<'brief' | 'outline' | 'content' | 'write'>('brief');
+  const [activeLibraryTab, setActiveLibraryTab] = useState<'brief' | 'outline' | 'content'>('brief');
 
   // Authentication states
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
@@ -75,7 +95,8 @@ export default function App() {
     const saved = localStorage.getItem('apex_briefs');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
       } catch (e) {
         console.error('Error parsing briefs:', e);
       }
@@ -87,7 +108,8 @@ export default function App() {
     const saved = localStorage.getItem('apex_outlines');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
       } catch (e) {
         console.error('Error parsing outlines:', e);
       }
@@ -99,7 +121,8 @@ export default function App() {
     const saved = localStorage.getItem('apex_contents');
     if (saved) {
       try {
-        return JSON.parse(saved);
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
       } catch (e) {
         console.error('Error parsing contents:', e);
       }
@@ -107,7 +130,98 @@ export default function App() {
     return MOCK_CONTENTS;
   });
 
+  const [homeConfig, setHomeConfig] = useState<HomeConfig>(() => {
+    const saved = localStorage.getItem('apex_home_config');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error('Error parsing home config:', e); }
+    }
+    return DEFAULT_HOME_CONFIG;
+  });
+
+  const [aboutConfig, setAboutConfig] = useState<AboutConfig>(() => {
+    const saved = localStorage.getItem('apex_about_config');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error('Error parsing about config:', e); }
+    }
+    return DEFAULT_ABOUT_CONFIG;
+  });
+
+  const [services, setServices] = useState<ServiceItem[]>(() => {
+    const saved = localStorage.getItem('apex_services');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error('Error parsing services:', e); }
+    }
+    return DEFAULT_SERVICES;
+  });
+
+  const [experiences, setExperiences] = useState<ExperienceItem[]>(() => {
+    const saved = localStorage.getItem('apex_experiences');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error('Error parsing experiences:', e); }
+    }
+    return DEFAULT_EXPERIENCE;
+  });
+
+  const [education, setEducation] = useState<EducationItem[]>(() => {
+    const saved = localStorage.getItem('apex_education');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error('Error parsing education:', e); }
+    }
+    return DEFAULT_EDUCATION;
+  });
+
+  const [certifications, setCertifications] = useState<CertificationItem[]>(() => {
+    const saved = localStorage.getItem('apex_certifications');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error('Error parsing certifications:', e); }
+    }
+    return DEFAULT_CERTIFICATIONS;
+  });
+
+  const [coreSkills, setCoreSkills] = useState<SkillItem[]>(() => {
+    const saved = localStorage.getItem('apex_core_skills');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error('Error parsing core skills:', e); }
+    }
+    return DEFAULT_SKILLS;
+  });
+
+  const [testimonials, setTestimonials] = useState<TestimonialItem[]>(() => {
+    const saved = localStorage.getItem('apex_testimonials');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error('Error parsing testimonials:', e); }
+    }
+    return DEFAULT_TESTIMONIALS;
+  });
+
+  const [blogs, setBlogs] = useState<BlogPost[]>(() => {
+    const saved = localStorage.getItem('apex_blogs');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error('Error parsing blogs:', e); }
+    }
+    return MOCK_BLOG_POSTS;
+  });
+
+  const [contactSubmissions, setContactSubmissions] = useState<ContactSubmission[]>(() => {
+    const saved = localStorage.getItem('apex_contact_submissions');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error('Error parsing contact submissions:', e); }
+    }
+    return DEFAULT_CONTACT_SUBMISSIONS;
+  });
+
+  const [resumeImage, setResumeImage] = useState<string>(() => {
+    return localStorage.getItem('apex_resume_image') || '';
+  });
+
   // Sync state modifications to localStorage
+  useEffect(() => {
+    if (resumeImage) {
+      localStorage.setItem('apex_resume_image', resumeImage);
+    } else {
+      localStorage.removeItem('apex_resume_image');
+    }
+  }, [resumeImage]);
   useEffect(() => {
     localStorage.setItem('apex_orders', JSON.stringify(orders));
   }, [orders]);
@@ -127,6 +241,82 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('apex_contents', JSON.stringify(contents));
   }, [contents]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_home_config', JSON.stringify(homeConfig));
+  }, [homeConfig]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_about_config', JSON.stringify(aboutConfig));
+  }, [aboutConfig]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_services', JSON.stringify(services));
+  }, [services]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_experiences', JSON.stringify(experiences));
+  }, [experiences]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_education', JSON.stringify(education));
+  }, [education]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_certifications', JSON.stringify(certifications));
+  }, [certifications]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_core_skills', JSON.stringify(coreSkills));
+  }, [coreSkills]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_testimonials', JSON.stringify(testimonials));
+  }, [testimonials]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_blogs', JSON.stringify(blogs));
+  }, [blogs]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_contact_submissions', JSON.stringify(contactSubmissions));
+  }, [contactSubmissions]);
+
+  // Synchronize dynamic sitemap state to server filesystem
+  useEffect(() => {
+    fetch('/api/sync-briefs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ briefs, outlines, contents })
+    }).catch(err => console.error('Error syncing dynamic briefs to server:', err));
+  }, [briefs, outlines, contents]);
+
+  useEffect(() => {
+    fetch('/api/sync-blogs', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ blogs })
+    }).catch(err => console.error('Error syncing dynamic blogs to server:', err));
+  }, [blogs]);
+
+  // URL Query Parameters Router on load/mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const pageParam = params.get('page');
+    if (pageParam) {
+      setCurrentPage(pageParam as ActivePage);
+    }
+    const briefParam = params.get('brief');
+    if (briefParam) {
+      setSelectedBriefId(briefParam);
+      setCurrentPage('detail');
+    }
+    const postParam = params.get('post');
+    if (postParam) {
+      setSelectedPostId(postParam);
+      setCurrentPage('blog');
+    }
+  }, []);
 
   const handlePublishBrief = (newBrief: ArticleBrief) => {
     setBriefs(prev => [newBrief, ...prev]);
@@ -230,7 +420,7 @@ export default function App() {
     setUnlockedBriefIds(prev => [...prev, unlockTargetId]);
     
     // Create simulated outline order record automatically
-    const targetBrief = MOCK_BRIEFS.find(b => b.id === unlockTargetId);
+    const targetBrief = briefs.find(b => b.id === unlockTargetId);
     if (targetBrief) {
       const newOrderRecord: ContentOrder = {
         id: `ord-${Math.floor(100 + Math.random() * 900)}`,
@@ -257,6 +447,32 @@ export default function App() {
   // Add new order from dashboard
   const handleAddNewOrder = (newOrder: ContentOrder) => {
     setOrders(prev => [newOrder, ...prev]);
+  };
+
+  // AI Generated item appenders
+  const handleAddBrief = (newBrief: ArticleBrief) => {
+    setBriefs(prev => [newBrief, ...prev]);
+    triggerToast(`Successfully generated new Brief: "${newBrief.title}"`, 'success');
+  };
+
+  const handleAddOutline = (newOutline: OutlineItem) => {
+    setOutlines(prev => [newOutline, ...prev]);
+    triggerToast(`Successfully generated new Outline: "${newOutline.title}"`, 'success');
+  };
+
+  const handleAddContent = (newContent: ContentItem) => {
+    setContents(prev => [newContent, ...prev]);
+    triggerToast(`Successfully generated new Content: "${newContent.title}"`, 'success');
+  };
+
+  const handleClearAllLibraryData = () => {
+    setBriefs([]);
+    setOutlines([]);
+    setContents([]);
+    localStorage.removeItem('apex_briefs');
+    localStorage.removeItem('apex_outlines');
+    localStorage.removeItem('apex_contents');
+    triggerToast('All generated portfolio data has been cleared successfully!', 'success');
   };
 
   // Filter selected brief metadata for detail page
@@ -307,6 +523,44 @@ export default function App() {
                 setSelectedBriefId={setSelectedBriefId}
                 setSearchKeyword={setSearchKeyword}
                 onToast={triggerToast}
+                homeConfig={homeConfig}
+              />
+            )}
+
+            {currentPage === 'about' && (
+              <About
+                setCurrentPage={setCurrentPage}
+                onToast={triggerToast}
+                aboutConfig={aboutConfig}
+              />
+            )}
+
+            {currentPage === 'services' && (
+              <Services
+                setCurrentPage={setCurrentPage}
+                onToast={triggerToast}
+                services={services}
+              />
+            )}
+
+            {currentPage === 'resume' && (
+              <Resume
+                setCurrentPage={setCurrentPage}
+                onToast={triggerToast}
+                experiences={experiences}
+                education={education}
+                certifications={certifications}
+                coreSkills={coreSkills}
+                resumeImage={resumeImage}
+              />
+            )}
+
+            {currentPage === 'testimonials' && (
+              <Testimonials
+                setCurrentPage={setCurrentPage}
+                onToast={triggerToast}
+                testimonials={testimonials}
+                setTestimonials={setTestimonials}
               />
             )}
 
@@ -321,6 +575,13 @@ export default function App() {
                 setSearchKeyword={setSearchKeyword}
                 initialLibrary={activeLibraryTab}
                 onLibraryChange={setActiveLibraryTab}
+                onAddBrief={handleAddBrief}
+                onAddOutline={handleAddOutline}
+                onAddContent={handleAddContent}
+                onDeleteBrief={handleDeleteBrief}
+                onDeleteOutline={handleDeleteOutline}
+                onDeleteContent={handleDeleteContent}
+                onClearAll={handleClearAllLibraryData}
               />
             )}
 
@@ -349,6 +610,9 @@ export default function App() {
             {currentPage === 'blog' && (
               <Blog
                 onToast={triggerToast}
+                blogs={blogs}
+                selectedPostId={selectedPostId}
+                onSelectPostId={setSelectedPostId}
               />
             )}
 
@@ -356,6 +620,9 @@ export default function App() {
               <Contact
                 initialSubject={selectedBriefId ? `Custom Copywriting: ${selectedBrief.title}` : ''}
                 onToast={triggerToast}
+                onAddSubmission={(newSub) => {
+                  setContactSubmissions(prev => [newSub, ...prev]);
+                }}
               />
             )}
 
@@ -383,6 +650,29 @@ export default function App() {
                 onDeleteOutline={handleDeleteOutline}
                 onEditContent={handleEditContent}
                 onDeleteContent={handleDeleteContent}
+                
+                homeConfig={homeConfig}
+                onUpdateHomeConfig={setHomeConfig}
+                aboutConfig={aboutConfig}
+                onUpdateAboutConfig={setAboutConfig}
+                services={services}
+                onUpdateServices={setServices}
+                experiences={experiences}
+                onUpdateExperiences={setExperiences}
+                education={education}
+                onUpdateEducation={setEducation}
+                certifications={certifications}
+                onUpdateCertifications={setCertifications}
+                coreSkills={coreSkills}
+                onUpdateCoreSkills={setCoreSkills}
+                resumeImage={resumeImage}
+                onUpdateResumeImage={setResumeImage}
+                testimonials={testimonials}
+                onUpdateTestimonials={setTestimonials}
+                blogs={blogs}
+                onUpdateBlogs={setBlogs}
+                contactSubmissions={contactSubmissions}
+                onUpdateContactSubmissions={setContactSubmissions}
               />
             )}
           </motion.div>
