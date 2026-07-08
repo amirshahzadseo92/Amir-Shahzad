@@ -8,12 +8,12 @@ interface LogoProps {
 }
 
 export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme = 'light' }) => {
-  const [logoText, setLogoText] = useState<'APEX' | 'OS'>('APEX');
+  const [activeLetterIdx, setActiveLetterIdx] = useState<number>(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setLogoText((prev) => (prev === 'APEX' ? 'OS' : 'APEX'));
-    }, 3000);
+      setActiveLetterIdx((prev) => (prev + 1) % 3);
+    }, 1600); // Transitions to the next letter every 1.6 seconds
     return () => clearInterval(timer);
   }, []);
 
@@ -23,18 +23,12 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
   const middleRingSize = size === 'sm' ? 'h-[38px] w-[38px]' : size === 'lg' ? 'h-[62px] w-[62px]' : 'h-[38px] w-[38px] md:h-[42px] md:w-[42px]';
   const innerSvgSize = size === 'sm' ? 'h-5 w-5' : size === 'lg' ? 'h-7 w-7' : 'h-5 w-5 md:h-[22px] md:w-[22px]';
   
-  // Custom styled templates for APEX and OS inside the emblem
-  const apexStyle = size === 'sm' 
-    ? 'text-[10px] font-extrabold tracking-tighter italic font-serif' 
+  // Custom styled templates for single H, A, S letters inside the emblem (larger and prominent)
+  const hasLetterStyle = size === 'sm' 
+    ? 'text-[18px] font-black font-sans select-none' 
     : size === 'lg' 
-      ? 'text-[17px] font-extrabold tracking-tighter italic font-serif' 
-      : 'text-[10px] md:text-[11.5px] font-extrabold tracking-tighter italic font-serif';
-
-  const osStyle = size === 'sm' 
-    ? 'text-[14px] font-extrabold tracking-tighter italic font-serif' 
-    : size === 'lg' 
-      ? 'text-[24px] font-extrabold tracking-tighter italic font-serif' 
-      : 'text-[14px] md:text-[16px] font-extrabold tracking-tighter italic font-serif';
+      ? 'text-[30px] font-black font-sans select-none' 
+      : 'text-[19px] md:text-[21.5px] font-black font-sans select-none';
 
   const outerTextSize = size === 'sm' ? 'text-lg' : size === 'lg' ? 'text-2xl' : 'text-base md:text-[18px]';
   const outerOsTextSize = size === 'sm' ? 'text-xl font-black' : size === 'lg' ? 'text-3xl font-black' : 'text-lg md:text-[22px] font-black';
@@ -143,32 +137,34 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
         {/* Central Geometric Emblem Container */}
         <div className={`relative flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white shadow-lg shadow-emerald-500/10 border border-emerald-500/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-emerald-500/20 group-hover:border-emerald-500/40 ${containerSize}`}>
           
-          {/* Dynamic "Ander ka Text" (Apex / OS) with beautiful Framer Motion text swap */}
-          <div className="relative z-10 text-center flex items-center justify-center w-full h-full">
+          {/* Animated active letter in the exact center (darmeyan) with a beautiful sequential sliding carousel transition */}
+          <div className="relative z-10 text-center flex items-center justify-center w-full h-full overflow-hidden">
             <AnimatePresence mode="wait">
-              {logoText === 'APEX' ? (
-                <motion.span
-                  key="apex"
-                  initial={{ opacity: 0, y: 4, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -4, scale: 0.9 }}
-                  transition={{ duration: 0.25, ease: 'easeInOut' }}
-                  className={`bg-gradient-to-r from-emerald-400 to-teal-300 bg-clip-text text-transparent uppercase font-black ${apexStyle}`}
-                >
-                  APEX
-                </motion.span>
-              ) : (
-                <motion.span
-                  key="os"
-                  initial={{ opacity: 0, y: 4, scale: 0.9 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -4, scale: 0.9 }}
-                  transition={{ duration: 0.25, ease: 'easeInOut' }}
-                  className={`bg-gradient-to-r from-teal-300 via-cyan-400 to-emerald-400 bg-clip-text text-transparent font-extrabold ${osStyle}`}
-                >
-                  OS
-                </motion.span>
-              )}
+              <motion.span
+                key={activeLetterIdx}
+                initial={{ opacity: 0, x: 12, scale: 0.8 }}
+                animate={{ 
+                  opacity: 1, 
+                  x: 0, 
+                  scale: 1,
+                  filter: [
+                    "hue-rotate(0deg) saturate(130%)", 
+                    "hue-rotate(120deg) saturate(150%)", 
+                    "hue-rotate(240deg) saturate(130%)", 
+                    "hue-rotate(360deg) saturate(100%)"
+                  ]
+                }}
+                exit={{ opacity: 0, x: -12, scale: 0.8 }}
+                transition={{ 
+                  x: { duration: 0.35, ease: "easeOut" },
+                  opacity: { duration: 0.25 },
+                  scale: { duration: 0.3, ease: "easeOut" },
+                  filter: { repeat: Infinity, duration: 4, ease: "linear" }
+                }}
+                className={`bg-gradient-to-br from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent uppercase font-black ${hasLetterStyle}`}
+              >
+                {['H', 'A', 'S'][activeLetterIdx]}
+              </motion.span>
             </AnimatePresence>
           </div>
         </div>
@@ -179,14 +175,14 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
         <div className="flex flex-col justify-center pl-1 whitespace-nowrap">
           <div className="flex items-baseline gap-1">
             <span className={`font-sans font-black tracking-[0.06em] italic uppercase leading-none ${outerTextSize} ${theme === 'dark' ? 'text-white' : 'text-slate-900'}`}>
-              Apex
+              Hafiz Amir
             </span>
             <span className={`font-display bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent uppercase leading-none tracking-[0.06em] ${outerOsTextSize}`}>
-              OS
+              Shahzad
             </span>
           </div>
-          <span className={`font-display font-semibold tracking-[0.2em] uppercase mt-0.5 md:mt-1.5 leading-none select-none ${outerSubTextSize} ${theme === 'dark' ? 'text-slate-400' : 'text-black'}`}>
-            Traffic Engine
+          <span className={`font-mono font-bold tracking-[0.12em] uppercase mt-0.5 md:mt-1.5 leading-none select-none ${outerSubTextSize} bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-600 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-400 bg-clip-text text-transparent`}>
+            SEO & Development Specialist
           </span>
         </div>
       )}

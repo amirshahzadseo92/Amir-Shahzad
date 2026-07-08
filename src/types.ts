@@ -71,7 +71,7 @@ export interface ContentItem {
   fontStyle?: string;
 }
 
-export type ActivePage = 'home' | 'library' | 'detail' | 'pricing' | 'blog' | 'contact' | 'dashboard' | 'about' | 'services' | 'resume' | 'testimonials';
+export type ActivePage = 'home' | 'library' | 'detail' | 'pricing' | 'contact' | 'dashboard' | 'about' | 'services' | 'resume';
 
 export interface HomeConfig {
   heroTitle: string;

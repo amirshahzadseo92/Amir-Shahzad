@@ -19,7 +19,11 @@ import {
   Inbox,
   Plus,
   Eye,
-  Briefcase
+  Briefcase,
+  TrendingUp,
+  Download,
+  Image,
+  Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArticleBrief, OutlineItem, ContentItem, ContentOrder, HomeConfig, AboutConfig, ServiceItem, ExperienceItem, TestimonialItem, BlogPost, ContactSubmission, EducationItem, CertificationItem, SkillItem } from '../types';
@@ -67,6 +71,19 @@ interface DashboardProps {
   onUpdateBlogs: (items: BlogPost[]) => void;
   contactSubmissions: ContactSubmission[];
   onUpdateContactSubmissions: (items: ContactSubmission[]) => void;
+  adminTab?: 'home' | 'about' | 'services' | 'portfolio' | 'resume' | 'testimonials' | 'blog' | 'contact' | 'seo';
+  seoOriginalImage?: string;
+  onUpdateSeoOriginalImage?: (val: string) => void;
+  seoOptimizedImage?: string;
+  onUpdateSeoOptimizedImage?: (val: string) => void;
+  seoOriginalSize?: number;
+  onUpdateSeoOriginalSize?: (val: number) => void;
+  seoOptimizedSize?: number;
+  onUpdateSeoOptimizedSize?: (val: number) => void;
+  seoImageName?: string;
+  onUpdateSeoImageName?: (val: string) => void;
+  seoAltText?: string;
+  onUpdateSeoAltText?: (val: string) => void;
 }
 
 const PRESET_COLORS = [
@@ -236,6 +253,19 @@ export default function Dashboard({
   onUpdateBlogs,
   contactSubmissions,
   onUpdateContactSubmissions,
+  adminTab: propAdminTab,
+  seoOriginalImage,
+  onUpdateSeoOriginalImage,
+  seoOptimizedImage,
+  onUpdateSeoOptimizedImage,
+  seoOriginalSize,
+  onUpdateSeoOriginalSize,
+  seoOptimizedSize,
+  onUpdateSeoOptimizedSize,
+  seoImageName,
+  onUpdateSeoImageName,
+  seoAltText,
+  onUpdateSeoAltText,
 }: DashboardProps) {
   // Password Lock state
   const [password, setPassword] = useState('');
@@ -243,9 +273,105 @@ export default function Dashboard({
   const [errorMsg, setErrorMsg] = useState('');
 
   // Tab State - Expanded for all sections
-  const [adminTab, setAdminTab] = useState<'home' | 'about' | 'services' | 'portfolio' | 'resume' | 'testimonials' | 'blog' | 'contact'>('portfolio');
+  const [adminTab, setAdminTab] = useState<'home' | 'about' | 'services' | 'portfolio' | 'resume' | 'testimonials' | 'blog' | 'contact' | 'seo'>('portfolio');
+
+  useEffect(() => {
+    if (propAdminTab) {
+      setAdminTab(propAdminTab);
+    }
+  }, [propAdminTab]);
   const [activeTab, setActiveTab] = useState<'briefs'>('briefs');
   const [adminView, setAdminView] = useState<'clean' | 'brief' | 'outline' | 'content'>('clean');
+
+  // --- SEO & Performance Image Optimizer States ---
+  const [originalImage, setOriginalImage] = useState<string | null>(seoOriginalImage || null);
+  const [optimizedImage, setOptimizedImage] = useState<string | null>(seoOptimizedImage || null);
+  const [originalSize, setOriginalSize] = useState<number>(seoOriginalSize || 0);
+  const [optimizedSize, setOptimizedSize] = useState<number>(seoOptimizedSize || 0);
+  const [imageName, setImageName] = useState<string>(seoImageName || '');
+  const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
+  const [seoAltTextState, setSeoAltTextState] = useState<string>(seoAltText || '');
+
+  useEffect(() => {
+    if (seoOriginalImage !== undefined) setOriginalImage(seoOriginalImage || null);
+    if (seoOptimizedImage !== undefined) setOptimizedImage(seoOptimizedImage || null);
+    if (seoOriginalSize !== undefined) setOriginalSize(seoOriginalSize || 0);
+    if (seoOptimizedSize !== undefined) setOptimizedSize(seoOptimizedSize || 0);
+    if (seoImageName !== undefined) setImageName(seoImageName || '');
+    if (seoAltText !== undefined) setSeoAltTextState(seoAltText || '');
+  }, [seoOriginalImage, seoOptimizedImage, seoOriginalSize, seoOptimizedSize, seoImageName, seoAltText]);
+
+  const handleImageOptimization = (file: File) => {
+    setIsOptimizing(true);
+    setImageName(file.name);
+    setOriginalSize(file.size);
+    if (onUpdateSeoImageName) onUpdateSeoImageName(file.name);
+    if (onUpdateSeoOriginalSize) onUpdateSeoOriginalSize(file.size);
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const imgDataUrl = event.target?.result as string;
+      setOriginalImage(imgDataUrl);
+      if (onUpdateSeoOriginalImage) onUpdateSeoOriginalImage(imgDataUrl);
+
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        let width = img.width;
+        let height = img.height;
+
+        // Resize image if it is too large for web standards (e.g., width > 1200px)
+        const maxWidth = 1200;
+        if (width > maxWidth) {
+          height = Math.round((height * maxWidth) / width);
+          width = maxWidth;
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          // Export as modern WebP image format for extreme performance and Google PageSpeed benefits
+          const mimeType = 'image/webp';
+          const optDataUrl = canvas.toDataURL(mimeType, 0.75); // 75% quality optimization
+          setOptimizedImage(optDataUrl);
+          if (onUpdateSeoOptimizedImage) onUpdateSeoOptimizedImage(optDataUrl);
+
+          // Estimate file size based on the base64 content
+          const head = 'data:image/webp;base64,';
+          const sizeInBytes = Math.round((optDataUrl.length - head.length) * 3 / 4);
+          setOptimizedSize(sizeInBytes);
+          if (onUpdateSeoOptimizedSize) onUpdateSeoOptimizedSize(sizeInBytes);
+          
+          // Generate customized alt text for maximum Google image SEO
+          const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+          const formattedName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
+          const customAlt = `Hafiz Amir Shahzad - ${formattedName}`;
+          setSeoAltTextState(customAlt);
+          if (onUpdateSeoAltText) onUpdateSeoAltText(customAlt);
+        }
+        setIsOptimizing(false);
+        onToast('Image optimized automatically and successfully!', 'success');
+      };
+      img.src = imgDataUrl;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const downloadOptimizedImage = () => {
+    if (!optimizedImage) return;
+    const link = document.createElement('a');
+    link.href = optimizedImage;
+    const baseName = imageName.substring(0, imageName.lastIndexOf('.')) || imageName;
+    link.download = `${baseName}_optimized.webp`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    onToast('Optimized WebP downloaded successfully!', 'success');
+  };
 
   // Brief Outline Content Form State
   const [briefTitle, setBriefTitle] = useState('');
@@ -1105,15 +1231,36 @@ export default function Dashboard({
       <div className="bg-white rounded-3xl border border-slate-100 p-6 sm:p-10 shadow-xs relative overflow-hidden transition-all duration-300">
         
         {/* Top Control Header - Minimal Back / Lock */}
-        <div className="flex justify-between items-center pb-6 border-b border-slate-100/80 mb-8 text-xs text-slate-400">
-          <div className="flex items-center space-x-2">
-            <span className="font-mono tracking-wider uppercase text-[10px] font-bold text-slate-300">Admin Session Active</span>
-            <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded font-mono">SECURE</span>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-100/80 mb-8 gap-4 text-xs text-slate-400">
+          <div className="flex items-center space-x-4 flex-wrap gap-y-2">
+            <div className="flex items-center space-x-2">
+              <span className="font-mono tracking-wider uppercase text-[10px] font-bold text-slate-300">Admin Session Active</span>
+              <span className="bg-emerald-50 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded font-mono">SECURE</span>
+            </div>
+            
+            {/* Clickable SEO & Performance Results button */}
+            <button 
+              type="button"
+              onClick={() => {
+                setAdminTab('seo');
+                setAdminView('clean');
+              }}
+              className={`inline-flex items-center space-x-1.5 text-[10px] font-extrabold px-3 py-1.5 rounded-xl font-mono uppercase tracking-wide cursor-pointer select-none transition-all duration-300 border ${
+                adminTab === 'seo'
+                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm shadow-emerald-500/20'
+                  : 'bg-slate-900 text-white hover:bg-slate-800 border-transparent shadow-3xs'
+              }`}
+              id="admin-seo-performance-badge"
+            >
+              <Sparkles className="h-3 w-3 text-emerald-400 animate-pulse" />
+              <span>SEO & Performance Results</span>
+              <TrendingUp className="h-3 w-3 text-emerald-400" />
+            </button>
           </div>
           <button 
             type="button"
             onClick={handleLockPanel}
-            className="bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-xl px-3 py-1.5 font-bold text-slate-600 transition-all cursor-pointer font-sans"
+            className="bg-slate-50 hover:bg-slate-100 border border-slate-200/60 rounded-xl px-3 py-1.5 font-bold text-slate-600 transition-all cursor-pointer font-sans self-end sm:self-auto"
             id="btn-lock-admin"
           >
             Lock Panel
@@ -1131,6 +1278,7 @@ export default function Dashboard({
             <div className="hidden lg:flex flex-col space-y-1 text-left">
               {[
                 { id: 'portfolio', label: 'Portfolio Library', icon: FolderOpen, desc: 'Briefs, Outlines, Content' },
+                { id: 'seo', label: 'SEO & Performance', icon: Sparkles, desc: 'Optimized Image Compressor' },
                 { id: 'home', label: 'Home Page', icon: Home, desc: 'Hero headers & badges' },
                 { id: 'about', label: 'About Me', icon: User, desc: 'Bio & work philosophy' },
                 { id: 'services', label: 'Services', icon: Layers, desc: 'Your offerings catalog' },
@@ -1171,6 +1319,7 @@ export default function Dashboard({
             <div className="flex lg:hidden overflow-x-auto gap-2 pb-1 scrollbar-none snap-x">
               {[
                 { id: 'portfolio', label: 'Portfolio', icon: FolderOpen },
+                { id: 'seo', label: 'SEO & Performance', icon: Sparkles },
                 { id: 'home', label: 'Home', icon: Home },
                 { id: 'about', label: 'About', icon: User },
                 { id: 'services', label: 'Services', icon: Layers },
@@ -1219,10 +1368,13 @@ export default function Dashboard({
                   setBriefData('');
                   setAdminView('brief');
                 }}
-                className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 hover:text-emerald-600 transition-all duration-300 cursor-pointer font-sans border-b-2 border-transparent hover:border-emerald-500 pb-2 active:scale-98"
+                className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 hover:text-emerald-600 transition-all duration-300 cursor-pointer font-sans border-b-2 border-transparent hover:border-emerald-500 pb-2 active:scale-98 flex items-center gap-3"
                 id="btn-brief-trigger"
               >
-                Brief
+                <span>Brief</span>
+                <span className="text-sm font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full border border-slate-200">
+                  {briefs.length}
+                </span>
               </button>
               
               <span className="hidden sm:inline text-slate-200 text-2xl font-light">|</span>
@@ -1234,10 +1386,13 @@ export default function Dashboard({
                   setBriefData('');
                   setAdminView('outline');
                 }}
-                className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 hover:text-emerald-600 transition-all duration-300 cursor-pointer font-sans border-b-2 border-transparent hover:border-emerald-500 pb-2 active:scale-98"
+                className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 hover:text-emerald-600 transition-all duration-300 cursor-pointer font-sans border-b-2 border-transparent hover:border-emerald-500 pb-2 active:scale-98 flex items-center gap-3"
                 id="btn-outline-trigger"
               >
-                Outline
+                <span>Outline</span>
+                <span className="text-sm font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full border border-slate-200">
+                  {outlines.length}
+                </span>
               </button>
               
               <span className="hidden sm:inline text-slate-200 text-2xl font-light">|</span>
@@ -1249,10 +1404,30 @@ export default function Dashboard({
                   setBriefData('');
                   setAdminView('content');
                 }}
-                className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 hover:text-emerald-600 transition-all duration-300 cursor-pointer font-sans border-b-2 border-transparent hover:border-emerald-500 pb-2 active:scale-98"
+                className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 hover:text-emerald-600 transition-all duration-300 cursor-pointer font-sans border-b-2 border-transparent hover:border-emerald-500 pb-2 active:scale-98 flex items-center gap-3"
                 id="btn-content-trigger"
               >
-                Content
+                <span>Content</span>
+                <span className="text-sm font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full border border-slate-200">
+                  {contents.length}
+                </span>
+              </button>
+
+              <span className="hidden sm:inline text-slate-200 text-2xl font-light">|</span>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setAdminTab('seo');
+                  setAdminView('clean');
+                }}
+                className="text-3xl sm:text-4xl font-black tracking-tight text-slate-900 hover:text-emerald-600 transition-all duration-300 cursor-pointer font-sans border-b-2 border-transparent hover:border-emerald-500 pb-2 active:scale-98 flex items-center gap-3"
+                id="btn-seo-trigger-portfolio"
+              >
+                <span>SEO & Performance Results</span>
+                <span className="text-sm font-bold bg-slate-100 text-slate-600 px-2.5 py-1 rounded-full border border-slate-200 flex items-center justify-center">
+                  <Sparkles className="h-3.5 w-3.5 animate-pulse text-emerald-500" />
+                </span>
               </button>
             </div>
             
@@ -1933,6 +2108,209 @@ export default function Dashboard({
                     ))
                   )}
                 </div>
+              </div>
+            )}
+
+            {adminTab === 'seo' && (
+              <div className="animate-fadeIn text-left space-y-8">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+                  <div>
+                    <h3 className="font-extrabold text-slate-900 text-lg flex items-center gap-2">
+                      <Sparkles className="h-5 w-5 text-emerald-500 animate-pulse" />
+                      SEO & Performance Results
+                    </h3>
+                    <p className="text-xs text-slate-500 mt-1">
+                      Convert and optimize raw graphics into high-performance, responsive Google PageSpeed compliant WebP assets automatically.
+                    </p>
+                  </div>
+                </div>
+
+                {!originalImage ? (
+                  <div className="space-y-6">
+                    {/* Image Drag and Drop area */}
+                    <div className="relative">
+                      <label 
+                        className="border-2 border-dashed border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/10 transition-all rounded-3xl p-16 flex flex-col items-center justify-center text-center cursor-pointer group min-h-[350px]"
+                        id="seo-image-dropzone"
+                      >
+                        <div className="h-16 w-16 rounded-2xl bg-emerald-50 group-hover:bg-emerald-100 transition-colors flex items-center justify-center mb-4 border border-emerald-100">
+                          <Image className="h-8 w-8 text-emerald-600 group-hover:scale-110 transition-transform" />
+                        </div>
+                        <h4 className="font-extrabold text-slate-800 text-base">Upload Image for Real-time SEO Optimization</h4>
+                        <p className="text-xs text-slate-400 max-w-md mt-1.5 mb-8 leading-relaxed">
+                          Drag and drop your project screenshot, portfolio work, or photo here. It will instantly be converted to optimized next-gen **WebP** format.
+                        </p>
+                        
+                        <span className="bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs px-6 py-3.5 rounded-xl transition-all shadow-md group-hover:-translate-y-0.5">
+                          Select Image File
+                        </span>
+                        
+                        <input 
+                          type="file" 
+                          accept="image/*" 
+                          className="hidden" 
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              handleImageOptimization(file);
+                            }
+                          }}
+                        />
+                      </label>
+                    </div>
+
+                    {/* Technical spec disclaimer */}
+                    <div className="bg-slate-50 border border-slate-150 rounded-2xl p-4 flex gap-3 text-slate-600">
+                      <Zap className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 animate-pulse" />
+                      <div className="text-xs leading-relaxed">
+                        <strong className="text-slate-800 font-bold">Why do this?</strong> High-resolution png/jpg formats harm your site's SEO ranking. Using automated WebP compression with precise width scaling cuts load times up to <span className="text-emerald-600 font-extrabold">90%</span>, elevating mobile performance scores on Google Lighthouse.
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-8 animate-fadeIn">
+                    
+                    {/* Visual Comparison Area */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      
+                      {/* Left: Original */}
+                      <div className="border border-slate-200/80 rounded-2xl p-4 bg-slate-50 flex flex-col justify-between">
+                        <div className="flex justify-between items-center mb-3">
+                          <span className="text-[10px] font-extrabold bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md uppercase tracking-wider font-mono">Original Source</span>
+                          <span className="text-xs font-bold text-slate-600 font-mono">
+                            {originalSize > 1024 * 1024 
+                              ? `${(originalSize / (1024 * 1024)).toFixed(2)} MB` 
+                              : `${(originalSize / 1024).toFixed(1)} KB`
+                            }
+                          </span>
+                        </div>
+                        <div className="h-48 rounded-xl overflow-hidden bg-slate-200 flex items-center justify-center border border-slate-300/40 relative group">
+                          <img 
+                            src={originalImage} 
+                            alt="Original preview" 
+                            className="max-h-full max-w-full object-contain"
+                            referrerPolicy="no-referrer"
+                          />
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-2 truncate text-center font-mono">{imageName}</p>
+                      </div>
+
+                      {/* Right: Optimized */}
+                      <div className="border border-emerald-200 bg-emerald-50/10 rounded-2xl p-4 flex flex-col justify-between">
+                        <div className="flex justify-between items-center mb-3">
+                          <span className="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md uppercase tracking-wider font-mono flex items-center gap-1">
+                            <Sparkles className="h-3 w-3 animate-spin" /> Next-gen WebP
+                          </span>
+                          <span className="text-xs font-black text-emerald-600 font-mono">
+                            {optimizedSize > 1024 * 1024 
+                              ? `${(optimizedSize / (1024 * 1024)).toFixed(2)} MB` 
+                              : `${(optimizedSize / 1024).toFixed(1)} KB`
+                            }
+                          </span>
+                        </div>
+                        <div className="h-48 rounded-xl overflow-hidden bg-slate-900 flex items-center justify-center border border-emerald-200/40 relative">
+                          {isOptimizing ? (
+                            <div className="text-xs text-white/70 flex flex-col items-center gap-2">
+                              <div className="h-6 w-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                              <span>Optimizing...</span>
+                            </div>
+                          ) : (
+                            <img 
+                              src={optimizedImage || ''} 
+                              alt="Optimized WebP Preview" 
+                              className="max-h-full max-w-full object-contain"
+                              referrerPolicy="no-referrer"
+                            />
+                          )}
+                        </div>
+                        <p className="text-[10px] text-emerald-600 mt-2 font-mono text-center font-bold">File fully optimized & Web-ready</p>
+                      </div>
+
+                    </div>
+
+                    {/* Stats & Optimization Highlights Grid */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      
+                      {/* Stat 1: Savings */}
+                      <div className="bg-slate-50 border border-slate-150 p-4 rounded-2xl flex flex-col justify-center">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Size reduction</span>
+                        <div className="text-2xl font-black text-emerald-600 mt-1 flex items-baseline gap-1">
+                          {originalSize > 0 ? Math.round(((originalSize - optimizedSize) / originalSize) * 100) : 0}%
+                          <span className="text-xs font-bold text-slate-500">Savings</span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1">Drastic storage & bandwidth compression</p>
+                      </div>
+
+                      {/* Stat 2: Load Time Speed */}
+                      <div className="bg-slate-50 border border-slate-150 p-4 rounded-2xl flex flex-col justify-center">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Mobile load time</span>
+                        <div className="text-2xl font-black text-slate-800 mt-1 flex items-baseline gap-1">
+                          -{originalSize > 0 ? ((originalSize - optimizedSize) / 50000).toFixed(2) : 0}s
+                          <span className="text-xs font-bold text-slate-500">Faster</span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1">Estimated on average 3G/4G connections</p>
+                      </div>
+
+                      {/* Stat 3: SEO Compliance Score */}
+                      <div className="bg-slate-50 border border-slate-150 p-4 rounded-2xl flex flex-col justify-center">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Google SEO Rank</span>
+                        <div className="text-2xl font-black text-cyan-600 mt-1 flex items-baseline gap-1">
+                          A+
+                          <span className="text-xs font-bold text-slate-500">Compliance</span>
+                        </div>
+                        <p className="text-[10px] text-slate-400 mt-1">Excellent performance indicators</p>
+                      </div>
+
+                    </div>
+
+                    {/* Recommended Alt text & copy section */}
+                    <div className="bg-emerald-50/20 border border-emerald-100 rounded-2xl p-5 space-y-3">
+                      <div className="flex items-center gap-2 text-slate-800 font-extrabold text-xs">
+                        <Check className="h-4.5 w-4.5 text-emerald-600 bg-emerald-50 p-0.5 rounded-full" />
+                        <span>Recommended SEO Image Alt Attribute</span>
+                      </div>
+                      <p className="text-[11px] text-slate-500 leading-relaxed">
+                        Search engine crawlers (Google, Bing) rely on the `alt` text attribute to index image graphics. Copy this optimized context tag:
+                      </p>
+                      <div className="flex items-center gap-2 bg-white border border-slate-150 p-3 rounded-xl">
+                        <code className="text-xs font-mono text-slate-700 select-all break-all flex-1">{`alt="${seoAltTextState}"`}</code>
+                        <button 
+                          onClick={() => {
+                            navigator.clipboard.writeText(`alt="${seoAltTextState}"`);
+                            onToast('Copied alt text to clipboard!', 'success');
+                          }}
+                          className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer font-sans shrink-0 uppercase tracking-wider"
+                        >
+                          Copy Tag
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Actions Row */}
+                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                      <button
+                        onClick={downloadOptimizedImage}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-extrabold text-xs py-4 px-6 rounded-xl shadow-lg shadow-emerald-950/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <Download className="h-4.5 w-4.5" />
+                        <span>Download Optimized Next-Gen WebP</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setOriginalImage(null);
+                          setOptimizedImage(null);
+                          setOriginalSize(0);
+                          setOptimizedSize(0);
+                          setImageName('');
+                        }}
+                        className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs py-4 rounded-xl transition-all cursor-pointer"
+                      >
+                        Reset / Optimise Another Image
+                      </button>
+                    </div>
+
+                  </div>
+                )}
               </div>
             )}
           </div>

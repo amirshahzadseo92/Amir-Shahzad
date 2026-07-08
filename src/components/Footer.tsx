@@ -80,11 +80,6 @@ export default function Footer({ setCurrentPage, onToast }: FooterProps) {
                     </button>
                   </li>
                   <li>
-                    <button onClick={() => navigateTo('testimonials')} className="text-sm text-gray-500 hover:text-emerald-600 transition-colors text-left font-semibold">
-                      Client Testimonials
-                    </button>
-                  </li>
-                  <li>
                     <button onClick={() => navigateTo('pricing')} className="text-sm text-gray-500 hover:text-emerald-600 transition-colors text-left">
                       Premium Outlines
                     </button>
@@ -104,11 +99,6 @@ export default function Footer({ setCurrentPage, onToast }: FooterProps) {
               <div className="mt-12 md:mt-0">
                 <h3 className="text-sm font-semibold tracking-wider text-gray-900 uppercase">Resources</h3>
                 <ul className="mt-4 space-y-2.5">
-                  <li>
-                    <button onClick={() => navigateTo('blog')} className="text-sm text-gray-500 hover:text-emerald-600 transition-colors text-left">
-                      SaaS SEO Blog
-                    </button>
-                  </li>
                   <li>
                     <a href="#" className="text-sm text-gray-500 hover:text-emerald-600 transition-colors">
                       Case Studies
@@ -170,8 +160,15 @@ export default function Footer({ setCurrentPage, onToast }: FooterProps) {
             <a href="#" className="hover:text-gray-600 transition-colors">Sitemap</a>
             <a href="#" className="hover:text-gray-600 transition-colors">Cookie Policy</a>
           </div>
-          <p className="mt-8 text-sm text-gray-400 md:mt-0">
-            &copy; {new Date().getFullYear()} Apex OS. Built with premium SaaS integrity.
+          <p className="mt-8 text-sm text-gray-400 md:mt-0 flex items-center gap-1.5 justify-start md:justify-end">
+            <button 
+              onClick={() => navigateTo('pricing')}
+              className="hover:text-emerald-500 focus:outline-none transition-all duration-200 transform hover:scale-110 cursor-pointer font-bold inline-flex items-center justify-center"
+              title="Open Apex Tool"
+            >
+              &copy;
+            </button>
+            <span>{new Date().getFullYear()} Hafiz Amir Shahzad. Built with premium SaaS integrity.</span>
           </p>
         </div>
       </div>

@@ -18,11 +18,11 @@ import { ActivePage, ArticleBrief, ContentOrder, OutlineItem, ContentItem, BlogP
 
 // Import mock datasets
 import { 
-  MOCK_BRIEFS, 
   MOCK_ORDERS, 
-  MOCK_OUTLINES, 
-  MOCK_CONTENTS, 
   MOCK_BLOG_POSTS, 
+  MOCK_BRIEFS,
+  MOCK_OUTLINES,
+  MOCK_CONTENTS,
   DEFAULT_HOME_CONFIG, 
   DEFAULT_ABOUT_CONFIG, 
   DEFAULT_SERVICES, 
@@ -43,12 +43,10 @@ import Home from './pages/Home';
 import BriefLibrary from './pages/BriefLibrary';
 import BriefDetail from './pages/BriefDetail';
 import Pricing from './pages/Pricing';
-import Blog from './pages/Blog';
 import Contact from './pages/Contact';
 import About from './pages/About';
 import Services from './pages/Services';
 import Resume from './pages/Resume';
-import Testimonials from './pages/Testimonials';
 
 export default function App() {
   // Navigation & Details Routing states
@@ -56,7 +54,9 @@ export default function App() {
   const [selectedBriefId, setSelectedBriefId] = useState<string | null>(null);
   const [selectedPostId, setSelectedPostId] = useState<string | null>(null);
   const [searchKeyword, setSearchKeyword] = useState<string>('');
-  const [activeLibraryTab, setActiveLibraryTab] = useState<'brief' | 'outline' | 'content'>('brief');
+  const [activeLibraryTab, setActiveLibraryTab] = useState<'brief' | 'outline' | 'content' | 'seo'>('brief');
+  const [activeLibraryItemId, setActiveLibraryItemId] = useState<string | null>(null);
+  const [adminTab, setAdminTab] = useState<'home' | 'about' | 'services' | 'portfolio' | 'resume' | 'testimonials' | 'blog' | 'contact' | 'seo'>('portfolio');
 
   // Authentication states
   const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
@@ -96,7 +96,9 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
       } catch (e) {
         console.error('Error parsing briefs:', e);
       }
@@ -109,7 +111,9 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
       } catch (e) {
         console.error('Error parsing outlines:', e);
       }
@@ -122,7 +126,9 @@ export default function App() {
     if (saved) {
       try {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed;
+        }
       } catch (e) {
         console.error('Error parsing contents:', e);
       }
@@ -214,6 +220,26 @@ export default function App() {
     return localStorage.getItem('apex_resume_image') || '';
   });
 
+  // Hoisted SEO States
+  const [seoOriginalImage, setSeoOriginalImage] = useState<string>(() => {
+    return localStorage.getItem('apex_seo_original_image') || '';
+  });
+  const [seoOptimizedImage, setSeoOptimizedImage] = useState<string>(() => {
+    return localStorage.getItem('apex_seo_optimized_image') || '';
+  });
+  const [seoOriginalSize, setSeoOriginalSize] = useState<number>(() => {
+    return Number(localStorage.getItem('apex_seo_original_size')) || 0;
+  });
+  const [seoOptimizedSize, setSeoOptimizedSize] = useState<number>(() => {
+    return Number(localStorage.getItem('apex_seo_optimized_size')) || 0;
+  });
+  const [seoImageName, setSeoImageName] = useState<string>(() => {
+    return localStorage.getItem('apex_seo_image_name') || '';
+  });
+  const [seoAltText, setSeoAltText] = useState<string>(() => {
+    return localStorage.getItem('apex_seo_alt_text') || '';
+  });
+
   // Sync state modifications to localStorage
   useEffect(() => {
     if (resumeImage) {
@@ -222,6 +248,15 @@ export default function App() {
       localStorage.removeItem('apex_resume_image');
     }
   }, [resumeImage]);
+
+  useEffect(() => {
+    localStorage.setItem('apex_seo_original_image', seoOriginalImage);
+    localStorage.setItem('apex_seo_optimized_image', seoOptimizedImage);
+    localStorage.setItem('apex_seo_original_size', String(seoOriginalSize));
+    localStorage.setItem('apex_seo_optimized_size', String(seoOptimizedSize));
+    localStorage.setItem('apex_seo_image_name', seoImageName);
+    localStorage.setItem('apex_seo_alt_text', seoAltText);
+  }, [seoOriginalImage, seoOptimizedImage, seoOriginalSize, seoOptimizedSize, seoImageName, seoAltText]);
   useEffect(() => {
     localStorage.setItem('apex_orders', JSON.stringify(orders));
   }, [orders]);
@@ -519,9 +554,16 @@ export default function App() {
             {currentPage === 'home' && (
               <Home
                 briefs={briefs}
+                outlines={outlines}
+                contents={contents}
                 setCurrentPage={setCurrentPage}
                 setSelectedBriefId={setSelectedBriefId}
                 setSearchKeyword={setSearchKeyword}
+                setActiveLibraryTab={setActiveLibraryTab}
+                setActiveLibraryItemId={setActiveLibraryItemId}
+                onAddBrief={handleAddBrief}
+                onAddOutline={handleAddOutline}
+                onAddContent={handleAddContent}
                 onToast={triggerToast}
                 homeConfig={homeConfig}
               />
@@ -555,15 +597,6 @@ export default function App() {
               />
             )}
 
-            {currentPage === 'testimonials' && (
-              <Testimonials
-                setCurrentPage={setCurrentPage}
-                onToast={triggerToast}
-                testimonials={testimonials}
-                setTestimonials={setTestimonials}
-              />
-            )}
-
             {currentPage === 'library' && (
               <BriefLibrary
                 briefs={briefs}
@@ -575,6 +608,8 @@ export default function App() {
                 setSearchKeyword={setSearchKeyword}
                 initialLibrary={activeLibraryTab}
                 onLibraryChange={setActiveLibraryTab}
+                activeLibraryItemId={activeLibraryItemId}
+                setActiveLibraryItemId={setActiveLibraryItemId}
                 onAddBrief={handleAddBrief}
                 onAddOutline={handleAddOutline}
                 onAddContent={handleAddContent}
@@ -582,6 +617,17 @@ export default function App() {
                 onDeleteOutline={handleDeleteOutline}
                 onDeleteContent={handleDeleteContent}
                 onClearAll={handleClearAllLibraryData}
+                onNavigateToSeo={() => {
+                  setAdminTab('seo');
+                  setCurrentPage('dashboard');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                seoOriginalImage={seoOriginalImage}
+                seoOptimizedImage={seoOptimizedImage}
+                seoOriginalSize={seoOriginalSize}
+                seoOptimizedSize={seoOptimizedSize}
+                seoImageName={seoImageName}
+                seoAltText={seoAltText}
               />
             )}
 
@@ -604,15 +650,6 @@ export default function App() {
               <Pricing
                 setCurrentPage={setCurrentPage}
                 onToast={triggerToast}
-              />
-            )}
-
-            {currentPage === 'blog' && (
-              <Blog
-                onToast={triggerToast}
-                blogs={blogs}
-                selectedPostId={selectedPostId}
-                onSelectPostId={setSelectedPostId}
               />
             )}
 
@@ -650,6 +687,7 @@ export default function App() {
                 onDeleteOutline={handleDeleteOutline}
                 onEditContent={handleEditContent}
                 onDeleteContent={handleDeleteContent}
+                adminTab={adminTab}
                 
                 homeConfig={homeConfig}
                 onUpdateHomeConfig={setHomeConfig}
@@ -673,6 +711,18 @@ export default function App() {
                 onUpdateBlogs={setBlogs}
                 contactSubmissions={contactSubmissions}
                 onUpdateContactSubmissions={setContactSubmissions}
+                seoOriginalImage={seoOriginalImage}
+                onUpdateSeoOriginalImage={setSeoOriginalImage}
+                seoOptimizedImage={seoOptimizedImage}
+                onUpdateSeoOptimizedImage={setSeoOptimizedImage}
+                seoOriginalSize={seoOriginalSize}
+                onUpdateSeoOriginalSize={setSeoOriginalSize}
+                seoOptimizedSize={seoOptimizedSize}
+                onUpdateSeoOptimizedSize={setSeoOptimizedSize}
+                seoImageName={seoImageName}
+                onUpdateSeoImageName={setSeoImageName}
+                seoAltText={seoAltText}
+                onUpdateSeoAltText={setSeoAltText}
               />
             )}
           </motion.div>

@@ -29,9 +29,6 @@ export default function Header({
     { label: 'Services', page: 'services' },
     { label: 'Portfolio', page: 'library' },
     { label: 'Resume', page: 'resume' },
-    { label: 'Testimonials', page: 'testimonials' },
-    { label: 'Apex Tool', page: 'pricing' },
-    { label: 'Blog', page: 'blog' },
     { label: 'Contact', page: 'contact' },
   ];
 
@@ -143,16 +140,6 @@ export default function Header({
                   {item.label}
                 </button>
               ))}
-              <button
-                onClick={() => handleNavClick('dashboard')}
-                className={`flex w-full items-center py-2.5 text-base font-medium rounded-lg px-3 ${
-                  currentPage === 'dashboard'
-                    ? 'bg-emerald-950/40 text-emerald-400'
-                    : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
-                }`}
-              >
-                Admin Panel
-              </button>
               <div className="pt-4 border-t border-zinc-900 flex flex-col space-y-2 px-3">
                 <button
                   onClick={() => handleNavClick('dashboard')}

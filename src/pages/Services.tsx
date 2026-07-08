@@ -15,6 +15,7 @@ import {
   ShoppingCart,
   Layout
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { ActivePage } from '../types';
 
 interface ServicesProps {
@@ -125,12 +126,18 @@ export default function Services({ setCurrentPage, onToast }: ServicesProps) {
   };
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8 bg-white min-h-screen animate-fadeIn">
+    <div className="mx-auto max-w-5xl px-4 py-16 sm:px-6 lg:px-8 bg-slate-50/20 min-h-screen overflow-hidden">
       
       {/* Premium Title Section */}
-      <div className="text-center space-y-4 max-w-3xl mx-auto mb-16">
+      <motion.div 
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.7, ease: "easeOut" }}
+        className="text-center space-y-4 max-w-3xl mx-auto mb-16"
+        id="services-header"
+      >
         <div className="inline-flex items-center space-x-2 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-100 shadow-3xs mb-2">
-          <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
+          <Sparkles className="h-3.5 w-3.5 text-emerald-600 animate-pulse" />
           <span className="text-2xs font-extrabold tracking-widest uppercase font-mono text-emerald-700">
             Professional Offerings
           </span>
@@ -141,44 +148,60 @@ export default function Services({ setCurrentPage, onToast }: ServicesProps) {
         <p className="text-base text-gray-500 leading-relaxed max-w-xl mx-auto font-normal">
           High-performance, data-driven optimization strategies built to dominate rankings and maximize search visibility.
         </p>
-      </div>
+      </motion.div>
 
       {/* Services Grid with Custom Animated Borders & VIP Aesthetics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-16" id="services-grid">
         {seoServices.map((service, index) => {
           const IconComponent = service.icon;
           return (
-            <div
+            <motion.div
               key={index}
-              className={`group p-6 rounded-2xl border border-slate-150 bg-white shadow-3xs hover:shadow-sm transition-all duration-300 flex flex-col justify-between ${service.hoverClass}`}
+              initial={{ opacity: 0, y: 25 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ duration: 0.5, delay: Math.min(index * 0.08, 0.6), ease: "easeOut" }}
+              whileHover={{ 
+                y: -6,
+                scale: 1.025,
+              }}
+              whileTap={{ scale: 0.98 }}
+              className="animated-gradient-border-thin rounded-2xl overflow-hidden p-[2.5px] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
+              id={`service-card-wrapper-${index}`}
             >
-              <div className="space-y-4">
-                {/* Icon wrapper */}
-                <div className="flex items-center space-x-4">
-                  <div className={`p-3 rounded-xl border ${service.colorClass} transition-transform duration-300 group-hover:scale-110`}>
-                    <IconComponent className="h-5 w-5" />
+              <div className="bg-white p-6 rounded-[14px] flex flex-col justify-between h-full flex-1 space-y-4">
+                <div className="space-y-4">
+                  {/* Icon wrapper */}
+                  <div className="flex items-center space-x-4">
+                    <motion.div 
+                      whileHover={{ rotate: 12, scale: 1.1 }}
+                      className={`p-3 rounded-xl border ${service.colorClass} transition-transform duration-300`}
+                    >
+                      <IconComponent className="h-5 w-5" />
+                    </motion.div>
+                    <h3 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight">
+                      {service.title}
+                    </h3>
                   </div>
-                  <h3 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight">
-                    {service.title}
-                  </h3>
+
+                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+                    {service.desc}
+                  </p>
                 </div>
 
-                <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-                  {service.desc}
-                </p>
+                {/* Hire Button inside each card to convert leads */}
+                <div className="pt-6 mt-4 border-t border-slate-100 flex justify-between items-center">
+                  <motion.button
+                    whileHover={{ x: 4 }}
+                    onClick={handleHireClick}
+                    className="text-xs sm:text-sm font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center space-x-1.5 transition-colors cursor-pointer group/btn"
+                  >
+                    <span>Inquire service</span>
+                    <ArrowRight className="h-3.5 w-3.5 transform transition-transform group-hover/btn:translate-x-1" />
+                  </motion.button>
+                </div>
               </div>
-
-              {/* Hire Button inside each card to convert leads */}
-              <div className="pt-6 mt-4 border-t border-slate-50 flex justify-between items-center">
-                <button
-                  onClick={handleHireClick}
-                  className="text-xs sm:text-sm font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center space-x-1.5 transition-colors cursor-pointer group/btn"
-                >
-                  <span>Inquire service</span>
-                  <ArrowRight className="h-3.5 w-3.5 transform transition-transform group-hover/btn:translate-x-1" />
-                </button>
-              </div>
-            </div>
+            </motion.div>
           );
         })}
       </div>

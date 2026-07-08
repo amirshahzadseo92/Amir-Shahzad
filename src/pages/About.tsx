@@ -1,5 +1,6 @@
 import React from 'react';
-import { User } from 'lucide-react';
+import { User, Sparkles, ExternalLink, ArrowRight } from 'lucide-react';
+import { motion } from 'motion/react';
 import { ActivePage, AboutConfig } from '../types';
 
 interface AboutProps {
@@ -8,50 +9,99 @@ interface AboutProps {
   aboutConfig?: AboutConfig;
 }
 
-export default function About({ setCurrentPage }: AboutProps) {
+export default function About({ setCurrentPage, onToast }: AboutProps) {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8 bg-white min-h-screen flex items-center justify-center animate-fadeIn">
-      {/* Outer container: Minimal, sleek slate frame */}
-      <div className="border border-slate-200/80 rounded-3xl w-full max-w-2xl overflow-hidden shadow-xs">
-        <div className="bg-white px-6 py-12 sm:px-10 sm:py-16 text-center space-y-8">
-          <div className="space-y-3">
-            <span className="text-xs font-bold tracking-wider text-emerald-600 uppercase font-mono">Expert Profile</span>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 truncate">
+    <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8 bg-slate-50/30 min-h-screen flex items-center justify-center overflow-hidden">
+      {/* Animated Card Container with beautiful flowing gradient border */}
+      <motion.div 
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: 'easeOut' }}
+        className="animated-gradient-border rounded-[32px] w-full max-w-2xl overflow-hidden shadow-2xl p-[5px]"
+        id="about-card-container"
+      >
+        {/* Inner Card Content with solid background and generous padding */}
+        <div className="bg-white px-6 py-12 sm:px-10 sm:py-16 text-center space-y-8 rounded-[27px] relative z-10">
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="space-y-3"
+            id="about-header-section"
+          >
+            <span className="inline-flex items-center gap-1.5 text-xs font-bold tracking-wider text-emerald-600 uppercase font-mono px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-100 shadow-3xs">
+              <Sparkles className="h-3.5 w-3.5 text-emerald-500 animate-pulse" />
+              Expert Profile
+            </span>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
               Hafiz Amir Shahzad Saifi
             </h1>
-            <h2 className="text-sm sm:text-base font-extrabold text-emerald-600 tracking-wider uppercase font-mono">
+            <h2 className="text-sm sm:text-base font-extrabold text-slate-500 tracking-wide uppercase font-mono">
               SEO & Web Development Specialist
             </h2>
-          </div>
+          </motion.div>
           
-          <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal text-center max-w-xl mx-auto">
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal text-center max-w-xl mx-auto"
+            id="about-bio-text"
+          >
             I'm Hafiz Amir Shahzad Saifi, an SEO Specialist dedicated to helping businesses grow through strategic search engine optimization. I specialize in On Page SEO, Technical SEO, Keyword Research, SEO Audits, Link Building, and Content Optimization. My approach is focused on improving search visibility, increasing organic traffic, and building long-term organic authority with ethical, data-driven frameworks. I deliver top-tier, compliant web engineering and measurable SEO results that create lasting client value.
-          </p>
+          </motion.p>
 
-          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4 w-full max-w-md mx-auto">
-            {/* Elegant, clean primary and secondary CTA buttons */}
-            <button
-              onClick={() => {
-                setCurrentPage('contact');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs px-8 py-3.5 rounded-xl transition-all tracking-wider uppercase cursor-pointer w-full sm:w-auto shadow-xs"
+          {/* CTAs with beautiful hover, tap, and glowing animated-gradient-border-thin borders */}
+          <motion.div 
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.7 }}
+            className="flex flex-col sm:flex-row justify-center items-center gap-5 pt-4 w-full max-w-md mx-auto"
+            id="about-buttons-section"
+          >
+            {/* 1. Hire Me Button wrapped in animated-gradient-border-thin */}
+            <motion.div
+              className="animated-gradient-border-thin rounded-2xl p-[3px] w-full sm:w-auto overflow-hidden shadow-md flex-1"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 15 }}
             >
-              Hire Me
-            </button>
+              <button
+                id="hire-me-btn"
+                onClick={() => {
+                  setCurrentPage('contact');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="bg-slate-900 hover:bg-slate-950 text-white font-extrabold text-xs px-8 py-4 rounded-[13px] tracking-wider uppercase cursor-pointer w-full transition-colors flex items-center justify-center gap-2 group"
+              >
+                <span>Hire Me</span>
+                <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+              </button>
+            </motion.div>
             
-            <button
-              onClick={() => {
-                setCurrentPage('library');
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-              }}
-              className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 font-bold text-xs px-8 py-3.5 rounded-xl transition-all tracking-wider uppercase cursor-pointer w-full sm:w-auto shadow-3xs"
+            {/* 2. View Portfolio Button wrapped in animated-gradient-border-thin */}
+            <motion.div
+              className="animated-gradient-border-thin rounded-2xl p-[3px] w-full sm:w-auto overflow-hidden shadow-md flex-1"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ type: "spring", stiffness: 400, damping: 15 }}
             >
-              View Portfolio
-            </button>
-          </div>
+              <button
+                id="view-portfolio-btn"
+                onClick={() => {
+                  setCurrentPage('library');
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="bg-white hover:bg-slate-50 text-slate-900 font-extrabold text-xs px-8 py-4 rounded-[13px] tracking-wider uppercase cursor-pointer w-full transition-colors flex items-center justify-center gap-2"
+              >
+                <span>View Portfolio</span>
+                <ExternalLink className="h-4 w-4 text-emerald-500" />
+              </button>
+            </motion.div>
+          </motion.div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
