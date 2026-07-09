@@ -14,7 +14,7 @@ import {
 import { motion, AnimatePresence } from 'motion/react';
 
 // Import local types
-import { ActivePage, ArticleBrief, ContentOrder, OutlineItem, ContentItem, BlogPost, HomeConfig, AboutConfig, ServiceItem, ExperienceItem, TestimonialItem, ContactSubmission, EducationItem, CertificationItem, SkillItem } from './types';
+import { ActivePage, ArticleBrief, ContentOrder, OutlineItem, ContentItem, BlogPost, HomeConfig, AboutConfig, ServiceItem, ExperienceItem, TestimonialItem, ContactSubmission, EducationItem, CertificationItem, SkillItem, SeoImage } from './types';
 
 // Import mock datasets
 import { 
@@ -221,23 +221,25 @@ export default function App() {
   });
 
   // Hoisted SEO States
-  const [seoOriginalImage, setSeoOriginalImage] = useState<string>(() => {
-    return localStorage.getItem('apex_seo_original_image') || '';
-  });
-  const [seoOptimizedImage, setSeoOptimizedImage] = useState<string>(() => {
-    return localStorage.getItem('apex_seo_optimized_image') || '';
-  });
-  const [seoOriginalSize, setSeoOriginalSize] = useState<number>(() => {
-    return Number(localStorage.getItem('apex_seo_original_size')) || 0;
-  });
-  const [seoOptimizedSize, setSeoOptimizedSize] = useState<number>(() => {
-    return Number(localStorage.getItem('apex_seo_optimized_size')) || 0;
-  });
-  const [seoImageName, setSeoImageName] = useState<string>(() => {
-    return localStorage.getItem('apex_seo_image_name') || '';
-  });
-  const [seoAltText, setSeoAltText] = useState<string>(() => {
-    return localStorage.getItem('apex_seo_alt_text') || '';
+  const [seoImages, setSeoImages] = useState<SeoImage[]>(() => {
+    const saved = localStorage.getItem('apex_seo_images');
+    if (saved) {
+      try { return JSON.parse(saved); } catch (e) { console.error(e); }
+    }
+    // Fallback migration from old state if exists
+    const oldOriginal = localStorage.getItem('apex_seo_original_image');
+    if (oldOriginal) {
+      return [{
+        id: '1',
+        originalImage: oldOriginal,
+        optimizedImage: localStorage.getItem('apex_seo_optimized_image') || '',
+        originalSize: Number(localStorage.getItem('apex_seo_original_size')) || 0,
+        optimizedSize: Number(localStorage.getItem('apex_seo_optimized_size')) || 0,
+        imageName: localStorage.getItem('apex_seo_image_name') || '',
+        altText: localStorage.getItem('apex_seo_alt_text') || ''
+      }];
+    }
+    return [];
   });
 
   // Sync state modifications to localStorage
@@ -250,13 +252,8 @@ export default function App() {
   }, [resumeImage]);
 
   useEffect(() => {
-    localStorage.setItem('apex_seo_original_image', seoOriginalImage);
-    localStorage.setItem('apex_seo_optimized_image', seoOptimizedImage);
-    localStorage.setItem('apex_seo_original_size', String(seoOriginalSize));
-    localStorage.setItem('apex_seo_optimized_size', String(seoOptimizedSize));
-    localStorage.setItem('apex_seo_image_name', seoImageName);
-    localStorage.setItem('apex_seo_alt_text', seoAltText);
-  }, [seoOriginalImage, seoOptimizedImage, seoOriginalSize, seoOptimizedSize, seoImageName, seoAltText]);
+    localStorage.setItem('apex_seo_images', JSON.stringify(seoImages));
+  }, [seoImages]);
   useEffect(() => {
     localStorage.setItem('apex_orders', JSON.stringify(orders));
   }, [orders]);
@@ -617,17 +614,13 @@ export default function App() {
                 onDeleteOutline={handleDeleteOutline}
                 onDeleteContent={handleDeleteContent}
                 onClearAll={handleClearAllLibraryData}
+                onToast={triggerToast}
                 onNavigateToSeo={() => {
                   setAdminTab('seo');
                   setCurrentPage('dashboard');
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }}
-                seoOriginalImage={seoOriginalImage}
-                seoOptimizedImage={seoOptimizedImage}
-                seoOriginalSize={seoOriginalSize}
-                seoOptimizedSize={seoOptimizedSize}
-                seoImageName={seoImageName}
-                seoAltText={seoAltText}
+                seoImages={seoImages}
               />
             )}
 
@@ -711,18 +704,8 @@ export default function App() {
                 onUpdateBlogs={setBlogs}
                 contactSubmissions={contactSubmissions}
                 onUpdateContactSubmissions={setContactSubmissions}
-                seoOriginalImage={seoOriginalImage}
-                onUpdateSeoOriginalImage={setSeoOriginalImage}
-                seoOptimizedImage={seoOptimizedImage}
-                onUpdateSeoOptimizedImage={setSeoOptimizedImage}
-                seoOriginalSize={seoOriginalSize}
-                onUpdateSeoOriginalSize={setSeoOriginalSize}
-                seoOptimizedSize={seoOptimizedSize}
-                onUpdateSeoOptimizedSize={setSeoOptimizedSize}
-                seoImageName={seoImageName}
-                onUpdateSeoImageName={setSeoImageName}
-                seoAltText={seoAltText}
-                onUpdateSeoAltText={setSeoAltText}
+                seoImages={seoImages}
+                onUpdateSeoImages={setSeoImages}
               />
             )}
           </motion.div>

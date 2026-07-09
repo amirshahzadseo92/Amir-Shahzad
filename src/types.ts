@@ -155,3 +155,12 @@ export interface ContactSubmission {
   date: string;
 }
 
+export interface SeoImage {
+  id: string;
+  originalImage: string;
+  optimizedImage: string;
+  originalSize: number;
+  optimizedSize: number;
+  imageName: string;
+  altText: string;
+}

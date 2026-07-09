@@ -26,7 +26,7 @@ import {
   Zap
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArticleBrief, OutlineItem, ContentItem, ContentOrder, HomeConfig, AboutConfig, ServiceItem, ExperienceItem, TestimonialItem, BlogPost, ContactSubmission, EducationItem, CertificationItem, SkillItem } from '../types';
+import { ArticleBrief, OutlineItem, ContentItem, ContentOrder, HomeConfig, AboutConfig, ServiceItem, ExperienceItem, TestimonialItem, BlogPost, ContactSubmission, EducationItem, CertificationItem, SkillItem, SeoImage } from '../types';
 
 interface DashboardProps {
   userEmail: string;
@@ -72,18 +72,8 @@ interface DashboardProps {
   contactSubmissions: ContactSubmission[];
   onUpdateContactSubmissions: (items: ContactSubmission[]) => void;
   adminTab?: 'home' | 'about' | 'services' | 'portfolio' | 'resume' | 'testimonials' | 'blog' | 'contact' | 'seo';
-  seoOriginalImage?: string;
-  onUpdateSeoOriginalImage?: (val: string) => void;
-  seoOptimizedImage?: string;
-  onUpdateSeoOptimizedImage?: (val: string) => void;
-  seoOriginalSize?: number;
-  onUpdateSeoOriginalSize?: (val: number) => void;
-  seoOptimizedSize?: number;
-  onUpdateSeoOptimizedSize?: (val: number) => void;
-  seoImageName?: string;
-  onUpdateSeoImageName?: (val: string) => void;
-  seoAltText?: string;
-  onUpdateSeoAltText?: (val: string) => void;
+  seoImages?: SeoImage[];
+  onUpdateSeoImages?: (items: SeoImage[]) => void;
 }
 
 const PRESET_COLORS = [
@@ -254,18 +244,8 @@ export default function Dashboard({
   contactSubmissions,
   onUpdateContactSubmissions,
   adminTab: propAdminTab,
-  seoOriginalImage,
-  onUpdateSeoOriginalImage,
-  seoOptimizedImage,
-  onUpdateSeoOptimizedImage,
-  seoOriginalSize,
-  onUpdateSeoOriginalSize,
-  seoOptimizedSize,
-  onUpdateSeoOptimizedSize,
-  seoImageName,
-  onUpdateSeoImageName,
-  seoAltText,
-  onUpdateSeoAltText,
+  seoImages = [],
+  onUpdateSeoImages,
 }: DashboardProps) {
   // Password Lock state
   const [password, setPassword] = useState('');
@@ -284,88 +264,76 @@ export default function Dashboard({
   const [adminView, setAdminView] = useState<'clean' | 'brief' | 'outline' | 'content'>('clean');
 
   // --- SEO & Performance Image Optimizer States ---
-  const [originalImage, setOriginalImage] = useState<string | null>(seoOriginalImage || null);
-  const [optimizedImage, setOptimizedImage] = useState<string | null>(seoOptimizedImage || null);
-  const [originalSize, setOriginalSize] = useState<number>(seoOriginalSize || 0);
-  const [optimizedSize, setOptimizedSize] = useState<number>(seoOptimizedSize || 0);
-  const [imageName, setImageName] = useState<string>(seoImageName || '');
   const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
-  const [seoAltTextState, setSeoAltTextState] = useState<string>(seoAltText || '');
-
-  useEffect(() => {
-    if (seoOriginalImage !== undefined) setOriginalImage(seoOriginalImage || null);
-    if (seoOptimizedImage !== undefined) setOptimizedImage(seoOptimizedImage || null);
-    if (seoOriginalSize !== undefined) setOriginalSize(seoOriginalSize || 0);
-    if (seoOptimizedSize !== undefined) setOptimizedSize(seoOptimizedSize || 0);
-    if (seoImageName !== undefined) setImageName(seoImageName || '');
-    if (seoAltText !== undefined) setSeoAltTextState(seoAltText || '');
-  }, [seoOriginalImage, seoOptimizedImage, seoOriginalSize, seoOptimizedSize, seoImageName, seoAltText]);
+  const [uploadingImageName, setUploadingImageName] = useState<string>('');
 
   const handleImageOptimization = (file: File) => {
     setIsOptimizing(true);
-    setImageName(file.name);
-    setOriginalSize(file.size);
-    if (onUpdateSeoImageName) onUpdateSeoImageName(file.name);
-    if (onUpdateSeoOriginalSize) onUpdateSeoOriginalSize(file.size);
+    setUploadingImageName(file.name);
 
     const reader = new FileReader();
     reader.onload = (event) => {
       const imgDataUrl = event.target?.result as string;
-      setOriginalImage(imgDataUrl);
-      if (onUpdateSeoOriginalImage) onUpdateSeoOriginalImage(imgDataUrl);
-
-      const img = new Image();
+      const img = new window.Image();
       img.onload = () => {
         const canvas = document.createElement('canvas');
         let width = img.width;
         let height = img.height;
-
-        // Resize image if it is too large for web standards (e.g., width > 1200px)
-        const maxWidth = 1200;
+        const maxWidth = 1080;
         if (width > maxWidth) {
           height = Math.round((height * maxWidth) / width);
           width = maxWidth;
         }
-
         canvas.width = width;
         canvas.height = height;
-
         const ctx = canvas.getContext('2d');
         if (ctx) {
+          ctx.imageSmoothingEnabled = true;
+          ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(img, 0, 0, width, height);
-          
-          // Export as modern WebP image format for extreme performance and Google PageSpeed benefits
           const mimeType = 'image/webp';
-          const optDataUrl = canvas.toDataURL(mimeType, 0.75); // 75% quality optimization
-          setOptimizedImage(optDataUrl);
-          if (onUpdateSeoOptimizedImage) onUpdateSeoOptimizedImage(optDataUrl);
-
-          // Estimate file size based on the base64 content
+          const optDataUrl = canvas.toDataURL(mimeType, 0.65); 
           const head = 'data:image/webp;base64,';
           const sizeInBytes = Math.round((optDataUrl.length - head.length) * 3 / 4);
-          setOptimizedSize(sizeInBytes);
-          if (onUpdateSeoOptimizedSize) onUpdateSeoOptimizedSize(sizeInBytes);
           
-          // Generate customized alt text for maximum Google image SEO
           const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
           const formattedName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
           const customAlt = `Hafiz Amir Shahzad - ${formattedName}`;
-          setSeoAltTextState(customAlt);
-          if (onUpdateSeoAltText) onUpdateSeoAltText(customAlt);
+
+          const newSeoImg: SeoImage = {
+            id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+            originalImage: imgDataUrl,
+            optimizedImage: optDataUrl,
+            originalSize: file.size,
+            optimizedSize: sizeInBytes,
+            imageName: file.name,
+            altText: customAlt
+          };
+
+          if (onUpdateSeoImages) {
+             onUpdateSeoImages([...seoImages, newSeoImg]);
+          }
         }
         setIsOptimizing(false);
-        onToast('Image optimized automatically and successfully!', 'success');
+        setUploadingImageName('');
+        onToast('Image optimized automatically and added to gallery!', 'success');
       };
       img.src = imgDataUrl;
     };
     reader.readAsDataURL(file);
   };
 
-  const downloadOptimizedImage = () => {
-    if (!optimizedImage) return;
+  const removeSeoImage = (id: string) => {
+     if (onUpdateSeoImages) {
+        onUpdateSeoImages(seoImages.filter(img => img.id !== id));
+        onToast('Image removed from SEO gallery.', 'info');
+     }
+  };
+
+  const downloadOptimizedImage = (img: SeoImage) => {
     const link = document.createElement('a');
-    link.href = optimizedImage;
-    const baseName = imageName.substring(0, imageName.lastIndexOf('.')) || imageName;
+    link.href = img.optimizedImage;
+    const baseName = img.imageName.substring(0, img.imageName.lastIndexOf('.')) || img.imageName;
     link.download = `${baseName}_optimized.webp`;
     document.body.appendChild(link);
     link.click();
@@ -1282,7 +1250,6 @@ export default function Dashboard({
                 { id: 'home', label: 'Home Page', icon: Home, desc: 'Hero headers & badges' },
                 { id: 'about', label: 'About Me', icon: User, desc: 'Bio & work philosophy' },
                 { id: 'services', label: 'Services', icon: Layers, desc: 'Your offerings catalog' },
-                { id: 'resume', label: 'Resume & Exp', icon: GraduationCap, desc: 'Work history timeline' },
                 { id: 'testimonials', label: 'Testimonials', icon: MessageSquare, desc: 'Client reviews & metrics' },
                 { id: 'blog', label: 'Blog Posts', icon: BookOpen, desc: 'Manage strategic articles' },
                 { id: 'contact', label: 'Inquiries', icon: Inbox, desc: 'Client form submissions' },
@@ -1323,7 +1290,6 @@ export default function Dashboard({
                 { id: 'home', label: 'Home', icon: Home },
                 { id: 'about', label: 'About', icon: User },
                 { id: 'services', label: 'Services', icon: Layers },
-                { id: 'resume', label: 'Resume', icon: GraduationCap },
                 { id: 'testimonials', label: 'Reviews', icon: MessageSquare },
                 { id: 'blog', label: 'Blog', icon: BookOpen },
                 { id: 'contact', label: 'Inquiries', icon: Inbox },
@@ -1893,7 +1859,7 @@ export default function Dashboard({
                     <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6">
                       <div className="w-full md:w-1/3 bg-white border border-slate-100 rounded-xl overflow-hidden shadow-md group relative">
                         <img 
-                          src={resumeImage} 
+                          src={resumeImage || undefined} 
                           alt="Resume Thumbnail Preview" 
                           className="w-full h-auto max-h-[220px] object-cover"
                           referrerPolicy="no-referrer"
@@ -2120,197 +2086,105 @@ export default function Dashboard({
                       SEO & Performance Results
                     </h3>
                     <p className="text-xs text-slate-500 mt-1">
-                      Convert and optimize raw graphics into high-performance, responsive Google PageSpeed compliant WebP assets automatically.
+                      Convert and optimize multiple graphics into high-performance, responsive Google PageSpeed compliant WebP assets automatically.
                     </p>
                   </div>
                 </div>
 
-                {!originalImage ? (
-                  <div className="space-y-6">
-                    {/* Image Drag and Drop area */}
-                    <div className="relative">
-                      <label 
-                        className="border-2 border-dashed border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/10 transition-all rounded-3xl p-16 flex flex-col items-center justify-center text-center cursor-pointer group min-h-[350px]"
-                        id="seo-image-dropzone"
-                      >
-                        <div className="h-16 w-16 rounded-2xl bg-emerald-50 group-hover:bg-emerald-100 transition-colors flex items-center justify-center mb-4 border border-emerald-100">
+                <div className="space-y-6">
+                  {/* Image Drag and Drop area */}
+                  <div className="relative">
+                    <label 
+                      className="border-2 border-dashed border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/10 transition-all rounded-3xl p-16 flex flex-col items-center justify-center text-center cursor-pointer group min-h-[350px]"
+                      id="seo-image-dropzone"
+                    >
+                      <div className="h-16 w-16 rounded-2xl bg-emerald-50 group-hover:bg-emerald-100 transition-colors flex items-center justify-center mb-4 border border-emerald-100">
+                        {isOptimizing ? (
+                          <div className="h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
+                        ) : (
                           <Image className="h-8 w-8 text-emerald-600 group-hover:scale-110 transition-transform" />
-                        </div>
-                        <h4 className="font-extrabold text-slate-800 text-base">Upload Image for Real-time SEO Optimization</h4>
-                        <p className="text-xs text-slate-400 max-w-md mt-1.5 mb-8 leading-relaxed">
-                          Drag and drop your project screenshot, portfolio work, or photo here. It will instantly be converted to optimized next-gen **WebP** format.
-                        </p>
-                        
-                        <span className="bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs px-6 py-3.5 rounded-xl transition-all shadow-md group-hover:-translate-y-0.5">
-                          Select Image File
-                        </span>
-                        
-                        <input 
-                          type="file" 
-                          accept="image/*" 
-                          className="hidden" 
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) {
-                              handleImageOptimization(file);
-                            }
-                          }}
-                        />
-                      </label>
-                    </div>
-
-                    {/* Technical spec disclaimer */}
-                    <div className="bg-slate-50 border border-slate-150 rounded-2xl p-4 flex gap-3 text-slate-600">
-                      <Zap className="h-5 w-5 text-amber-500 shrink-0 mt-0.5 animate-pulse" />
-                      <div className="text-xs leading-relaxed">
-                        <strong className="text-slate-800 font-bold">Why do this?</strong> High-resolution png/jpg formats harm your site's SEO ranking. Using automated WebP compression with precise width scaling cuts load times up to <span className="text-emerald-600 font-extrabold">90%</span>, elevating mobile performance scores on Google Lighthouse.
+                        )}
                       </div>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="space-y-8 animate-fadeIn">
-                    
-                    {/* Visual Comparison Area */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      
-                      {/* Left: Original */}
-                      <div className="border border-slate-200/80 rounded-2xl p-4 bg-slate-50 flex flex-col justify-between">
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="text-[10px] font-extrabold bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md uppercase tracking-wider font-mono">Original Source</span>
-                          <span className="text-xs font-bold text-slate-600 font-mono">
-                            {originalSize > 1024 * 1024 
-                              ? `${(originalSize / (1024 * 1024)).toFixed(2)} MB` 
-                              : `${(originalSize / 1024).toFixed(1)} KB`
-                            }
-                          </span>
-                        </div>
-                        <div className="h-48 rounded-xl overflow-hidden bg-slate-200 flex items-center justify-center border border-slate-300/40 relative group">
-                          <img 
-                            src={originalImage} 
-                            alt="Original preview" 
-                            className="max-h-full max-w-full object-contain"
-                            referrerPolicy="no-referrer"
-                          />
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-2 truncate text-center font-mono">{imageName}</p>
-                      </div>
-
-                      {/* Right: Optimized */}
-                      <div className="border border-emerald-200 bg-emerald-50/10 rounded-2xl p-4 flex flex-col justify-between">
-                        <div className="flex justify-between items-center mb-3">
-                          <span className="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md uppercase tracking-wider font-mono flex items-center gap-1">
-                            <Sparkles className="h-3 w-3 animate-spin" /> Next-gen WebP
-                          </span>
-                          <span className="text-xs font-black text-emerald-600 font-mono">
-                            {optimizedSize > 1024 * 1024 
-                              ? `${(optimizedSize / (1024 * 1024)).toFixed(2)} MB` 
-                              : `${(optimizedSize / 1024).toFixed(1)} KB`
-                            }
-                          </span>
-                        </div>
-                        <div className="h-48 rounded-xl overflow-hidden bg-slate-900 flex items-center justify-center border border-emerald-200/40 relative">
-                          {isOptimizing ? (
-                            <div className="text-xs text-white/70 flex flex-col items-center gap-2">
-                              <div className="h-6 w-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                              <span>Optimizing...</span>
-                            </div>
-                          ) : (
-                            <img 
-                              src={optimizedImage || ''} 
-                              alt="Optimized WebP Preview" 
-                              className="max-h-full max-w-full object-contain"
-                              referrerPolicy="no-referrer"
-                            />
-                          )}
-                        </div>
-                        <p className="text-[10px] text-emerald-600 mt-2 font-mono text-center font-bold">File fully optimized & Web-ready</p>
-                      </div>
-
-                    </div>
-
-                    {/* Stats & Optimization Highlights Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      
-                      {/* Stat 1: Savings */}
-                      <div className="bg-slate-50 border border-slate-150 p-4 rounded-2xl flex flex-col justify-center">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Size reduction</span>
-                        <div className="text-2xl font-black text-emerald-600 mt-1 flex items-baseline gap-1">
-                          {originalSize > 0 ? Math.round(((originalSize - optimizedSize) / originalSize) * 100) : 0}%
-                          <span className="text-xs font-bold text-slate-500">Savings</span>
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1">Drastic storage & bandwidth compression</p>
-                      </div>
-
-                      {/* Stat 2: Load Time Speed */}
-                      <div className="bg-slate-50 border border-slate-150 p-4 rounded-2xl flex flex-col justify-center">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Mobile load time</span>
-                        <div className="text-2xl font-black text-slate-800 mt-1 flex items-baseline gap-1">
-                          -{originalSize > 0 ? ((originalSize - optimizedSize) / 50000).toFixed(2) : 0}s
-                          <span className="text-xs font-bold text-slate-500">Faster</span>
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1">Estimated on average 3G/4G connections</p>
-                      </div>
-
-                      {/* Stat 3: SEO Compliance Score */}
-                      <div className="bg-slate-50 border border-slate-150 p-4 rounded-2xl flex flex-col justify-center">
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Google SEO Rank</span>
-                        <div className="text-2xl font-black text-cyan-600 mt-1 flex items-baseline gap-1">
-                          A+
-                          <span className="text-xs font-bold text-slate-500">Compliance</span>
-                        </div>
-                        <p className="text-[10px] text-slate-400 mt-1">Excellent performance indicators</p>
-                      </div>
-
-                    </div>
-
-                    {/* Recommended Alt text & copy section */}
-                    <div className="bg-emerald-50/20 border border-emerald-100 rounded-2xl p-5 space-y-3">
-                      <div className="flex items-center gap-2 text-slate-800 font-extrabold text-xs">
-                        <Check className="h-4.5 w-4.5 text-emerald-600 bg-emerald-50 p-0.5 rounded-full" />
-                        <span>Recommended SEO Image Alt Attribute</span>
-                      </div>
-                      <p className="text-[11px] text-slate-500 leading-relaxed">
-                        Search engine crawlers (Google, Bing) rely on the `alt` text attribute to index image graphics. Copy this optimized context tag:
+                      <h4 className="font-extrabold text-slate-800 text-base">
+                        {isOptimizing ? `Optimizing ${uploadingImageName}...` : 'Upload Images for Real-time SEO Optimization'}
+                      </h4>
+                      <p className="text-xs text-slate-400 max-w-md mt-1.5 mb-8 leading-relaxed">
+                        Drag and drop your project screenshots, portfolio works, or photos here. They will instantly be converted to optimized next-gen **WebP** format.
                       </p>
-                      <div className="flex items-center gap-2 bg-white border border-slate-150 p-3 rounded-xl">
-                        <code className="text-xs font-mono text-slate-700 select-all break-all flex-1">{`alt="${seoAltTextState}"`}</code>
-                        <button 
-                          onClick={() => {
-                            navigator.clipboard.writeText(`alt="${seoAltTextState}"`);
-                            onToast('Copied alt text to clipboard!', 'success');
-                          }}
-                          className="bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all cursor-pointer font-sans shrink-0 uppercase tracking-wider"
-                        >
-                          Copy Tag
-                        </button>
+                      
+                      <span className="bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs px-6 py-3.5 rounded-xl transition-all shadow-md group-hover:-translate-y-0.5">
+                        Select Image File
+                      </span>
+                      
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={(e) => {
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            handleImageOptimization(file);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
+
+                  {seoImages.length > 0 && (
+                    <div className="space-y-6">
+                      <h4 className="font-extrabold text-slate-800 text-sm border-b border-slate-100 pb-2">Optimized Image Gallery</h4>
+                      <div className="grid grid-cols-1 gap-6">
+                        {seoImages.map(img => (
+                          <div key={img.id} className="border border-slate-200/80 rounded-2xl p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                            <div className="h-32 rounded-xl overflow-hidden bg-slate-200 flex items-center justify-center border border-slate-300/40 relative">
+                               <img 
+                                 src={img.optimizedImage} 
+                                 alt={img.altText} 
+                                 className="max-h-full max-w-full object-contain"
+                                 referrerPolicy="no-referrer"
+                               />
+                            </div>
+                            
+                            <div className="space-y-4 md:col-span-2">
+                              <div>
+                                <h5 className="font-bold text-slate-800 text-sm truncate" title={img.imageName}>{img.imageName}</h5>
+                                <div className="flex gap-4 mt-2">
+                                  <div className="text-xs text-slate-500">
+                                    <span className="font-semibold text-slate-700">Original:</span> {(img.originalSize / 1024).toFixed(1)} KB
+                                  </div>
+                                  <div className="text-xs text-emerald-600 font-bold">
+                                    <span className="font-semibold text-slate-700">Optimized:</span> {(img.optimizedSize / 1024).toFixed(1)} KB
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="flex items-center gap-2 bg-white border border-slate-150 p-2 rounded-lg">
+                                <code className="text-[10px] font-mono text-slate-700 select-all break-all flex-1">{img.altText}</code>
+                              </div>
+                              
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => downloadOptimizedImage(img)}
+                                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-extrabold text-[10px] py-2 px-4 rounded-lg shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer"
+                                >
+                                  <Download className="h-3 w-3" />
+                                  <span>Download</span>
+                                </button>
+                                <button
+                                  onClick={() => removeSeoImage(img.id)}
+                                  className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[10px] py-2 px-4 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1"
+                                >
+                                  <Trash2 className="h-3 w-3" />
+                                  <span>Remove</span>
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
                     </div>
-
-                    {/* Actions Row */}
-                    <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                      <button
-                        onClick={downloadOptimizedImage}
-                        className="flex-1 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-extrabold text-xs py-4 px-6 rounded-xl shadow-lg shadow-emerald-950/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
-                      >
-                        <Download className="h-4.5 w-4.5" />
-                        <span>Download Optimized Next-Gen WebP</span>
-                      </button>
-                      <button
-                        onClick={() => {
-                          setOriginalImage(null);
-                          setOptimizedImage(null);
-                          setOriginalSize(0);
-                          setOptimizedSize(0);
-                          setImageName('');
-                        }}
-                        className="px-6 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs py-4 rounded-xl transition-all cursor-pointer"
-                      >
-                        Reset / Optimise Another Image
-                      </button>
-                    </div>
-
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             )}
           </div>

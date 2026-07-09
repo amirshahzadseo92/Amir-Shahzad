@@ -14,7 +14,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ActivePage, ArticleBrief, OutlineItem, ContentItem } from '../types';
+import { ActivePage, ArticleBrief, OutlineItem, ContentItem, SeoImage } from '../types';
 
 interface BriefLibraryProps {
   briefs: ArticleBrief[];
@@ -36,12 +36,8 @@ interface BriefLibraryProps {
   onDeleteContent?: (id: string) => void;
   onClearAll?: () => void;
   onNavigateToSeo?: () => void;
-  seoOriginalImage?: string;
-  seoOptimizedImage?: string;
-  seoOriginalSize?: number;
-  seoOptimizedSize?: number;
-  seoImageName?: string;
-  seoAltText?: string;
+  seoImages?: SeoImage[];
+  onToast?: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
 }
 
 export default function BriefLibrary({
@@ -62,12 +58,8 @@ export default function BriefLibrary({
   onDeleteContent,
   onClearAll,
   onNavigateToSeo,
-  seoOriginalImage,
-  seoOptimizedImage,
-  seoOriginalSize,
-  seoOptimizedSize,
-  seoImageName,
-  seoAltText,
+  seoImages = [],
+  onToast,
 }: BriefLibraryProps) {
   const [activeTab, setActiveTab] = useState<'brief' | 'outline' | 'content' | 'seo'>(() => {
     if (initialLibrary === 'content') return 'content';
@@ -399,15 +391,8 @@ export default function BriefLibrary({
       </div>
 
       {/* Main Content Display Area */}
-      <div className="w-full max-w-3xl mx-auto animate-fadeIn animated-gradient-border-thin p-[2px] rounded-3xl shadow-xs">
-        <div className={`bg-white flex flex-col transition-all duration-350 rounded-[22px] ${
-          ((activeTab === 'brief' && briefs.length > 0) || 
-           (activeTab === 'outline' && outlines.length > 0) || 
-           (activeTab === 'content' && contents.length > 0) ||
-           (activeTab === 'seo'))
-            ? 'p-6 sm:p-10 min-h-[350px]'
-            : 'p-6 sm:p-10 min-h-[200px]'
-        }`}>
+      <div className="w-full max-w-3xl mx-auto animate-fadeIn mt-6">
+        <div className="flex flex-col transition-all duration-350 min-h-[350px]">
           
           {/* Header Row with Active Category title and Clear All Action */}
           <div className="flex items-center justify-between mb-6 pb-4 border-b border-slate-100/80">
@@ -685,131 +670,26 @@ export default function BriefLibrary({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="space-y-6 text-left flex-1 flex flex-col justify-between"
+                className="space-y-6 text-center flex-1 flex flex-col justify-center"
               >
-                <div className="space-y-6">
-                  {seoOptimizedImage ? (
+                <div className="w-full">
+                  {seoImages.length > 0 ? (
                     <div className="space-y-6">
-                      <div className="bg-emerald-50 border border-emerald-100 p-4 rounded-2xl flex gap-3 text-emerald-800">
-                        <Sparkles className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5 animate-pulse" />
-                        <div className="text-xs leading-relaxed">
-                          <strong className="font-bold">Actual Production Results Active:</strong> This screenshot displays your optimized, next-gen WebP asset processed directly in the administrative workspace, resulting in high organic reach and perfect compliance scores on Google PageSpeed!
+                      {seoImages.map((img) => (
+                        <div key={img.id} className="rounded-xl overflow-hidden shadow-lg border border-slate-200">
+                          <img 
+                            src={img.optimizedImage} 
+                            alt={img.altText || "SEO Performance Screenshot"} 
+                            className="w-full h-auto object-contain bg-slate-900"
+                            referrerPolicy="no-referrer"
+                          />
                         </div>
-                      </div>
-
-                      {/* Visual Comparison Side-by-Side */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                        {/* Original */}
-                        <div className="border border-slate-200 bg-slate-50/50 rounded-2xl p-4 flex flex-col justify-between">
-                          <div className="flex justify-between items-center mb-2.5">
-                            <span className="text-[10px] font-extrabold bg-slate-200 text-slate-700 px-2.5 py-1 rounded-md uppercase tracking-wider font-mono">Original Source</span>
-                            <span className="text-xs font-bold text-slate-600 font-mono">
-                              {seoOriginalSize && seoOriginalSize > 1024 * 1024 
-                                ? `${(seoOriginalSize / (1024 * 1024)).toFixed(2)} MB` 
-                                : seoOriginalSize 
-                                ? `${(seoOriginalSize / 1024).toFixed(1)} KB`
-                                : 'Unknown Size'
-                              }
-                            </span>
-                          </div>
-                          <div className="h-44 rounded-xl overflow-hidden bg-slate-100 flex items-center justify-center border border-slate-200 relative">
-                            <img 
-                              src={seoOriginalImage} 
-                              alt="Original source asset" 
-                              className="max-h-full max-w-full object-contain"
-                              referrerPolicy="no-referrer"
-                            />
-                          </div>
-                          <p className="text-[10px] text-slate-400 mt-2 truncate text-center font-mono">{seoImageName || 'source_asset.png'}</p>
-                        </div>
-
-                        {/* Optimized */}
-                        <div className="border border-emerald-200 bg-emerald-50/10 rounded-2xl p-4 flex flex-col justify-between">
-                          <div className="flex justify-between items-center mb-2.5">
-                            <span className="text-[10px] font-extrabold bg-emerald-100 text-emerald-800 px-2.5 py-1 rounded-md uppercase tracking-wider font-mono flex items-center gap-1">
-                              <Sparkles className="h-3 w-3 animate-pulse" /> Next-gen WebP
-                            </span>
-                            <span className="text-xs font-black text-emerald-600 font-mono">
-                              {seoOptimizedSize && seoOptimizedSize > 1024 * 1024 
-                                ? `${(seoOptimizedSize / (1024 * 1024)).toFixed(2)} MB` 
-                                : seoOptimizedSize 
-                                ? `${(seoOptimizedSize / 1024).toFixed(1)} KB`
-                                : 'Unknown Size'
-                              }
-                            </span>
-                          </div>
-                          <div className="h-44 rounded-xl overflow-hidden bg-slate-900 flex items-center justify-center border border-emerald-200 relative">
-                            <img 
-                              src={seoOptimizedImage} 
-                              alt="Optimized WebP" 
-                              className="max-h-full max-w-full object-contain"
-                              referrerPolicy="no-referrer"
-                            />
-                          </div>
-                          <p className="text-[10px] text-emerald-600 mt-2 font-mono text-center font-bold">100% Production-ready WebP</p>
-                        </div>
-                      </div>
-
-                      {/* Performance Indicators Summary bar */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                        <div className="bg-slate-50 border border-slate-150 p-4 rounded-xl flex flex-col justify-center text-center">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Size reduction</span>
-                          <div className="text-2xl font-black text-emerald-600 mt-1">
-                            {seoOriginalSize && seoOptimizedSize ? Math.round(((seoOriginalSize - seoOptimizedSize) / seoOriginalSize) * 100) : 92}%
-                          </div>
-                        </div>
-                        <div className="bg-slate-50 border border-slate-150 p-4 rounded-xl flex flex-col justify-center text-center">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Google Index Status</span>
-                          <div className="text-sm font-extrabold text-slate-800 mt-2">Highly Optimized</div>
-                        </div>
-                        <div className="bg-slate-50 border border-slate-150 p-4 rounded-xl flex flex-col justify-center text-center">
-                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest font-mono">Alt Attribute</span>
-                          <div className="text-[11px] font-semibold text-emerald-600 truncate mt-2 px-1 select-all" title={seoAltText}>
-                            {seoAltText || 'Set'}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Action buttons */}
-                      <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                        <a 
-                          href={seoOptimizedImage}
-                          download={`${seoImageName ? seoImageName.replace(/\.[^/.]+$/, "") : "seo_asset"}_optimized.webp`}
-                          className="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs px-5 py-3.5 rounded-xl transition-all shadow-md flex items-center justify-center gap-2 text-center"
-                        >
-                          Download Optimized WebP
-                        </a>
-                        <button 
-                          onClick={onNavigateToSeo}
-                          className="px-5 py-3.5 border border-slate-200 hover:border-slate-300 text-slate-600 hover:text-slate-800 bg-white font-extrabold text-xs rounded-xl transition-all cursor-pointer"
-                        >
-                          Upload New in Admin Panel
-                        </button>
-                      </div>
+                      ))}
                     </div>
                   ) : (
-                    // Clean Empty State when no custom image report is uploaded yet
-                    <div className="space-y-6 py-6 text-center">
-                      <div className="max-w-md mx-auto space-y-4">
-                        <div className="mx-auto h-16 w-16 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
-                          <Sparkles className="h-8 w-8 text-slate-300 animate-pulse" />
-                        </div>
-                        <div className="space-y-2">
-                          <h4 className="font-extrabold text-slate-800 text-base">No SEO & Performance Data Uploaded</h4>
-                          <p className="text-xs text-slate-500 leading-relaxed max-w-sm mx-auto">
-                            Please upload your verified PageSpeed or lighthouse performance screenshot in the admin panel to display the live results here.
-                          </p>
-                        </div>
-                        <div className="pt-2">
-                          <button 
-                            onClick={onNavigateToSeo}
-                            className="bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs px-6 py-3.5 rounded-xl transition-all shadow-md inline-flex items-center gap-2 cursor-pointer font-sans"
-                          >
-                            <Sparkles className="h-4 w-4 text-emerald-400 animate-pulse" />
-                            <span>Go to Admin Dashboard to Upload Real SEO Screenshot</span>
-                          </button>
-                        </div>
-                      </div>
+                    <div className="py-12 text-slate-400 text-sm font-medium font-sans flex flex-col items-center">
+                      <Sparkles className="h-8 w-8 text-slate-300 mb-4 animate-pulse" />
+                      No SEO & Performance screenshot uploaded yet.
                     </div>
                   )}
                 </div>

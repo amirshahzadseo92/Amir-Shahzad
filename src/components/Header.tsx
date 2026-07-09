@@ -28,7 +28,6 @@ export default function Header({
     { label: 'About Me', page: 'about' },
     { label: 'Services', page: 'services' },
     { label: 'Portfolio', page: 'library' },
-    { label: 'Resume', page: 'resume' },
     { label: 'Contact', page: 'contact' },
   ];
 
