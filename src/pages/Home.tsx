@@ -29,17 +29,24 @@ export default function Home({
       <div className="absolute bottom-1/4 left-0 -z-10 h-[300px] w-[300px] rounded-full bg-gradient-to-tr from-cyan-50 to-emerald-50 blur-3xl opacity-50" />
 
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-        className="max-w-3xl mx-auto space-y-8"
+        initial={{ opacity: 0, y: 20, borderColor: "rgba(0, 0, 0, 0.1)" }}
+        animate={{ 
+          opacity: 1, 
+          y: 0,
+          borderColor: ["rgba(0, 0, 0, 0.1)", "rgba(0, 0, 0, 1)", "rgba(0, 0, 0, 0.1)"]
+        }}
+        transition={{ 
+          default: { duration: 0.8, ease: "easeOut" },
+          borderColor: { repeat: Infinity, duration: 3, ease: "easeInOut" }
+        }}
+        className="max-w-3xl w-[96%] sm:w-full mx-auto space-y-8 bg-white/80 backdrop-blur-xl border-2 p-4 min-[400px]:p-8 sm:p-12 rounded-[2.5rem] shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)]"
       >
         <div className="space-y-4">
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.1 }}
-            className="text-[1.75rem] sm:text-4xl md:text-6xl font-black tracking-tight font-display whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 via-purple-600 to-pink-600"
+            className="text-[1.35rem] min-[400px]:text-3xl sm:text-4xl md:text-6xl font-extrabold tracking-tight font-luxury whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-cyan-600"
           >
             HAFIZ AMIR SHAHZAD
           </motion.h1>
@@ -68,21 +75,41 @@ export default function Home({
           transition={{ duration: 0.8, delay: 0.4 }}
           className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-6"
         >
-          <button 
+          <motion.button 
+            animate={{ 
+              scale: [1, 1.03, 1],
+              backgroundColor: ["#0f172a", "#064e3b", "#0f172a"], // slate-900 to emerald-900 to slate-900
+              boxShadow: [
+                "0px 4px 6px rgba(0,0,0,0.1)", 
+                "0px 10px 15px rgba(16,185,129,0.3)", 
+                "0px 4px 6px rgba(0,0,0,0.1)"
+              ]
+            }}
+            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setCurrentPage('contact')}
-            className="bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 px-8 rounded-full transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 w-full sm:w-auto text-sm tracking-wide group"
+            className="text-white font-bold py-3.5 px-8 rounded-full flex items-center justify-center gap-2 w-full sm:w-auto text-sm tracking-wide group"
           >
             Hire Me
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-          </button>
+          </motion.button>
           
-          <button 
+          <motion.button 
+            animate={{ 
+              scale: [1, 1.03, 1],
+              borderColor: ["#e2e8f0", "#10b981", "#e2e8f0"],
+              backgroundColor: ["#ffffff", "#f0fdf4", "#ffffff"]
+            }}
+            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut", delay: 1.5 }}
+            whileHover={{ scale: 1.08 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setCurrentPage('library')}
-            className="bg-white hover:bg-slate-50 text-slate-900 border border-slate-200 font-bold py-3.5 px-8 rounded-full transition-all shadow-sm hover:shadow-md flex items-center justify-center gap-2 w-full sm:w-auto text-sm tracking-wide"
+            className="text-slate-900 border-2 font-bold py-3.5 px-8 rounded-full flex items-center justify-center gap-2 w-full sm:w-auto text-sm tracking-wide shadow-sm"
           >
             <Briefcase className="w-4 h-4 text-emerald-500" />
             View Portfolio
-          </button>
+          </motion.button>
         </motion.div>
       </motion.div>
     </div>

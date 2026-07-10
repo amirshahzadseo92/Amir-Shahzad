@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Menu, X, ShieldAlert, Sparkles, User, LogIn, ChevronRight, LayoutDashboard, LogOut, PenTool } from 'lucide-react';
+import { Menu, X, ShieldAlert, Sparkles, User, LogIn, ChevronRight, LayoutDashboard, LogOut, PenTool, Home, Briefcase, FolderOpen, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ActivePage } from '../types';
 import { Logo } from './Logo';
@@ -23,12 +23,12 @@ export default function Header({
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
-  const navItems: { label: string; page: ActivePage }[] = [
-    { label: 'Home', page: 'home' },
-    { label: 'About Me', page: 'about' },
-    { label: 'Services', page: 'services' },
-    { label: 'Portfolio', page: 'library' },
-    { label: 'Contact', page: 'contact' },
+  const navItems: { label: string; page: ActivePage; icon: any }[] = [
+    { label: 'Home', page: 'home', icon: Home },
+    { label: 'About Me', page: 'about', icon: User },
+    { label: 'Services', page: 'services', icon: Briefcase },
+    { label: 'Portfolio', page: 'library', icon: FolderOpen },
+    { label: 'Contact', page: 'contact', icon: Phone },
   ];
 
   const handleNavClick = (page: ActivePage) => {
@@ -54,14 +54,16 @@ export default function Header({
         <nav className="hidden md:flex items-center space-x-8">
           {navItems.map((item) => {
             const isActive = currentPage === item.page;
+            const Icon = item.icon;
             return (
               <button
                 key={item.page}
                 onClick={() => handleNavClick(item.page)}
-                className={`relative py-2 text-sm font-medium transition-colors hover:text-emerald-400 ${
+                className={`group relative flex items-center gap-2 py-2 text-sm font-medium transition-all active:scale-95 hover:text-emerald-400 ${
                   isActive ? 'text-emerald-400' : 'text-zinc-400'
                 }`}
               >
+                <Icon className={`h-4 w-4 transition-all duration-300 group-hover:scale-125 group-hover:rotate-6 group-active:scale-110 group-active:-rotate-12 ${isActive ? 'text-emerald-500' : ''}`} />
                 {item.label}
                 {isActive && (
                   <motion.div
@@ -76,10 +78,11 @@ export default function Header({
           {isLoggedIn && (
             <button
               onClick={() => handleNavClick('dashboard')}
-              className={`relative py-2 text-sm font-medium transition-colors hover:text-emerald-400 ${
+              className={`group relative flex items-center gap-2 py-2 text-sm font-medium transition-all active:scale-95 hover:text-emerald-400 ${
                 currentPage === 'dashboard' ? 'text-emerald-400' : 'text-zinc-400'
               }`}
             >
+              <LayoutDashboard className={`h-4 w-4 transition-all duration-300 group-hover:scale-125 group-hover:rotate-6 group-active:scale-110 group-active:-rotate-12 ${currentPage === 'dashboard' ? 'text-emerald-500' : ''}`} />
               Admin Panel
               {currentPage === 'dashboard' && (
                 <motion.div
@@ -126,25 +129,29 @@ export default function Header({
             className="absolute top-16 left-0 right-0 z-50 md:hidden border-t border-b border-zinc-900 bg-black shadow-xl"
           >
             <div className="space-y-1 px-4 py-3 pb-6">
-              {navItems.map((item) => (
-                <button
-                  key={item.page}
-                  onClick={() => handleNavClick(item.page)}
-                  className={`flex w-full items-center py-2.5 text-base font-medium rounded-lg px-3 ${
-                    currentPage === item.page
-                      ? 'bg-emerald-950/40 text-emerald-400'
-                      : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
-                  }`}
-                >
-                  {item.label}
-                </button>
-              ))}
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button
+                    key={item.page}
+                    onClick={() => handleNavClick(item.page)}
+                    className={`group flex w-full items-center gap-3 py-3 text-base font-medium rounded-lg px-3 transition-all active:scale-95 ${
+                      currentPage === item.page
+                        ? 'bg-emerald-950/40 text-emerald-400'
+                        : 'text-zinc-300 hover:bg-zinc-900 hover:text-white'
+                    }`}
+                  >
+                    <Icon className={`h-5 w-5 transition-all duration-300 group-hover:scale-125 group-hover:rotate-6 group-active:scale-110 group-active:-rotate-12 ${currentPage === item.page ? 'text-emerald-500' : 'text-zinc-400 group-hover:text-emerald-400'}`} />
+                    {item.label}
+                  </button>
+                );
+              })}
               <div className="pt-4 border-t border-zinc-900 flex flex-col space-y-2 px-3">
                 <button
                   onClick={() => handleNavClick('dashboard')}
-                  className="flex items-center justify-center space-x-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-500"
+                  className="group flex w-full items-center gap-3 py-3 text-base font-medium rounded-lg px-3 transition-all active:scale-95 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
                 >
-                  <LayoutDashboard className="h-4 w-4" />
+                  <LayoutDashboard className="h-5 w-5 transition-all duration-300 group-hover:scale-125 group-hover:rotate-6 group-active:scale-110 group-active:-rotate-12 text-emerald-500" />
                   <span>Admin Panel</span>
                 </button>
               </div>
