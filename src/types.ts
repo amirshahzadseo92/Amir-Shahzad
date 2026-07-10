@@ -78,6 +78,7 @@ export interface HomeConfig {
   heroTitleGradient: string;
   heroSubtitle: string;
   badgeText: string;
+  logoImage?: string;
 }
 
 export interface AboutConfig {

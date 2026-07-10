@@ -351,6 +351,7 @@ export default function Dashboard({
   // --- Dynamic Sections Edit States ---
 
   // Home Config State
+  const [homeLogo, setHomeLogo] = useState(homeConfig?.logoImage || '');
   const [homeBadge, setHomeBadge] = useState(homeConfig?.badgeText || '');
   const [homeHeadline, setHomeHeadline] = useState(homeConfig?.heroTitle || '');
   const [homeGradientWord, setHomeGradientWord] = useState(homeConfig?.heroTitleGradient || '');
@@ -358,6 +359,7 @@ export default function Dashboard({
 
   useEffect(() => {
     if (homeConfig) {
+      setHomeLogo(homeConfig.logoImage || '');
       setHomeBadge(homeConfig.badgeText);
       setHomeHeadline(homeConfig.heroTitle);
       setHomeGradientWord(homeConfig.heroTitleGradient);
@@ -565,6 +567,7 @@ export default function Dashboard({
   const handleSaveHome = (e: React.FormEvent) => {
     e.preventDefault();
     onUpdateHomeConfig({
+      logoImage: homeLogo,
       badgeText: homeBadge,
       heroTitle: homeHeadline,
       heroTitleGradient: homeGradientWord,
@@ -1732,6 +1735,10 @@ export default function Dashboard({
                   <p className="text-xs text-slate-500">Update hero headings, subtitles, and badges</p>
                 </div>
                 <div className="space-y-4 text-left">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-bold text-slate-600 block">Logo Image URL</label>
+                    <input type="text" value={homeLogo} onChange={(e) => setHomeLogo(e.target.value)} placeholder="https://example.com/logo.png (leave empty for default H A S)" className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-emerald-500" />
+                  </div>
                   <div className="space-y-1.5">
                     <label className="text-xs font-bold text-slate-600 block">Hero Badge Text</label>
                     <input type="text" value={homeBadge} onChange={(e) => setHomeBadge(e.target.value)} className="w-full border border-slate-200 rounded-xl p-3 text-sm focus:outline-emerald-500" />

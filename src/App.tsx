@@ -536,6 +536,7 @@ export default function App() {
           setCurrentPage('library');
           window.scrollTo({ top: 0, behavior: 'smooth' });
         }}
+        homeConfig={homeConfig}
       />
 
       {/* Main Render Views Router */}

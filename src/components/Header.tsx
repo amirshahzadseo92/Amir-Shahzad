@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, X, ShieldAlert, Sparkles, User, LogIn, ChevronRight, LayoutDashboard, LogOut, PenTool, Home, Briefcase, FolderOpen, Phone } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ActivePage } from '../types';
+import { ActivePage, HomeConfig } from '../types';
 import { Logo } from './Logo';
 
 interface HeaderProps {
@@ -11,6 +11,7 @@ interface HeaderProps {
   onLoginToggle: () => void;
   onSignUpOpen: () => void;
   onNewArticleClick?: () => void;
+  homeConfig?: HomeConfig;
 }
 
 export default function Header({
@@ -20,6 +21,7 @@ export default function Header({
   onLoginToggle,
   onSignUpOpen,
   onNewArticleClick,
+  homeConfig,
 }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
@@ -46,7 +48,7 @@ export default function Header({
             onClick={() => handleNavClick('home')}
             className="cursor-pointer flex items-center h-full"
           >
-            <Logo size="md" showText={true} theme="dark" />
+            <Logo size="md" showText={true} theme="dark" logoImage={homeConfig?.logoImage} />
           </div>
         </div>
 

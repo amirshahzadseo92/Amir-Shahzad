@@ -5,9 +5,10 @@ interface LogoProps {
   size?: 'sm' | 'md' | 'lg';
   showText?: boolean;
   theme?: 'light' | 'dark';
+  logoImage?: string;
 }
 
-export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme = 'light' }) => {
+export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme = 'light', logoImage }) => {
   const [activeLetterIdx, setActiveLetterIdx] = useState<number>(0);
 
   useEffect(() => {
@@ -138,7 +139,10 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
         <div className={`relative flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-slate-950 via-slate-900 to-emerald-950 text-white shadow-lg shadow-emerald-500/10 border border-emerald-500/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-emerald-500/20 group-hover:border-emerald-500/40 ${containerSize}`}>
           
           {/* Animated active letter in the exact center (darmeyan) with a beautiful sequential sliding carousel transition */}
-          <div className="relative z-10 text-center flex items-center justify-center w-full h-full overflow-hidden">
+          <div className="relative z-10 text-center flex items-center justify-center w-full h-full overflow-hidden rounded-full">
+            {logoImage ? (
+              <img src={logoImage} alt="Logo" className="w-full h-full object-cover" />
+            ) : (
             <AnimatePresence mode="wait">
               <motion.span
                 key={activeLetterIdx}
@@ -166,6 +170,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
                 {['H', 'A', 'S'][activeLetterIdx]}
               </motion.span>
             </AnimatePresence>
+            )}
           </div>
         </div>
       </div>
