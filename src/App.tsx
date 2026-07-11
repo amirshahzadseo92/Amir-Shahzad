@@ -47,6 +47,7 @@ import Contact from './pages/Contact';
 import About from './pages/About';
 import Services from './pages/Services';
 import Resume from './pages/Resume';
+import SchemaMarkup from './components/SchemaMarkup';
 
 export default function App() {
   // Navigation & Details Routing states
@@ -520,6 +521,11 @@ export default function App() {
 
   return (
     <div className="flex min-h-screen flex-col bg-white">
+      <SchemaMarkup 
+        currentPage={currentPage}
+        blogPost={blogs.find(b => b.id === selectedPostId)}
+        briefItem={selectedBrief}
+      />
       {/* Sticky Header */}
       <Header
         currentPage={currentPage}
