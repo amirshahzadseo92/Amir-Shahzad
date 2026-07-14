@@ -157,7 +157,7 @@ async function bootstrap() {
   const app = express();
   const PORT = 3000;
 
-  app.use(express.json());
+  app.use(express.json({ limit: '50mb' }));
 
   // API route for competitor analysis
   app.post("/api/analyze-competitors", async (req: any, res: any) => {
@@ -1355,6 +1355,26 @@ STRICT FORMATTING CONSTRAINT (NO HASH '#' OR STAR '*' CHARACTERS):
       return false;
     }
   }
+
+  // Centralized Data Sync
+  app.get("/api/site-data", (req: any, res: any) => {
+    const siteData = loadDynamicData("./src/data/site_data.json", {});
+    return res.json(siteData);
+  });
+
+  app.post("/api/site-data", express.json({ limit: "50mb" }), (req: any, res: any) => {
+    const success = saveDynamicData("./src/data/site_data.json", req.body);
+    
+    // Also save briefs and blogs separately for the sitemap compatibility, or just let sitemap read from site_data.json
+    if (req.body.briefs) {
+      saveDynamicData("./src/data/briefs_dynamic.json", req.body.briefs);
+    }
+    if (req.body.blogs) {
+      saveDynamicData("./src/data/blogs_dynamic.json", req.body.blogs);
+    }
+
+    return res.json({ success });
+  });
 
   // Synchronized API routes for dynamic content tracking
   app.post("/api/sync-briefs", express.json({ limit: "10mb" }), (req: any, res: any) => {

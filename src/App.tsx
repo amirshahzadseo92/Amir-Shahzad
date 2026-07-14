@@ -315,22 +315,64 @@ export default function App() {
     localStorage.setItem('apex_contact_submissions', JSON.stringify(contactSubmissions));
   }, [contactSubmissions]);
 
-  // Synchronize dynamic sitemap state to server filesystem
-  useEffect(() => {
-    fetch('/api/sync-briefs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ briefs, outlines, contents })
-    }).catch(err => console.error('Error syncing dynamic briefs to server:', err));
-  }, [briefs, outlines, contents]);
+  const [dataLoaded, setDataLoaded] = useState(false);
 
+  // Load global data on mount
   useEffect(() => {
-    fetch('/api/sync-blogs', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ blogs })
-    }).catch(err => console.error('Error syncing dynamic blogs to server:', err));
-  }, [blogs]);
+    fetch('/api/site-data')
+      .then(res => res.json())
+      .then(data => {
+        if (data && Object.keys(data).length > 0) {
+          if (data.briefs) setBriefs(data.briefs);
+          if (data.outlines) setOutlines(data.outlines);
+          if (data.contents) setContents(data.contents);
+          if (data.blogs) setBlogs(data.blogs);
+          if (data.homeConfig) setHomeConfig(data.homeConfig);
+          if (data.aboutConfig) setAboutConfig(data.aboutConfig);
+          if (data.services) setServices(data.services);
+          if (data.experiences) setExperiences(data.experiences);
+          if (data.education) setEducation(data.education);
+          if (data.certifications) setCertifications(data.certifications);
+          if (data.coreSkills) setCoreSkills(data.coreSkills);
+          if (data.testimonials) setTestimonials(data.testimonials);
+          if (data.contactSubmissions) setContactSubmissions(data.contactSubmissions);
+          if (data.resumeImage) setResumeImage(data.resumeImage);
+          if (data.seoImages) setSeoImages(data.seoImages);
+        }
+        setDataLoaded(true);
+      })
+      .catch(err => {
+        console.error('Error fetching global site data:', err);
+        setDataLoaded(true);
+      });
+  }, []);
+
+  // Synchronize dynamic state to server filesystem
+  useEffect(() => {
+    if (!dataLoaded) return; // Don't overwrite the server data with initial local state before loading
+
+    const payload = {
+      briefs, outlines, contents, blogs,
+      homeConfig, aboutConfig, services,
+      experiences, education, certifications, coreSkills,
+      testimonials, contactSubmissions, resumeImage, seoImages
+    };
+
+    const timer = setTimeout(() => {
+      fetch('/api/site-data', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      }).catch(err => console.error('Error syncing dynamic data to server:', err));
+    }, 1000); // Debounce to avoid spamming the server on rapid typing
+
+    return () => clearTimeout(timer);
+  }, [
+    dataLoaded, briefs, outlines, contents, blogs,
+    homeConfig, aboutConfig, services,
+    experiences, education, certifications, coreSkills,
+    testimonials, contactSubmissions, resumeImage, seoImages
+  ]);
 
   // URL Query Parameters Router on load/mount
   useEffect(() => {
