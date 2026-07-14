@@ -400,13 +400,13 @@ export default function App() {
 
     const timer = setTimeout(() => {
       const batch = writeBatch(db);
-      batch.set(doc(db, 'site_data', 'briefs'), { briefs }, { merge: true });
-      batch.set(doc(db, 'site_data', 'outlines'), { outlines }, { merge: true });
-      batch.set(doc(db, 'site_data', 'contents'), { contents }, { merge: true });
-      batch.set(doc(db, 'site_data', 'blogs'), { blogs }, { merge: true });
-      batch.set(doc(db, 'site_data', 'config'), { homeConfig, aboutConfig, services }, { merge: true });
-      batch.set(doc(db, 'site_data', 'portfolio'), { experiences, education, certifications, coreSkills }, { merge: true });
-      batch.set(doc(db, 'site_data', 'other'), { testimonials, contactSubmissions }, { merge: true });
+      batch.set(doc(db, 'site_data', 'briefs'), JSON.parse(JSON.stringify({ briefs })), { merge: true });
+      batch.set(doc(db, 'site_data', 'outlines'), JSON.parse(JSON.stringify({ outlines })), { merge: true });
+      batch.set(doc(db, 'site_data', 'contents'), JSON.parse(JSON.stringify({ contents })), { merge: true });
+      batch.set(doc(db, 'site_data', 'blogs'), JSON.parse(JSON.stringify({ blogs })), { merge: true });
+      batch.set(doc(db, 'site_data', 'config'), JSON.parse(JSON.stringify({ homeConfig, aboutConfig, services })), { merge: true });
+      batch.set(doc(db, 'site_data', 'portfolio'), JSON.parse(JSON.stringify({ experiences, education, certifications, coreSkills })), { merge: true });
+      batch.set(doc(db, 'site_data', 'other'), JSON.parse(JSON.stringify({ testimonials, contactSubmissions })), { merge: true });
       
       batch.commit().catch(err => console.error('Error syncing dynamic data to Firestore:', err));
 
