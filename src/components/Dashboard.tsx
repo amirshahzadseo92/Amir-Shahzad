@@ -266,6 +266,9 @@ export default function Dashboard({
   // --- SEO & Performance Image Optimizer States ---
   const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
   const [uploadingImageName, setUploadingImageName] = useState<string>('');
+  
+  const seoImagesRef = React.useRef(seoImages);
+  useEffect(() => { seoImagesRef.current = seoImages; }, [seoImages]);
 
   const compressImageToTargetKB = (file: File | string, targetKB: number): Promise<{dataUrl: string, size: number}> => {
     return new Promise((resolve, reject) => {
@@ -354,7 +357,7 @@ export default function Dashboard({
       };
 
       if (onUpdateSeoImages) {
-         onUpdateSeoImages([...seoImages, newSeoImg]);
+         onUpdateSeoImages([...seoImagesRef.current, newSeoImg]);
       }
       onToast('Image optimized automatically (36KB) and added to gallery!', 'success');
     } catch (err) {
@@ -368,7 +371,7 @@ export default function Dashboard({
 
   const removeSeoImage = (id: string) => {
      if (onUpdateSeoImages) {
-        onUpdateSeoImages(seoImages.filter(img => img.id !== id));
+        onUpdateSeoImages(seoImagesRef.current.filter(img => img.id !== id));
         onToast('Image removed from SEO gallery.', 'info');
      }
   };

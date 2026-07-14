@@ -321,6 +321,7 @@ export default function App() {
   }, [contactSubmissions]);
 
   const [dataLoaded, setDataLoaded] = useState(false);
+  const [largeDataLoaded, setLargeDataLoaded] = useState(false);
   const isRemoteUpdate = React.useRef(false);
 
   // Load global data on mount from Firestore
@@ -365,28 +366,30 @@ export default function App() {
     });
 
     // Fetch large base64 fields from Firestore chunks
-    loadLargeData('resumeImage').then(data => {
-      if (data !== null) setResumeImage(data);
-    }).catch(err => console.error('Error fetching resumeImage chunks:', err));
-
-    loadLargeData('seoImages').then(data => {
-      if (data !== null) {
-        try {
-          const parsed = JSON.parse(data);
-          setSeoImages(parsed);
-        } catch (e) {
-          console.error('Failed to parse seoImages chunks', e);
+    Promise.allSettled([
+      loadLargeData('resumeImage').then(data => {
+        if (data !== null) setResumeImage(data);
+      }),
+      loadLargeData('seoImages').then(data => {
+        if (data !== null) {
+          try {
+            const parsed = JSON.parse(data);
+            setSeoImages(parsed);
+          } catch (e) {
+            console.error('Failed to parse seoImages chunks', e);
+          }
         }
-      }
-    }).catch(err => console.error('Error fetching seoImages chunks:', err));
-
+      })
+    ]).finally(() => {
+      setLargeDataLoaded(true);
+    });
 
     return () => unsub();
   }, []);
 
   // Synchronize dynamic state to Firestore
   useEffect(() => {
-    if (!dataLoaded || isRemoteUpdate.current) return; // Don't overwrite the server data with initial local state before loading, or if this is a remote update
+    if (!dataLoaded || !largeDataLoaded || isRemoteUpdate.current) return; // Don't overwrite the server data with initial local state before loading, or if this is a remote update
 
     const payload = {
       briefs, outlines, contents, blogs,
@@ -420,7 +423,7 @@ export default function App() {
 
     return () => clearTimeout(timer);
   }, [
-    dataLoaded, briefs, outlines, contents, blogs,
+    dataLoaded, largeDataLoaded, briefs, outlines, contents, blogs,
     homeConfig, aboutConfig, services,
     experiences, education, certifications, coreSkills,
     testimonials, contactSubmissions, resumeImage, seoImages
