@@ -267,60 +267,103 @@ export default function Dashboard({
   const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
   const [uploadingImageName, setUploadingImageName] = useState<string>('');
 
-  const handleImageOptimization = (file: File) => {
-    setIsOptimizing(true);
-    setUploadingImageName(file.name);
-
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const imgDataUrl = event.target?.result as string;
+  const compressImageToTargetKB = (file: File | string, targetKB: number): Promise<{dataUrl: string, size: number}> => {
+    return new Promise((resolve, reject) => {
       const img = new window.Image();
       img.onload = () => {
-        const canvas = document.createElement('canvas');
-        let width = img.width;
-        let height = img.height;
-        const maxWidth = 1080;
-        if (width > maxWidth) {
-          height = Math.round((height * maxWidth) / width);
-          width = maxWidth;
+        const targetBytes = targetKB * 1024;
+        let quality = 0.9;
+        let scale = 1.0;
+        let dataUrl = '';
+        let size = Number.MAX_SAFE_INTEGER;
+        
+        if (img.width > 2000) {
+           scale = 2000 / img.width;
         }
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
+
+        const attempt = () => {
+          const canvas = document.createElement('canvas');
+          const width = Math.max(10, Math.floor(img.width * scale));
+          const height = Math.max(10, Math.floor(img.height * scale));
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          if (!ctx) {
+             return resolve({dataUrl: img.src, size: 0});
+          }
+          
           ctx.imageSmoothingEnabled = true;
           ctx.imageSmoothingQuality = 'high';
           ctx.drawImage(img, 0, 0, width, height);
-          const mimeType = 'image/webp';
-          const optDataUrl = canvas.toDataURL(mimeType, 0.65); 
+          dataUrl = canvas.toDataURL('image/webp', quality);
           const head = 'data:image/webp;base64,';
-          const sizeInBytes = Math.round((optDataUrl.length - head.length) * 3 / 4);
+          size = Math.round((dataUrl.length - head.length) * 3 / 4);
           
-          const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
-          const formattedName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
-          const customAlt = `Hafiz Amir Shahzad - ${formattedName}`;
-
-          const newSeoImg: SeoImage = {
-            id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
-            originalImage: imgDataUrl,
-            optimizedImage: optDataUrl,
-            originalSize: file.size,
-            optimizedSize: sizeInBytes,
-            imageName: file.name,
-            altText: customAlt
-          };
-
-          if (onUpdateSeoImages) {
-             onUpdateSeoImages([...seoImages, newSeoImg]);
+          if (size <= targetBytes || (quality <= 0.1 && scale <= 0.1)) {
+            resolve({dataUrl, size});
+          } else {
+            if (quality > 0.4) {
+              quality -= 0.15;
+            } else {
+              scale -= 0.15;
+              quality = 0.7;
+            }
+            setTimeout(attempt, 0);
           }
-        }
-        setIsOptimizing(false);
-        setUploadingImageName('');
-        onToast('Image optimized automatically and added to gallery!', 'success');
+        };
+        attempt();
       };
-      img.src = imgDataUrl;
-    };
-    reader.readAsDataURL(file);
+      img.onerror = () => reject(new Error('Failed to load image'));
+
+      if (typeof file === 'string') {
+        img.src = file;
+      } else {
+        const reader = new FileReader();
+        reader.onload = (e) => { img.src = e.target?.result as string; };
+        reader.onerror = () => reject(new Error('Failed to read file'));
+        reader.readAsDataURL(file);
+      }
+    });
+  };
+
+  const handleImageOptimization = async (file: File) => {
+    setIsOptimizing(true);
+    setUploadingImageName(file.name);
+
+    try {
+      // Create a heavily compressed version for "originalImage" to save DB space
+      // Max 300KB
+      const original = await compressImageToTargetKB(file, 300);
+      
+      // Create the ultra-optimized version for "optimizedImage" to save bandwidth
+      // Max 36KB
+      const optimized = await compressImageToTargetKB(file, 36);
+
+      const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+      const formattedName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
+      const customAlt = `Hafiz Amir Shahzad - ${formattedName}`;
+
+      const newSeoImg: SeoImage = {
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+        originalImage: original.dataUrl,
+        optimizedImage: optimized.dataUrl,
+        originalSize: file.size,
+        optimizedSize: optimized.size,
+        imageName: file.name,
+        altText: customAlt
+      };
+
+      if (onUpdateSeoImages) {
+         onUpdateSeoImages([...seoImages, newSeoImg]);
+      }
+      onToast('Image optimized automatically (36KB) and added to gallery!', 'success');
+    } catch (err) {
+      console.error('Optimization error:', err);
+      onToast('Failed to optimize image.', 'error');
+    } finally {
+      setIsOptimizing(false);
+      setUploadingImageName('');
+    }
   };
 
   const removeSeoImage = (id: string) => {
@@ -1896,17 +1939,17 @@ export default function Dashboard({
                               type="file" 
                               accept="image/*" 
                               className="hidden" 
-                              onChange={(e) => {
+                              onChange={async (e) => {
                                 const file = e.target.files?.[0];
-                                if (file) {
-                                  const reader = new FileReader();
-                                  reader.onloadend = () => {
-                                    if (typeof reader.result === 'string' && onUpdateResumeImage) {
-                                      onUpdateResumeImage(reader.result);
-                                      onToast('Resume image updated successfully!', 'success');
-                                    }
-                                  };
-                                  reader.readAsDataURL(file);
+                                if (file && onUpdateResumeImage) {
+                                  try {
+                                    const optimized = await compressImageToTargetKB(file, 50);
+                                    onUpdateResumeImage(optimized.dataUrl);
+                                    onToast('Resume image optimized & updated successfully!', 'success');
+                                  } catch (err) {
+                                    console.error('Resume image opt error:', err);
+                                    onToast('Failed to optimize image.', 'error');
+                                  }
                                 }
                               }}
                             />
@@ -1948,17 +1991,17 @@ export default function Dashboard({
                         type="file" 
                         accept="image/*" 
                         className="hidden" 
-                        onChange={(e) => {
+                        onChange={async (e) => {
                           const file = e.target.files?.[0];
-                          if (file) {
-                            const reader = new FileReader();
-                            reader.onloadend = () => {
-                              if (typeof reader.result === 'string' && onUpdateResumeImage) {
-                                onUpdateResumeImage(reader.result);
-                                onToast('Resume image uploaded successfully!', 'success');
-                              }
-                            };
-                            reader.readAsDataURL(file);
+                          if (file && onUpdateResumeImage) {
+                            try {
+                              const optimized = await compressImageToTargetKB(file, 50);
+                              onUpdateResumeImage(optimized.dataUrl);
+                              onToast('Resume image optimized & uploaded successfully!', 'success');
+                            } catch (err) {
+                              console.error('Resume image opt error:', err);
+                              onToast('Failed to optimize image.', 'error');
+                            }
                           }
                         }}
                       />

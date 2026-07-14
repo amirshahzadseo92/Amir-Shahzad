@@ -1,8 +1,9 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { collection, doc, onSnapshot, setDoc, writeBatch } from 'firebase/firestore';
-import { db } from './lib/firebase';
+import { db, saveLargeData, loadLargeData } from './lib/firebase';
 
 const SITE_DATA_DOC = 'global';
+
 import { 
   CheckCircle2, 
   X, 
@@ -363,16 +364,22 @@ export default function App() {
       setDataLoaded(true);
     });
 
-    // Also fetch large base64 fields from API
-    fetch('/api/site-data')
-      .then(res => res.json())
-      .then(data => {
-        if (data) {
-          if (data.resumeImage) setResumeImage(data.resumeImage);
-          if (data.seoImages) setSeoImages(data.seoImages);
+    // Fetch large base64 fields from Firestore chunks
+    loadLargeData('resumeImage').then(data => {
+      if (data) setResumeImage(data);
+    }).catch(err => console.error('Error fetching resumeImage chunks:', err));
+
+    loadLargeData('seoImages').then(data => {
+      if (data) {
+        try {
+          const parsed = JSON.parse(data);
+          setSeoImages(parsed);
+        } catch (e) {
+          console.error('Failed to parse seoImages chunks', e);
         }
-      })
-      .catch(err => console.error('Error fetching large images from server:', err));
+      }
+    }).catch(err => console.error('Error fetching seoImages chunks:', err));
+
 
     return () => unsub();
   }, []);
@@ -399,6 +406,13 @@ export default function App() {
       batch.set(doc(db, 'site_data', 'other'), { testimonials, contactSubmissions }, { merge: true });
       
       batch.commit().catch(err => console.error('Error syncing dynamic data to Firestore:', err));
+
+      if (resumeImage) {
+        saveLargeData('resumeImage', resumeImage).catch(err => console.error('Error saving resumeImage:', err));
+      }
+      if (seoImages && seoImages.length > 0) {
+        saveLargeData('seoImages', JSON.stringify(seoImages)).catch(err => console.error('Error saving seoImages:', err));
+      }
         
       // Also sync to server for sitemap generation and large image storage
       fetch('/api/site-data', {
