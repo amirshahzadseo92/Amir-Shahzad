@@ -1327,7 +1327,7 @@ STRICT FORMATTING CONSTRAINT (NO HASH '#' OR STAR '*' CHARACTERS):
   });
 
   // Helper to load dynamic sitemap lists or fall back
-  function loadDynamicData<T>(filePath: string, fallback: T[]): T[] {
+  function loadDynamicData(filePath: string, fallback: any): any {
     try {
       const absPath = path.resolve(filePath);
       if (fs.existsSync(absPath)) {
@@ -1341,7 +1341,7 @@ STRICT FORMATTING CONSTRAINT (NO HASH '#' OR STAR '*' CHARACTERS):
   }
 
   // Helper to save dynamic list
-  function saveDynamicData<T>(filePath: string, data: T[]): boolean {
+  function saveDynamicData(filePath: string, data: any): boolean {
     try {
       const absPath = path.resolve(filePath);
       const dir = path.dirname(absPath);

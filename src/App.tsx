@@ -1,4 +1,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
+import { collection, doc, onSnapshot, setDoc, writeBatch } from 'firebase/firestore';
+import { db } from './lib/firebase';
+
+const SITE_DATA_DOC = 'global';
 import { 
   CheckCircle2, 
   X, 
@@ -316,40 +320,66 @@ export default function App() {
   }, [contactSubmissions]);
 
   const [dataLoaded, setDataLoaded] = useState(false);
+  const isRemoteUpdate = React.useRef(false);
 
-  // Load global data on mount
+  // Load global data on mount from Firestore
   useEffect(() => {
+    const unsub = onSnapshot(collection(db, 'site_data'), (snapshot) => {
+      let hasData = false;
+      snapshot.docs.forEach(docSnap => {
+        const data = docSnap.data();
+        if (data) {
+          hasData = true;
+          isRemoteUpdate.current = true;
+          if (docSnap.id === 'briefs' && data.briefs) setBriefs(data.briefs);
+          if (docSnap.id === 'outlines' && data.outlines) setOutlines(data.outlines);
+          if (docSnap.id === 'contents' && data.contents) setContents(data.contents);
+          if (docSnap.id === 'blogs' && data.blogs) setBlogs(data.blogs);
+          if (docSnap.id === 'config') {
+            if (data.homeConfig) setHomeConfig(data.homeConfig);
+            if (data.aboutConfig) setAboutConfig(data.aboutConfig);
+            if (data.services) setServices(data.services);
+          }
+          if (docSnap.id === 'portfolio') {
+            if (data.experiences) setExperiences(data.experiences);
+            if (data.education) setEducation(data.education);
+            if (data.certifications) setCertifications(data.certifications);
+            if (data.coreSkills) setCoreSkills(data.coreSkills);
+          }
+          if (docSnap.id === 'other') {
+            if (data.testimonials) setTestimonials(data.testimonials);
+            if (data.contactSubmissions) setContactSubmissions(data.contactSubmissions);
+          }
+        }
+      });
+      if (hasData) {
+        setTimeout(() => {
+          isRemoteUpdate.current = false;
+        }, 100);
+      }
+      setDataLoaded(true);
+    }, (err) => {
+      console.error('Error fetching global site data from Firestore:', err);
+      setDataLoaded(true);
+    });
+
+    // Also fetch large base64 fields from API
     fetch('/api/site-data')
       .then(res => res.json())
       .then(data => {
-        if (data && Object.keys(data).length > 0) {
-          if (data.briefs) setBriefs(data.briefs);
-          if (data.outlines) setOutlines(data.outlines);
-          if (data.contents) setContents(data.contents);
-          if (data.blogs) setBlogs(data.blogs);
-          if (data.homeConfig) setHomeConfig(data.homeConfig);
-          if (data.aboutConfig) setAboutConfig(data.aboutConfig);
-          if (data.services) setServices(data.services);
-          if (data.experiences) setExperiences(data.experiences);
-          if (data.education) setEducation(data.education);
-          if (data.certifications) setCertifications(data.certifications);
-          if (data.coreSkills) setCoreSkills(data.coreSkills);
-          if (data.testimonials) setTestimonials(data.testimonials);
-          if (data.contactSubmissions) setContactSubmissions(data.contactSubmissions);
+        if (data) {
           if (data.resumeImage) setResumeImage(data.resumeImage);
           if (data.seoImages) setSeoImages(data.seoImages);
         }
-        setDataLoaded(true);
       })
-      .catch(err => {
-        console.error('Error fetching global site data:', err);
-        setDataLoaded(true);
-      });
+      .catch(err => console.error('Error fetching large images from server:', err));
+
+    return () => unsub();
   }, []);
 
-  // Synchronize dynamic state to server filesystem
+  // Synchronize dynamic state to Firestore
   useEffect(() => {
-    if (!dataLoaded) return; // Don't overwrite the server data with initial local state before loading
+    if (!dataLoaded || isRemoteUpdate.current) return; // Don't overwrite the server data with initial local state before loading, or if this is a remote update
 
     const payload = {
       briefs, outlines, contents, blogs,
@@ -359,11 +389,23 @@ export default function App() {
     };
 
     const timer = setTimeout(() => {
+      const batch = writeBatch(db);
+      batch.set(doc(db, 'site_data', 'briefs'), { briefs }, { merge: true });
+      batch.set(doc(db, 'site_data', 'outlines'), { outlines }, { merge: true });
+      batch.set(doc(db, 'site_data', 'contents'), { contents }, { merge: true });
+      batch.set(doc(db, 'site_data', 'blogs'), { blogs }, { merge: true });
+      batch.set(doc(db, 'site_data', 'config'), { homeConfig, aboutConfig, services }, { merge: true });
+      batch.set(doc(db, 'site_data', 'portfolio'), { experiences, education, certifications, coreSkills }, { merge: true });
+      batch.set(doc(db, 'site_data', 'other'), { testimonials, contactSubmissions }, { merge: true });
+      
+      batch.commit().catch(err => console.error('Error syncing dynamic data to Firestore:', err));
+        
+      // Also sync to server for sitemap generation and large image storage
       fetch('/api/site-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-      }).catch(err => console.error('Error syncing dynamic data to server:', err));
+      }).catch(err => console.error('Error syncing to server for sitemap:', err));
     }, 1000); // Debounce to avoid spamming the server on rapid typing
 
     return () => clearTimeout(timer);
