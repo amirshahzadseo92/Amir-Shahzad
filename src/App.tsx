@@ -366,11 +366,11 @@ export default function App() {
 
     // Fetch large base64 fields from Firestore chunks
     loadLargeData('resumeImage').then(data => {
-      if (data) setResumeImage(data);
+      if (data !== null) setResumeImage(data);
     }).catch(err => console.error('Error fetching resumeImage chunks:', err));
 
     loadLargeData('seoImages').then(data => {
-      if (data) {
+      if (data !== null) {
         try {
           const parsed = JSON.parse(data);
           setSeoImages(parsed);
@@ -407,12 +407,8 @@ export default function App() {
       
       batch.commit().catch(err => console.error('Error syncing dynamic data to Firestore:', err));
 
-      if (resumeImage) {
-        saveLargeData('resumeImage', resumeImage).catch(err => console.error('Error saving resumeImage:', err));
-      }
-      if (seoImages && seoImages.length > 0) {
-        saveLargeData('seoImages', JSON.stringify(seoImages)).catch(err => console.error('Error saving seoImages:', err));
-      }
+      saveLargeData('resumeImage', resumeImage || '').catch(err => console.error('Error saving resumeImage:', err));
+      saveLargeData('seoImages', JSON.stringify(seoImages || [])).catch(err => console.error('Error saving seoImages:', err));
         
       // Also sync to server for sitemap generation and large image storage
       fetch('/api/site-data', {
