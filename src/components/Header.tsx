@@ -77,24 +77,6 @@ export default function Header({
               </button>
             );
           })}
-          {isLoggedIn && (
-            <button
-              onClick={() => handleNavClick('dashboard')}
-              className={`group relative flex items-center gap-2 py-2 text-sm font-medium transition-all active:scale-95 hover:text-emerald-400 ${
-                currentPage === 'dashboard' ? 'text-emerald-400' : 'text-zinc-400'
-              }`}
-            >
-              <LayoutDashboard className={`h-4 w-4 transition-all duration-300 group-hover:scale-125 group-hover:rotate-6 group-active:scale-110 group-active:-rotate-12 ${currentPage === 'dashboard' ? 'text-emerald-500' : ''}`} />
-              Admin Panel
-              {currentPage === 'dashboard' && (
-                <motion.div
-                  layoutId="activeNavIndicator"
-                  className="absolute bottom-0 left-0 h-0.5 w-full bg-emerald-500 rounded-full"
-                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                />
-              )}
-            </button>
-          )}
         </nav>
 
         {/* Right side CTA buttons */}
