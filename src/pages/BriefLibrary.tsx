@@ -11,7 +11,7 @@ import {
   Sparkles,
   Cpu,
   AlertCircle,
-  Trash2
+  X, Trash2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ActivePage, ArticleBrief, OutlineItem, ContentItem, SeoImage } from '../types';
@@ -81,6 +81,9 @@ export default function BriefLibrary({
   const [expandedBriefId, setExpandedBriefId] = useState<string | null>(null);
   const [expandedOutlineId, setExpandedOutlineId] = useState<string | null>(null);
   const [expandedContentId, setExpandedContentId] = useState<string | null>(null);
+
+  // SEO image modal
+  const [selectedImageModal, setSelectedImageModal] = useState<string | null>(null);
 
   useEffect(() => {
     if (initialLibrary) {
@@ -670,19 +673,44 @@ export default function BriefLibrary({
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
-                className="space-y-6 text-center flex-1 flex flex-col justify-center"
+                className="space-y-6 flex-1 flex flex-col justify-start"
               >
                 <div className="w-full">
                   {seoImages.length > 0 ? (
-                    <div className="space-y-6">
+                    <div className="grid grid-cols-1 gap-8">
                       {seoImages.map((img) => (
-                        <div key={img.id} className="rounded-xl overflow-hidden shadow-lg border border-slate-200">
-                          <img 
-                            src={img.optimizedImage} 
-                            alt={img.altText || "SEO Performance Screenshot"} 
-                            className="w-full h-auto object-contain bg-slate-900"
-                            referrerPolicy="no-referrer"
-                          />
+                        <div key={img.id} className="bg-slate-50 border border-slate-200 rounded-2xl p-6 shadow-sm">
+                          <h4 className="font-extrabold text-slate-800 text-base mb-4 text-center">{img.title || img.imageName || 'Transformation'}</h4>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div 
+                              className="group cursor-pointer flex flex-col items-center"
+                              onClick={() => setSelectedImageModal(img.beforeImage || img.originalImage || '')}
+                            >
+                              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Before</div>
+                              <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-transform transform group-hover:scale-[1.02]">
+                                <img 
+                                  src={img.beforeImage || img.originalImage} 
+                                  alt="Before Transformation" 
+                                  className="w-full h-auto object-cover"
+                                  referrerPolicy="no-referrer"
+                                />
+                              </div>
+                            </div>
+                            <div 
+                              className="group cursor-pointer flex flex-col items-center"
+                              onClick={() => setSelectedImageModal(img.afterImage || img.optimizedImage || '')}
+                            >
+                              <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-2">After</div>
+                              <div className="rounded-xl overflow-hidden border border-emerald-200 shadow-sm transition-transform transform group-hover:scale-[1.02]">
+                                <img 
+                                  src={img.afterImage || img.optimizedImage} 
+                                  alt="After Transformation" 
+                                  className="w-full h-auto object-cover"
+                                  referrerPolicy="no-referrer"
+                                />
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -699,6 +727,36 @@ export default function BriefLibrary({
           </AnimatePresence>
         </div>
       </div>
+
+      {/* Fullscreen Image Modal */}
+      <AnimatePresence>
+        {selectedImageModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/90 backdrop-blur-sm p-4 md:p-12 cursor-zoom-out"
+            onClick={() => setSelectedImageModal(null)}
+          >
+            <motion.img 
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              src={selectedImageModal}
+              alt="Enlarged view"
+              className="max-w-full max-h-full object-contain rounded-xl shadow-2xl cursor-default"
+              onClick={(e) => e.stopPropagation()}
+              referrerPolicy="no-referrer"
+            />
+            <button 
+              className="absolute top-6 right-6 text-white hover:text-emerald-400 transition-colors cursor-pointer bg-slate-800/50 hover:bg-slate-800 p-2 rounded-full"
+              onClick={() => setSelectedImageModal(null)}
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </div>
   );

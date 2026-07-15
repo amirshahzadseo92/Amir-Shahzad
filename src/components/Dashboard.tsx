@@ -266,6 +266,9 @@ export default function Dashboard({
   // --- SEO & Performance Image Optimizer States ---
   const [isOptimizing, setIsOptimizing] = useState<boolean>(false);
   const [uploadingImageName, setUploadingImageName] = useState<string>('');
+  const [seoTitle, setSeoTitle] = useState('');
+  const [seoBeforeFile, setSeoBeforeFile] = useState<File | null>(null);
+  const [seoAfterFile, setSeoAfterFile] = useState<File | null>(null);
   
   const seoImagesRef = React.useRef(seoImages);
   useEffect(() => { seoImagesRef.current = seoImages; }, [seoImages]);
@@ -329,40 +332,46 @@ export default function Dashboard({
     });
   };
 
-  const handleImageOptimization = async (file: File) => {
+  const handleSeoSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!seoBeforeFile || !seoAfterFile || !seoTitle.trim()) {
+      onToast('Please provide a title and both before and after images.', 'error');
+      return;
+    }
+
     setIsOptimizing(true);
-    setUploadingImageName(file.name);
+    setUploadingImageName('Saving SEO item...');
 
     try {
-      // Create a heavily compressed version for "originalImage" to save DB space
-      // Max 300KB
-      const original = await compressImageToTargetKB(file, 300);
-      
-      // Create the ultra-optimized version for "optimizedImage" to save bandwidth
-      // Max 36KB
-      const optimized = await compressImageToTargetKB(file, 36);
-
-      const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
-      const formattedName = baseName.charAt(0).toUpperCase() + baseName.slice(1);
-      const customAlt = `Hafiz Amir Shahzad - ${formattedName}`;
+      const beforeCompressed = await compressImageToTargetKB(seoBeforeFile, 150);
+      const afterCompressed = await compressImageToTargetKB(seoAfterFile, 150);
 
       const newSeoImg: SeoImage = {
         id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
-        originalImage: original.dataUrl,
-        optimizedImage: optimized.dataUrl,
-        originalSize: file.size,
-        optimizedSize: optimized.size,
-        imageName: file.name,
-        altText: customAlt
+        title: seoTitle,
+        beforeImage: beforeCompressed.dataUrl,
+        afterImage: afterCompressed.dataUrl,
+        // Fallback backward compatibility strings
+        originalImage: beforeCompressed.dataUrl,
+        optimizedImage: afterCompressed.dataUrl,
+        originalSize: seoBeforeFile.size,
+        optimizedSize: seoAfterFile.size,
+        imageName: seoTitle,
+        altText: seoTitle
       };
 
       if (onUpdateSeoImages) {
          onUpdateSeoImages([...seoImagesRef.current, newSeoImg]);
       }
-      onToast('Image optimized automatically (36KB) and added to gallery!', 'success');
+      onToast('SEO Transformation added to gallery!', 'success');
+      
+      // reset form
+      setSeoTitle('');
+      setSeoBeforeFile(null);
+      setSeoAfterFile(null);
     } catch (err) {
       console.error('Optimization error:', err);
-      onToast('Failed to optimize image.', 'error');
+      onToast('Failed to save SEO item.', 'error');
     } finally {
       setIsOptimizing(false);
       setUploadingImageName('');
@@ -2139,98 +2148,96 @@ export default function Dashboard({
                       SEO & Performance Results
                     </h3>
                     <p className="text-xs text-slate-500 mt-1">
-                      Convert and optimize multiple graphics into high-performance, responsive Google PageSpeed compliant WebP assets automatically.
+                      Upload Before and After screenshots to showcase your SEO or performance improvements in your portfolio.
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-6">
-                  {/* Image Drag and Drop area */}
-                  <div className="relative">
-                    <label 
-                      className="border-2 border-dashed border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/10 transition-all rounded-3xl p-16 flex flex-col items-center justify-center text-center cursor-pointer group min-h-[350px]"
-                      id="seo-image-dropzone"
-                    >
-                      <div className="h-16 w-16 rounded-2xl bg-emerald-50 group-hover:bg-emerald-100 transition-colors flex items-center justify-center mb-4 border border-emerald-100">
-                        {isOptimizing ? (
-                          <div className="h-8 w-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div>
-                        ) : (
-                          <Image className="h-8 w-8 text-emerald-600 group-hover:scale-110 transition-transform" />
-                        )}
-                      </div>
-                      <h4 className="font-extrabold text-slate-800 text-base">
-                        {isOptimizing ? `Optimizing ${uploadingImageName}...` : 'Upload Images for Real-time SEO Optimization'}
-                      </h4>
-                      <p className="text-xs text-slate-400 max-w-md mt-1.5 mb-8 leading-relaxed">
-                        Drag and drop your project screenshots, portfolio works, or photos here. They will instantly be converted to optimized next-gen **WebP** format.
-                      </p>
-                      
-                      <span className="bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs px-6 py-3.5 rounded-xl transition-all shadow-md group-hover:-translate-y-0.5">
-                        Select Image File
-                      </span>
-                      
+                  {/* SEO Form */}
+                  <form onSubmit={handleSeoSubmit} className="space-y-4 p-6 bg-slate-50 border border-slate-200 rounded-3xl">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Project/Transformation Title</label>
                       <input 
-                        type="file" 
-                        accept="image/*" 
-                        className="hidden" 
-                        onChange={(e) => {
-                          const file = e.target.files?.[0];
-                          if (file) {
-                            handleImageOptimization(file);
-                          }
-                        }}
+                        type="text"
+                        value={seoTitle}
+                        onChange={(e) => setSeoTitle(e.target.value)}
+                        placeholder="e.g. Website Speed Optimization"
+                        className="w-full bg-white border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-800 font-medium focus:ring-2 focus:ring-emerald-500 outline-none"
+                        required
                       />
-                    </label>
-                  </div>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Before Image</label>
+                        <input 
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setSeoBeforeFile(e.target.files?.[0] || null)}
+                          className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                          required
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">After Image</label>
+                        <input 
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setSeoAfterFile(e.target.files?.[0] || null)}
+                          className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100"
+                          required
+                        />
+                      </div>
+                    </div>
+                    <button 
+                      type="submit"
+                      disabled={isOptimizing}
+                      className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl disabled:opacity-50 transition-colors"
+                    >
+                      {isOptimizing ? uploadingImageName : 'Publish Before/After Result'}
+                    </button>
+                  </form>
 
                   {seoImages.length > 0 && (
                     <div className="space-y-6">
-                      <h4 className="font-extrabold text-slate-800 text-sm border-b border-slate-100 pb-2">Optimized Image Gallery</h4>
+                      <h4 className="font-extrabold text-slate-800 text-sm border-b border-slate-100 pb-2">SEO Results Portfolio</h4>
                       <div className="grid grid-cols-1 gap-6">
                         {seoImages.map(img => (
-                          <div key={img.id} className="border border-slate-200/80 rounded-2xl p-4 bg-slate-50 grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-                            <div className="h-32 rounded-xl overflow-hidden bg-slate-200 flex items-center justify-center border border-slate-300/40 relative">
-                               <img 
-                                 src={img.optimizedImage} 
-                                 alt={img.altText} 
-                                 className="max-h-full max-w-full object-contain"
-                                 referrerPolicy="no-referrer"
-                               />
-                            </div>
-                            
-                            <div className="space-y-4 md:col-span-2">
-                              <div>
-                                <h5 className="font-bold text-slate-800 text-sm truncate" title={img.imageName}>{img.imageName}</h5>
-                                <div className="flex gap-4 mt-2">
-                                  <div className="text-xs text-slate-500">
-                                    <span className="font-semibold text-slate-700">Original:</span> {(img.originalSize / 1024).toFixed(1)} KB
-                                  </div>
-                                  <div className="text-xs text-emerald-600 font-bold">
-                                    <span className="font-semibold text-slate-700">Optimized:</span> {(img.optimizedSize / 1024).toFixed(1)} KB
-                                  </div>
-                                </div>
-                              </div>
-                              
-                              <div className="flex items-center gap-2 bg-white border border-slate-150 p-2 rounded-lg">
-                                <code className="text-[10px] font-mono text-slate-700 select-all break-all flex-1">{img.altText}</code>
-                              </div>
-                              
-                              <div className="flex gap-2">
-                                <button
-                                  onClick={() => downloadOptimizedImage(img)}
-                                  className="flex-1 bg-emerald-600 hover:bg-emerald-500 active:bg-emerald-700 text-white font-extrabold text-[10px] py-2 px-4 rounded-lg shadow-sm transition-all flex items-center justify-center gap-1 cursor-pointer"
-                                >
-                                  <Download className="h-3 w-3" />
-                                  <span>Download</span>
-                                </button>
-                                <button
+                          <div key={img.id} className="border border-slate-200/80 rounded-2xl p-4 bg-slate-50 flex flex-col gap-4">
+                            <div className="flex justify-between items-center">
+                               <h5 className="font-bold text-slate-800 text-sm truncate" title={img.title || img.imageName}>{img.title || img.imageName || 'Untitled'}</h5>
+                               <button
                                   onClick={() => removeSeoImage(img.id)}
-                                  className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[10px] py-2 px-4 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1"
+                                  className="bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold text-[10px] py-1.5 px-3 rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1"
                                 >
                                   <Trash2 className="h-3 w-3" />
                                   <span>Remove</span>
                                 </button>
-                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-4">
+                               <div>
+                                  <div className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Before</div>
+                                  <div className="h-24 rounded-lg overflow-hidden bg-slate-200 flex items-center justify-center border border-slate-300/40 relative">
+                                    <img 
+                                      src={img.beforeImage || img.originalImage} 
+                                      alt="Before" 
+                                      className="h-full w-full object-cover"
+                                      referrerPolicy="no-referrer"
+                                    />
+                                  </div>
+                               </div>
+                               <div>
+                                  <div className="text-[10px] font-bold text-emerald-600 mb-1 uppercase tracking-wider">After</div>
+                                  <div className="h-24 rounded-lg overflow-hidden bg-slate-200 flex items-center justify-center border border-slate-300/40 relative">
+                                    <img 
+                                      src={img.afterImage || img.optimizedImage} 
+                                      alt="After" 
+                                      className="h-full w-full object-cover"
+                                      referrerPolicy="no-referrer"
+                                    />
+                                  </div>
+                               </div>
                             </div>
                           </div>
                         ))}
