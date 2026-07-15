@@ -36,7 +36,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
   const outerSubTextSize = size === 'sm' ? 'text-[8px]' : size === 'lg' ? 'text-[10px]' : 'text-[7.5px] md:text-[8.5px]';
 
   return (
-    <div className="flex items-center gap-2 md:gap-3 group select-none py-0.5 md:py-0.5 relative md:translate-y-[1.5px]">
+    <div className="flex items-center gap-2 md:gap-3 group select-none py-0.5 md:py-0.5 relative md:translate-y-0">
       {/* Dynamic Automated Outer Ring + Emblem Wrapper */}
       <div className={`relative flex items-center justify-center shrink-0 ${size === 'sm' ? 'h-[44px] w-[44px]' : size === 'lg' ? 'h-[72px] w-[72px]' : 'h-[44px] w-[44px] md:h-[52px] md:w-[52px]'}`}>
         
@@ -146,10 +146,11 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
                 alt="Logo" 
                 className="w-full h-full object-cover select-none rounded-full" 
                 style={{
-                  imageRendering: 'auto',
+                  imageRendering: '-webkit-optimize-contrast',
                   WebkitFontSmoothing: 'antialiased',
-                  transform: 'translate3d(0, 0, 0)',
-                  backfaceVisibility: 'hidden'
+                  transform: 'translate3d(0, 0, 0) scale(1)',
+                  backfaceVisibility: 'hidden',
+                  transformOrigin: 'center center'
                 }}
               />
             ) : (
