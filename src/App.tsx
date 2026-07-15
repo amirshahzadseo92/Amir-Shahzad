@@ -65,7 +65,9 @@ export default function App() {
   const [adminTab, setAdminTab] = useState<'home' | 'about' | 'services' | 'portfolio' | 'resume' | 'testimonials' | 'blog' | 'contact' | 'seo'>('portfolio');
 
   // Authentication states
-  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(true);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(() => {
+    return localStorage.getItem('apex_is_logged_in') === 'true';
+  });
   const [userEmail, setUserEmail] = useState<string>('hafizamirsaifi12345@gmail.com');
   const [tempEmail, setTempEmail] = useState<string>('');
   const [tempPassword, setTempPassword] = useState<string>('');
@@ -492,14 +494,6 @@ export default function App() {
             const data = docSnap.data();
             if (data) {
               const docTS = data.updatedAt || 0;
-              
-              // CRITICAL: Skip document loading if its data in Firestore is older than or equal to what we currently have loaded!
-              // This strictly prevents failing/stale Firestore snapshots (such as due to Quota Exhaustion) from reverting newer local edits.
-              if (docTS <= currentTS) {
-                console.log(`[Firestore Sync] Skipping older/stale document ${docSnap.id} (Firestore timestamp: ${docTS}, Current local timestamp: ${currentTS})`);
-                return;
-              }
-
               hasData = true;
               isRemoteUpdate.current = true;
               
@@ -617,6 +611,7 @@ export default function App() {
 
   // Synchronize dynamic state with a high-performance differential update strategy
   useEffect(() => {
+    if (!isLoggedIn) return; // ONLY authenticated admins can write/sync to the database!
     if (!dataLoaded || !largeDataLoaded || isRemoteUpdate.current) return;
 
     const timestamp = Date.now();
@@ -771,6 +766,9 @@ export default function App() {
       setSelectedPostId(postParam);
       setCurrentPage('blog');
     }
+    if (params.get('admin') === 'true' || params.get('login') === 'true') {
+      setAuthModalType('login');
+    }
   }, []);
 
   const handlePublishBrief = (newBrief: ArticleBrief) => {
@@ -833,6 +831,7 @@ export default function App() {
     }
     setUserEmail(tempEmail);
     setIsLoggedIn(true);
+    localStorage.setItem('apex_is_logged_in', 'true');
     setAuthModalType(null);
     triggerToast(`Welcome back, ${tempEmail.split('@')[0]}! Workspace synced successfully.`, 'success');
   };
@@ -846,6 +845,7 @@ export default function App() {
     }
     setUserEmail(tempEmail);
     setIsLoggedIn(true);
+    localStorage.setItem('apex_is_logged_in', 'true');
     setAuthModalType(null);
     triggerToast('Account created! Welcome to Apex OS high performance workspaces.', 'success');
   };
@@ -854,6 +854,7 @@ export default function App() {
   const handleLogOutToggle = () => {
     if (isLoggedIn) {
       setIsLoggedIn(false);
+      localStorage.removeItem('apex_is_logged_in');
       triggerToast('You have logged out of the workspace.', 'info');
     } else {
       setTempEmail(userEmail);

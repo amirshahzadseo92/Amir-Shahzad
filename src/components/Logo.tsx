@@ -40,18 +40,37 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
       {/* Dynamic Automated Outer Ring + Emblem Wrapper */}
       <div className={`relative flex items-center justify-center shrink-0 ${size === 'sm' ? 'h-[44px] w-[44px]' : size === 'lg' ? 'h-[72px] w-[72px]' : 'h-[44px] w-[44px] md:h-[52px] md:w-[52px]'}`}>
         
-        {/* AUTOMATION RING 1: Outermost dynamic orbit with dashed line (Slow clockwise rotation) */}
-        <div className={`absolute inset-0 m-auto pointer-events-none flex items-center justify-center ${outerRingSize}`}>
-          <div 
-            className={`w-full h-full rounded-full border border-dashed ${theme === 'dark' ? 'border-white' : 'border-slate-950/30'} animate-[spin_20s_linear_infinite]`}
-          />
-        </div>
-
-        {/* AUTOMATION RING 2: Middle orbit with dotted style (Faster counter-clockwise rotation) */}
-        <div className={`absolute inset-0 m-auto pointer-events-none flex items-center justify-center ${middleRingSize}`}>
-          <div 
-            className={`w-full h-full rounded-full border border-dotted ${theme === 'dark' ? 'border-white' : 'border-slate-950/25'} animate-[spin_10s_linear_infinite_reverse]`}
-          />
+        {/* AUTOMATION VECTORS: Pixel-perfect vector orbits that NEVER blur on zoom or laptops */}
+        <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+          <svg 
+            viewBox="0 0 100 100" 
+            className="w-full h-full select-none overflow-visible"
+            style={{ transform: 'translate3d(0,0,0)' }}
+          >
+            {/* Outermost dynamic orbit with dashed line (Slow clockwise rotation) */}
+            <circle 
+              cx="50" 
+              cy="50" 
+              r="46" 
+              fill="none" 
+              stroke={theme === 'dark' ? 'rgba(255,255,255,0.4)' : 'rgba(9,9,11,0.25)'} 
+              strokeWidth="1.2" 
+              strokeDasharray="6 4" 
+              className="origin-center animate-[spin_25s_linear_infinite]"
+            />
+            {/* Middle orbit with dotted style (Faster counter-clockwise rotation) */}
+            <circle 
+              cx="50" 
+              cy="50" 
+              r="38" 
+              fill="none" 
+              stroke={theme === 'dark' ? 'rgba(255,255,255,0.3)' : 'rgba(9,9,11,0.18)'} 
+              strokeWidth="1.5" 
+              strokeDasharray="2 3" 
+              strokeLinecap="round" 
+              className="origin-center animate-[spin_12s_linear_infinite_reverse]"
+            />
+          </svg>
         </div>
 
         {/* AUTOMATION NODES: High-tech pulsing satellite points with dynamic, automatic color-cycling */}
