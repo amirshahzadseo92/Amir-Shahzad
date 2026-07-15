@@ -164,4 +164,7 @@ export interface SeoImage {
   optimizedSize: number;
   imageName: string;
   altText: string;
+  title?: string;
+  beforeImage?: string;
+  afterImage?: string;
 }

@@ -686,7 +686,10 @@ export default function BriefLibrary({
                               className="group cursor-pointer flex flex-col items-center"
                               onClick={() => setSelectedImageModal(img.beforeImage || img.originalImage || '')}
                             >
-                              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2">Before</div>
+                              <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex justify-between w-full px-1">
+                                <span>Before</span>
+                                <span className="font-mono text-slate-400">{( (img.originalSize || 0) / 1024).toFixed(1)} KB</span>
+                              </div>
                               <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-transform transform group-hover:scale-[1.02]">
                                 <img 
                                   src={img.beforeImage || img.originalImage} 
@@ -700,7 +703,10 @@ export default function BriefLibrary({
                               className="group cursor-pointer flex flex-col items-center"
                               onClick={() => setSelectedImageModal(img.afterImage || img.optimizedImage || '')}
                             >
-                              <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-2">After</div>
+                              <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-2 flex justify-between w-full px-1">
+                                <span>After</span>
+                                <span className="font-mono text-emerald-500">{( (img.optimizedSize || 0) / 1024).toFixed(1)} KB</span>
+                              </div>
                               <div className="rounded-xl overflow-hidden border border-emerald-200 shadow-sm transition-transform transform group-hover:scale-[1.02]">
                                 <img 
                                   src={img.afterImage || img.optimizedImage} 

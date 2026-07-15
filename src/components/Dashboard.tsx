@@ -343,8 +343,8 @@ export default function Dashboard({
     setUploadingImageName('Saving SEO item...');
 
     try {
-      const beforeCompressed = await compressImageToTargetKB(seoBeforeFile, 150);
-      const afterCompressed = await compressImageToTargetKB(seoAfterFile, 150);
+      const beforeCompressed = await compressImageToTargetKB(seoBeforeFile, 45);
+      const afterCompressed = await compressImageToTargetKB(seoAfterFile, 45);
 
       const newSeoImg: SeoImage = {
         id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
@@ -354,8 +354,8 @@ export default function Dashboard({
         // Fallback backward compatibility strings
         originalImage: beforeCompressed.dataUrl,
         optimizedImage: afterCompressed.dataUrl,
-        originalSize: seoBeforeFile.size,
-        optimizedSize: seoAfterFile.size,
+        originalSize: beforeCompressed.size,
+        optimizedSize: afterCompressed.size,
         imageName: seoTitle,
         altText: seoTitle
       };
@@ -363,7 +363,7 @@ export default function Dashboard({
       if (onUpdateSeoImages) {
          onUpdateSeoImages([...seoImagesRef.current, newSeoImg]);
       }
-      onToast('SEO Transformation added to gallery!', 'success');
+      onToast(`SEO Transformation added! Before: ${(beforeCompressed.size / 1024).toFixed(1)}KB, After: ${(afterCompressed.size / 1024).toFixed(1)}KB (Fully Optimized)`, 'success');
       
       // reset form
       setSeoTitle('');
@@ -2217,7 +2217,10 @@ export default function Dashboard({
                             
                             <div className="grid grid-cols-2 gap-4">
                                <div>
-                                  <div className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider">Before</div>
+                                  <div className="text-[10px] font-bold text-slate-400 mb-1 uppercase tracking-wider flex justify-between">
+                                    <span>Before</span>
+                                    <span className="font-mono text-slate-500">{( (img.originalSize || 0) / 1024).toFixed(1)} KB</span>
+                                  </div>
                                   <div className="h-24 rounded-lg overflow-hidden bg-slate-200 flex items-center justify-center border border-slate-300/40 relative">
                                     <img 
                                       src={img.beforeImage || img.originalImage} 
@@ -2228,7 +2231,10 @@ export default function Dashboard({
                                   </div>
                                </div>
                                <div>
-                                  <div className="text-[10px] font-bold text-emerald-600 mb-1 uppercase tracking-wider">After</div>
+                                  <div className="text-[10px] font-bold text-emerald-600 mb-1 uppercase tracking-wider flex justify-between">
+                                    <span>After</span>
+                                    <span className="font-mono text-emerald-500">{( (img.optimizedSize || 0) / 1024).toFixed(1)} KB</span>
+                                  </div>
                                   <div className="h-24 rounded-lg overflow-hidden bg-slate-200 flex items-center justify-center border border-slate-300/40 relative">
                                     <img 
                                       src={img.afterImage || img.optimizedImage} 
