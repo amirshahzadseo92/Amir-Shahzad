@@ -562,20 +562,30 @@ export default function App() {
 
     // 3. Fetch large base64 fields from Firestore chunks
     Promise.allSettled([
-      loadLargeData('resumeImage').then(data => {
-        if (data !== null) {
-          setResumeImage(data);
-          lastSiteData.current.resumeImage = data;
+      loadLargeData('resumeImage').then(res => {
+        if (res !== null) {
+          const { data, updatedAt } = res;
+          const currentTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
+          // Only load from Firestore if Firestore's data is strictly newer than what we have locally
+          if (updatedAt > currentTS && data) {
+            setResumeImage(data);
+            lastSiteData.current.resumeImage = data;
+          }
         }
       }),
-      loadLargeData('seoImages').then(data => {
-        if (data !== null) {
-          try {
-            const parsed = JSON.parse(data);
-            setSeoImages(parsed);
-            lastSiteData.current.seoImages = parsed;
-          } catch (e) {
-            console.error('Failed to parse seoImages chunks', e);
+      loadLargeData('seoImages').then(res => {
+        if (res !== null) {
+          const { data, updatedAt } = res;
+          const currentTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
+          // Only load from Firestore if Firestore's data is strictly newer than what we have locally
+          if (updatedAt > currentTS && data) {
+            try {
+              const parsed = JSON.parse(data);
+              setSeoImages(parsed);
+              lastSiteData.current.seoImages = parsed;
+            } catch (e) {
+              console.error('Failed to parse seoImages chunks', e);
+            }
           }
         }
       })
@@ -685,7 +695,7 @@ export default function App() {
       }
 
       if ((resumeImage || '') !== (lastSiteData.current.resumeImage || '')) {
-        saveLargeData('resumeImage', resumeImage || '').then(() => {
+        saveLargeData('resumeImage', resumeImage || '', timestamp).then(() => {
           lastSiteData.current.resumeImage = resumeImage || '';
           setLastUpdated(timestamp);
           localStorage.setItem('apex_last_updated', timestamp.toString());
@@ -701,7 +711,7 @@ export default function App() {
       const currentSeoImagesStr = JSON.stringify(seoImages || []);
       const lastSeoImagesStr = JSON.stringify(lastSiteData.current.seoImages || []);
       if (currentSeoImagesStr !== lastSeoImagesStr) {
-        saveLargeData('seoImages', currentSeoImagesStr).then(() => {
+        saveLargeData('seoImages', currentSeoImagesStr, timestamp).then(() => {
           lastSiteData.current.seoImages = seoImages || [];
           setLastUpdated(timestamp);
           localStorage.setItem('apex_last_updated', timestamp.toString());

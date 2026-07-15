@@ -18,7 +18,7 @@ export const storage = getStorage(app);
 
 const CHUNK_SIZE = 900000;
 
-export async function saveLargeData(id: string, dataStr: string) {
+export async function saveLargeData(id: string, dataStr: string, timestamp?: number) {
   if (!dataStr) dataStr = "";
   const chunks = [];
   for (let i = 0; i < dataStr.length; i += CHUNK_SIZE) {
@@ -26,7 +26,10 @@ export async function saveLargeData(id: string, dataStr: string) {
   }
   
   const batch = writeBatch(db);
-  batch.set(doc(db, 'large_data', id), { numChunks: chunks.length });
+  batch.set(doc(db, 'large_data', id), { 
+    numChunks: chunks.length,
+    updatedAt: timestamp || Date.now()
+  });
   
   for (let i = 0; i < chunks.length; i++) {
     batch.set(doc(db, `large_data/${id}/chunks`, `chunk_${i}`), { data: chunks[i] });
@@ -44,6 +47,7 @@ export async function loadLargeData(id: string) {
   const metaSnap = await getDoc(doc(db, 'large_data', id));
   if (!metaSnap.exists()) return null;
   const numChunks = metaSnap.data().numChunks;
+  const updatedAt = metaSnap.data().updatedAt || 0;
   let fullData = '';
   for (let i = 0; i < numChunks; i++) {
     const chunkSnap = await getDoc(doc(db, `large_data/${id}/chunks`, `chunk_${i}`));
@@ -51,6 +55,6 @@ export async function loadLargeData(id: string) {
       fullData += chunkSnap.data().data;
     }
   }
-  return fullData;
+  return { data: fullData, updatedAt };
 }
 
