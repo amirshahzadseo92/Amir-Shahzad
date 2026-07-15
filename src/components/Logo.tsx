@@ -144,9 +144,9 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
               <img 
                 src={logoImage} 
                 alt="Logo" 
-                className="w-full h-full object-cover select-none" 
+                className="w-full h-full object-cover select-none rounded-full" 
                 style={{
-                  imageRendering: '-webkit-optimize-contrast',
+                  imageRendering: 'auto',
                   WebkitFontSmoothing: 'antialiased',
                   transform: 'translate3d(0, 0, 0)',
                   backfaceVisibility: 'hidden'
@@ -160,22 +160,19 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
                 animate={{ 
                   opacity: 1, 
                   x: 0, 
-                  scale: 1,
-                  filter: [
-                    "hue-rotate(0deg) saturate(130%)", 
-                    "hue-rotate(120deg) saturate(150%)", 
-                    "hue-rotate(240deg) saturate(130%)", 
-                    "hue-rotate(360deg) saturate(100%)"
-                  ]
+                  scale: 1
                 }}
                 exit={{ opacity: 0, x: -12, scale: 0.8 }}
                 transition={{ 
                   x: { duration: 0.35, ease: "easeOut" },
                   opacity: { duration: 0.25 },
-                  scale: { duration: 0.3, ease: "easeOut" },
-                  filter: { repeat: Infinity, duration: 4, ease: "linear" }
+                  scale: { duration: 0.3, ease: "easeOut" }
                 }}
                 className={`bg-gradient-to-br from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent uppercase font-black ${hasLetterStyle}`}
+                style={{
+                  WebkitFontSmoothing: 'antialiased',
+                  MozOsxFontSmoothing: 'grayscale',
+                }}
               >
                 {['H', 'A', 'S'][activeLetterIdx]}
               </motion.span>
