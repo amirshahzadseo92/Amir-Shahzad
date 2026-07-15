@@ -278,13 +278,13 @@ export default function Dashboard({
       const img = new window.Image();
       img.onload = () => {
         const targetBytes = targetKB * 1024;
-        let quality = 0.9;
+        let quality = 0.90;
         let scale = 1.0;
         let dataUrl = '';
         let size = Number.MAX_SAFE_INTEGER;
         
-        if (img.width > 2000) {
-           scale = 2000 / img.width;
+        if (img.width > 1600) {
+           scale = 1600 / img.width;
         }
 
         const attempt = () => {
@@ -305,14 +305,20 @@ export default function Dashboard({
           const head = 'data:image/webp;base64,';
           size = Math.round((dataUrl.length - head.length) * 3 / 4);
           
-          if (size <= targetBytes || (quality <= 0.1 && scale <= 0.1)) {
+          const minQuality = 0.75;
+          const minScale = 0.75;
+
+          if (size <= targetBytes || (quality <= minQuality && scale <= minScale)) {
             resolve({dataUrl, size});
           } else {
-            if (quality > 0.4) {
-              quality -= 0.15;
+            if (quality > minQuality) {
+              quality = Math.max(minQuality, quality - 0.05);
+            } else if (scale > minScale) {
+              scale = Math.max(minScale, scale - 0.05);
+              quality = 0.85; // reset quality slightly higher for the scaled-down step
             } else {
-              scale -= 0.15;
-              quality = 0.7;
+              resolve({dataUrl, size});
+              return;
             }
             setTimeout(attempt, 0);
           }
