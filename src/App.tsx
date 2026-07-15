@@ -343,6 +343,8 @@ export default function App() {
     seoImages?: any;
   }>({});
 
+  const unsubRef = React.useRef<(() => void) | null>(null);
+
   const [lastUpdated, setLastUpdated] = useState<number>(() => {
     const saved = localStorage.getItem('apex_last_updated');
     return saved ? parseInt(saved, 10) : 0;
@@ -352,7 +354,22 @@ export default function App() {
     localStorage.setItem('apex_last_updated', lastUpdated.toString());
   }, [lastUpdated]);
 
-  // Load global data on mount from both server and Firestore
+  // Synchronously update the local lastUpdated timestamp whenever the user makes edits
+  // This guarantees that any instant refresh preserves user edits in local storage as newer than stale database snapshots.
+  useEffect(() => {
+    if (!dataLoaded || !largeDataLoaded || isRemoteUpdate.current) return;
+    
+    const newTS = Date.now();
+    setLastUpdated(newTS);
+    localStorage.setItem('apex_last_updated', newTS.toString());
+  }, [
+    briefs, outlines, contents, blogs,
+    homeConfig, aboutConfig, services,
+    experiences, education, certifications, coreSkills,
+    testimonials, contactSubmissions, resumeImage, seoImages
+  ]);
+
+  // Load global data on mount from both server and Firestore sequentially to eliminate race conditions
   useEffect(() => {
     let active = true;
 
@@ -365,8 +382,8 @@ export default function App() {
           const sTimestamp = serverData.lastUpdated || 0;
           const localTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
 
-          // If server data is newer or equal, we load it as baseline
-          if (sTimestamp >= localTS) {
+          // If server data is newer, or client is completely empty/uninitialized, we load it as baseline
+          if (sTimestamp > localTS || localTS === 0) {
             isRemoteUpdate.current = true;
             if (serverData.briefs) {
               setBriefs(serverData.briefs);
@@ -438,105 +455,110 @@ export default function App() {
           }
         }
       })
-      .catch(err => console.error('Error loading fallback server site-data:', err));
+      .catch(err => console.error('Error loading fallback server site-data:', err))
+      .finally(() => {
+        if (!active) return;
 
-    // 2. Load / sync from Firestore Realtime updates
-    const unsub = onSnapshot(collection(db, 'site_data'), (snapshot) => {
-      if (!active) return;
-      let hasData = false;
-      const currentTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
+        // 2. Load / sync from Firestore Realtime updates (only if they are strictly newer than local state)
+        const unsub = onSnapshot(collection(db, 'site_data'), (snapshot) => {
+          if (!active) return;
+          let hasData = false;
+          const currentTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
 
-      snapshot.docs.forEach(docSnap => {
-        const data = docSnap.data();
-        if (data) {
-          const docTS = data.updatedAt || 0;
-          
-          // CRITICAL: Skip document loading if its data in Firestore is older than what we currently have loaded!
-          // This prevents failing Firestore writes (due to Quota Exhaustion) from overwriting newer local state with stale database copies.
-          if (docTS < currentTS) {
-            console.log(`[Firestore Sync] Skipping older stale document ${docSnap.id} (Firestore timestamp: ${docTS}, Current local timestamp: ${currentTS})`);
-            return;
-          }
+          snapshot.docs.forEach(docSnap => {
+            const data = docSnap.data();
+            if (data) {
+              const docTS = data.updatedAt || 0;
+              
+              // CRITICAL: Skip document loading if its data in Firestore is older than or equal to what we currently have loaded!
+              // This strictly prevents failing/stale Firestore snapshots (such as due to Quota Exhaustion) from reverting newer local edits.
+              if (docTS <= currentTS) {
+                console.log(`[Firestore Sync] Skipping older/stale document ${docSnap.id} (Firestore timestamp: ${docTS}, Current local timestamp: ${currentTS})`);
+                return;
+              }
 
-          hasData = true;
-          isRemoteUpdate.current = true;
-          
-          if (docSnap.id === 'briefs' && data.briefs) {
-            setBriefs(data.briefs);
-            lastSiteData.current.briefs = data.briefs;
-          }
-          if (docSnap.id === 'outlines' && data.outlines) {
-            setOutlines(data.outlines);
-            lastSiteData.current.outlines = data.outlines;
-          }
-          if (docSnap.id === 'contents' && data.contents) {
-            setContents(data.contents);
-            lastSiteData.current.contents = data.contents;
-          }
-          if (docSnap.id === 'blogs' && data.blogs) {
-            setBlogs(data.blogs);
-            lastSiteData.current.blogs = data.blogs;
-          }
-          if (docSnap.id === 'config') {
-            if (data.homeConfig) {
-              setHomeConfig(data.homeConfig);
-              lastSiteData.current.homeConfig = data.homeConfig;
-            }
-            if (data.aboutConfig) {
-              setAboutConfig(data.aboutConfig);
-              lastSiteData.current.aboutConfig = data.aboutConfig;
-            }
-            if (data.services) {
-              setServices(data.services);
-              lastSiteData.current.services = data.services;
-            }
-          }
-          if (docSnap.id === 'portfolio') {
-            if (data.experiences) {
-              setExperiences(data.experiences);
-              lastSiteData.current.experiences = data.experiences;
-            }
-            if (data.education) {
-              setEducation(data.education);
-              lastSiteData.current.education = data.education;
-            }
-            if (data.certifications) {
-              setCertifications(data.certifications);
-              lastSiteData.current.certifications = data.certifications;
-            }
-            if (data.coreSkills) {
-              setCoreSkills(data.coreSkills);
-              lastSiteData.current.coreSkills = data.coreSkills;
-            }
-          }
-          if (docSnap.id === 'other') {
-            if (data.testimonials) {
-              setTestimonials(data.testimonials);
-              lastSiteData.current.testimonials = data.testimonials;
-            }
-            if (data.contactSubmissions) {
-              setContactSubmissions(data.contactSubmissions);
-              lastSiteData.current.contactSubmissions = data.contactSubmissions;
-            }
-          }
+              hasData = true;
+              isRemoteUpdate.current = true;
+              
+              if (docSnap.id === 'briefs' && data.briefs) {
+                setBriefs(data.briefs);
+                lastSiteData.current.briefs = data.briefs;
+              }
+              if (docSnap.id === 'outlines' && data.outlines) {
+                setOutlines(data.outlines);
+                lastSiteData.current.outlines = data.outlines;
+              }
+              if (docSnap.id === 'contents' && data.contents) {
+                setContents(data.contents);
+                lastSiteData.current.contents = data.contents;
+              }
+              if (docSnap.id === 'blogs' && data.blogs) {
+                setBlogs(data.blogs);
+                lastSiteData.current.blogs = data.blogs;
+              }
+              if (docSnap.id === 'config') {
+                if (data.homeConfig) {
+                  setHomeConfig(data.homeConfig);
+                  lastSiteData.current.homeConfig = data.homeConfig;
+                }
+                if (data.aboutConfig) {
+                  setAboutConfig(data.aboutConfig);
+                  lastSiteData.current.aboutConfig = data.aboutConfig;
+                }
+                if (data.services) {
+                  setServices(data.services);
+                  lastSiteData.current.services = data.services;
+                }
+              }
+              if (docSnap.id === 'portfolio') {
+                if (data.experiences) {
+                  setExperiences(data.experiences);
+                  lastSiteData.current.experiences = data.experiences;
+                }
+                if (data.education) {
+                  setEducation(data.education);
+                  lastSiteData.current.education = data.education;
+                }
+                if (data.certifications) {
+                  setCertifications(data.certifications);
+                  lastSiteData.current.certifications = data.certifications;
+                }
+                if (data.coreSkills) {
+                  setCoreSkills(data.coreSkills);
+                  lastSiteData.current.coreSkills = data.coreSkills;
+                }
+              }
+              if (docSnap.id === 'other') {
+                if (data.testimonials) {
+                  setTestimonials(data.testimonials);
+                  lastSiteData.current.testimonials = data.testimonials;
+                }
+                if (data.contactSubmissions) {
+                  setContactSubmissions(data.contactSubmissions);
+                  lastSiteData.current.contactSubmissions = data.contactSubmissions;
+                }
+              }
 
-          // If Firestore actually has newer data, update our global timestamp tracker
-          if (docTS > currentTS) {
-            setLastUpdated(docTS);
-            localStorage.setItem('apex_last_updated', docTS.toString());
+              // If Firestore actually has newer data, update our global timestamp tracker
+              if (docTS > currentTS) {
+                setLastUpdated(docTS);
+                localStorage.setItem('apex_last_updated', docTS.toString());
+              }
+            }
+          });
+          if (hasData) {
+            setTimeout(() => {
+              isRemoteUpdate.current = false;
+            }, 100);
           }
-        }
+          setDataLoaded(true);
+        }, (err) => {
+          console.warn('Firestore subscription quota limit exceeded or offline. Operating seamlessly using server/localStorage fallbacks.', err);
+          setDataLoaded(true);
+        });
+
+        unsubRef.current = unsub;
       });
-      if (hasData) {
-        setTimeout(() => {
-          isRemoteUpdate.current = false;
-        }, 100);
-      }
-      setDataLoaded(true);
-    }, (err) => {
-      console.warn('Firestore subscription quota limit exceeded or offline. Operating seamlessly using server/localStorage fallbacks.', err);
-      setDataLoaded(true);
-    });
 
     // 3. Fetch large base64 fields from Firestore chunks
     Promise.allSettled([
@@ -563,7 +585,9 @@ export default function App() {
 
     return () => {
       active = false;
-      unsub();
+      if (unsubRef.current) {
+        unsubRef.current();
+      }
     };
   }, []);
 
