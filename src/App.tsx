@@ -322,7 +322,18 @@ export default function App() {
 
   const [dataLoaded, setDataLoaded] = useState(false);
   const [largeDataLoaded, setLargeDataLoaded] = useState(false);
-  const isRemoteUpdate = React.useRef(false);
+  const isRemoteUpdate = React.useRef(true);
+
+  // Allow a brief delay for any state updates to fully settle and render before enabling the local edit tracker
+  useEffect(() => {
+    if (dataLoaded && largeDataLoaded) {
+      const timer = setTimeout(() => {
+        isRemoteUpdate.current = false;
+        console.log('[Sync] Initial remote data load complete. Local edit tracker enabled.');
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [dataLoaded, largeDataLoaded]);
 
   // In-memory cache of the last loaded/saved Firestore state to enable smart differential updates
   const lastSiteData = React.useRef<{
@@ -464,10 +475,6 @@ export default function App() {
 
             setLastUpdated(sTimestamp);
             localStorage.setItem('apex_last_updated', sTimestamp.toString());
-
-            setTimeout(() => {
-              isRemoteUpdate.current = false;
-            }, 100);
           }
         }
       })
@@ -562,11 +569,6 @@ export default function App() {
               }
             }
           });
-          if (hasData) {
-            setTimeout(() => {
-              isRemoteUpdate.current = false;
-            }, 100);
-          }
           setDataLoaded(true);
         }, (err) => {
           console.warn('Firestore subscription quota limit exceeded or offline. Operating seamlessly using server/localStorage fallbacks.', err);
@@ -580,10 +582,8 @@ export default function App() {
     Promise.allSettled([
       loadLargeData('resumeImage').then(res => {
         if (res !== null) {
-          const { data, updatedAt } = res;
-          const currentTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
-          // Only load from Firestore if Firestore's data is strictly newer than what we have locally
-          if (updatedAt > currentTS && typeof data === 'string') {
+          const { data } = res;
+          if (typeof data === 'string') {
             setResumeImage(data);
             lastSiteData.current.resumeImage = data;
           }
@@ -591,10 +591,8 @@ export default function App() {
       }),
       loadLargeData('seoImages').then(res => {
         if (res !== null) {
-          const { data, updatedAt } = res;
-          const currentTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
-          // Only load from Firestore if Firestore's data is strictly newer than what we have locally
-          if (updatedAt > currentTS && typeof data === 'string') {
+          const { data } = res;
+          if (typeof data === 'string') {
             try {
               const parsed = JSON.parse(data);
               setSeoImages(parsed);
