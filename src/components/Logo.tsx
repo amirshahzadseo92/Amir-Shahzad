@@ -19,9 +19,9 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
   }, []);
 
   // Dimensions based on size prop
-  const containerSize = size === 'sm' ? 'h-9 w-9' : size === 'lg' ? 'h-14 w-14' : 'h-9 w-9 md:h-[38px] md:w-[38px]';
-  const outerRingSize = size === 'sm' ? 'h-[44px] w-[44px]' : size === 'lg' ? 'h-[72px] w-[72px]' : 'h-[44px] w-[44px] md:h-[48px] md:w-[48px]';
-  const middleRingSize = size === 'sm' ? 'h-[38px] w-[38px]' : size === 'lg' ? 'h-[62px] w-[62px]' : 'h-[38px] w-[38px] md:h-[42px] md:w-[42px]';
+  const containerSize = size === 'sm' ? 'h-9 w-9' : size === 'lg' ? 'h-14 w-14' : 'h-9 w-9 md:h-[42px] md:w-[42px]';
+  const outerRingSize = size === 'sm' ? 'h-[44px] w-[44px]' : size === 'lg' ? 'h-[72px] w-[72px]' : 'h-[44px] w-[44px] md:h-[52px] md:w-[52px]';
+  const middleRingSize = size === 'sm' ? 'h-[38px] w-[38px]' : size === 'lg' ? 'h-[62px] w-[62px]' : 'h-[38px] w-[38px] md:h-[46px] md:w-[46px]';
   const innerSvgSize = size === 'sm' ? 'h-5 w-5' : size === 'lg' ? 'h-7 w-7' : 'h-5 w-5 md:h-[22px] md:w-[22px]';
   
   // Custom styled templates for single H, A, S letters inside the emblem (larger and prominent)
@@ -38,7 +38,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
   return (
     <div className="flex items-center gap-2 md:gap-3 group select-none py-0.5 md:py-0.5 relative md:translate-y-[1.5px]">
       {/* Dynamic Automated Outer Ring + Emblem Wrapper */}
-      <div className={`relative flex items-center justify-center shrink-0 ${size === 'sm' ? 'h-[44px] w-[44px]' : size === 'lg' ? 'h-[72px] w-[72px]' : 'h-[44px] w-[44px] md:h-[48px] md:w-[48px]'}`}>
+      <div className={`relative flex items-center justify-center shrink-0 ${size === 'sm' ? 'h-[44px] w-[44px]' : size === 'lg' ? 'h-[72px] w-[72px]' : 'h-[44px] w-[44px] md:h-[52px] md:w-[52px]'}`}>
         
         {/* AUTOMATION RING 1: Outermost dynamic orbit with dashed line (Slow clockwise rotation) */}
         <div className={`absolute inset-0 m-auto pointer-events-none flex items-center justify-center ${outerRingSize}`}>
@@ -141,7 +141,17 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
           {/* Animated active letter in the exact center (darmeyan) with a beautiful sequential sliding carousel transition */}
           <div className="relative z-10 text-center flex items-center justify-center w-full h-full overflow-hidden rounded-full">
             {logoImage ? (
-              <img src={logoImage} alt="Logo" className="w-full h-full object-cover" />
+              <img 
+                src={logoImage} 
+                alt="Logo" 
+                className="w-full h-full object-cover select-none" 
+                style={{
+                  imageRendering: '-webkit-optimize-contrast',
+                  WebkitFontSmoothing: 'antialiased',
+                  transform: 'translate3d(0, 0, 0)',
+                  backfaceVisibility: 'hidden'
+                }}
+              />
             ) : (
             <AnimatePresence mode="wait">
               <motion.span
