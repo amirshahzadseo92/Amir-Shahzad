@@ -34,7 +34,7 @@ interface DashboardProps {
   allBriefsCount: number;
   orders: ContentOrder[];
   onAddNewOrder: (newOrder: ContentOrder) => void;
-  onToast: (msg: string, type: 'success' | 'info') => void;
+  onToast: (msg: string, type: 'success' | 'info' | 'error') => void;
   onNavigateToLibrary: () => void;
   briefs: ArticleBrief[];
   outlines: OutlineItem[];

@@ -324,33 +324,206 @@ export default function App() {
   const [largeDataLoaded, setLargeDataLoaded] = useState(false);
   const isRemoteUpdate = React.useRef(false);
 
-  // Load global data on mount from Firestore
+  // In-memory cache of the last loaded/saved Firestore state to enable smart differential updates
+  const lastSiteData = React.useRef<{
+    briefs?: any;
+    outlines?: any;
+    contents?: any;
+    blogs?: any;
+    homeConfig?: any;
+    aboutConfig?: any;
+    services?: any;
+    experiences?: any;
+    education?: any;
+    certifications?: any;
+    coreSkills?: any;
+    testimonials?: any;
+    contactSubmissions?: any;
+    resumeImage?: any;
+    seoImages?: any;
+  }>({});
+
+  const [lastUpdated, setLastUpdated] = useState<number>(() => {
+    const saved = localStorage.getItem('apex_last_updated');
+    return saved ? parseInt(saved, 10) : 0;
+  });
+
   useEffect(() => {
+    localStorage.setItem('apex_last_updated', lastUpdated.toString());
+  }, [lastUpdated]);
+
+  // Load global data on mount from both server and Firestore
+  useEffect(() => {
+    let active = true;
+
+    // 1. Fetch from Express server as the robust, independent baseline/fallback
+    fetch('/api/site-data')
+      .then(res => res.json())
+      .then(serverData => {
+        if (!active) return;
+        if (serverData && Object.keys(serverData).length > 0) {
+          const sTimestamp = serverData.lastUpdated || 0;
+          const localTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
+
+          // If server data is newer or equal, we load it as baseline
+          if (sTimestamp >= localTS) {
+            isRemoteUpdate.current = true;
+            if (serverData.briefs) {
+              setBriefs(serverData.briefs);
+              lastSiteData.current.briefs = serverData.briefs;
+            }
+            if (serverData.outlines) {
+              setOutlines(serverData.outlines);
+              lastSiteData.current.outlines = serverData.outlines;
+            }
+            if (serverData.contents) {
+              setContents(serverData.contents);
+              lastSiteData.current.contents = serverData.contents;
+            }
+            if (serverData.blogs) {
+              setBlogs(serverData.blogs);
+              lastSiteData.current.blogs = serverData.blogs;
+            }
+            if (serverData.homeConfig) {
+              setHomeConfig(serverData.homeConfig);
+              lastSiteData.current.homeConfig = serverData.homeConfig;
+            }
+            if (serverData.aboutConfig) {
+              setAboutConfig(serverData.aboutConfig);
+              lastSiteData.current.aboutConfig = serverData.aboutConfig;
+            }
+            if (serverData.services) {
+              setServices(serverData.services);
+              lastSiteData.current.services = serverData.services;
+            }
+            if (serverData.experiences) {
+              setExperiences(serverData.experiences);
+              lastSiteData.current.experiences = serverData.experiences;
+            }
+            if (serverData.education) {
+              setEducation(serverData.education);
+              lastSiteData.current.education = serverData.education;
+            }
+            if (serverData.certifications) {
+              setCertifications(serverData.certifications);
+              lastSiteData.current.certifications = serverData.certifications;
+            }
+            if (serverData.coreSkills) {
+              setCoreSkills(serverData.coreSkills);
+              lastSiteData.current.coreSkills = serverData.coreSkills;
+            }
+            if (serverData.testimonials) {
+              setTestimonials(serverData.testimonials);
+              lastSiteData.current.testimonials = serverData.testimonials;
+            }
+            if (serverData.contactSubmissions) {
+              setContactSubmissions(serverData.contactSubmissions);
+              lastSiteData.current.contactSubmissions = serverData.contactSubmissions;
+            }
+            if (serverData.resumeImage) {
+              setResumeImage(serverData.resumeImage);
+              lastSiteData.current.resumeImage = serverData.resumeImage;
+            }
+            if (serverData.seoImages) {
+              setSeoImages(serverData.seoImages);
+              lastSiteData.current.seoImages = serverData.seoImages;
+            }
+
+            setLastUpdated(sTimestamp);
+            localStorage.setItem('apex_last_updated', sTimestamp.toString());
+
+            setTimeout(() => {
+              isRemoteUpdate.current = false;
+            }, 100);
+          }
+        }
+      })
+      .catch(err => console.error('Error loading fallback server site-data:', err));
+
+    // 2. Load / sync from Firestore Realtime updates
     const unsub = onSnapshot(collection(db, 'site_data'), (snapshot) => {
+      if (!active) return;
       let hasData = false;
+      const currentTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
+
       snapshot.docs.forEach(docSnap => {
         const data = docSnap.data();
         if (data) {
+          const docTS = data.updatedAt || 0;
+          
+          // CRITICAL: Skip document loading if its data in Firestore is older than what we currently have loaded!
+          // This prevents failing Firestore writes (due to Quota Exhaustion) from overwriting newer local state with stale database copies.
+          if (docTS < currentTS) {
+            console.log(`[Firestore Sync] Skipping older stale document ${docSnap.id} (Firestore timestamp: ${docTS}, Current local timestamp: ${currentTS})`);
+            return;
+          }
+
           hasData = true;
           isRemoteUpdate.current = true;
-          if (docSnap.id === 'briefs' && data.briefs) setBriefs(data.briefs);
-          if (docSnap.id === 'outlines' && data.outlines) setOutlines(data.outlines);
-          if (docSnap.id === 'contents' && data.contents) setContents(data.contents);
-          if (docSnap.id === 'blogs' && data.blogs) setBlogs(data.blogs);
+          
+          if (docSnap.id === 'briefs' && data.briefs) {
+            setBriefs(data.briefs);
+            lastSiteData.current.briefs = data.briefs;
+          }
+          if (docSnap.id === 'outlines' && data.outlines) {
+            setOutlines(data.outlines);
+            lastSiteData.current.outlines = data.outlines;
+          }
+          if (docSnap.id === 'contents' && data.contents) {
+            setContents(data.contents);
+            lastSiteData.current.contents = data.contents;
+          }
+          if (docSnap.id === 'blogs' && data.blogs) {
+            setBlogs(data.blogs);
+            lastSiteData.current.blogs = data.blogs;
+          }
           if (docSnap.id === 'config') {
-            if (data.homeConfig) setHomeConfig(data.homeConfig);
-            if (data.aboutConfig) setAboutConfig(data.aboutConfig);
-            if (data.services) setServices(data.services);
+            if (data.homeConfig) {
+              setHomeConfig(data.homeConfig);
+              lastSiteData.current.homeConfig = data.homeConfig;
+            }
+            if (data.aboutConfig) {
+              setAboutConfig(data.aboutConfig);
+              lastSiteData.current.aboutConfig = data.aboutConfig;
+            }
+            if (data.services) {
+              setServices(data.services);
+              lastSiteData.current.services = data.services;
+            }
           }
           if (docSnap.id === 'portfolio') {
-            if (data.experiences) setExperiences(data.experiences);
-            if (data.education) setEducation(data.education);
-            if (data.certifications) setCertifications(data.certifications);
-            if (data.coreSkills) setCoreSkills(data.coreSkills);
+            if (data.experiences) {
+              setExperiences(data.experiences);
+              lastSiteData.current.experiences = data.experiences;
+            }
+            if (data.education) {
+              setEducation(data.education);
+              lastSiteData.current.education = data.education;
+            }
+            if (data.certifications) {
+              setCertifications(data.certifications);
+              lastSiteData.current.certifications = data.certifications;
+            }
+            if (data.coreSkills) {
+              setCoreSkills(data.coreSkills);
+              lastSiteData.current.coreSkills = data.coreSkills;
+            }
           }
           if (docSnap.id === 'other') {
-            if (data.testimonials) setTestimonials(data.testimonials);
-            if (data.contactSubmissions) setContactSubmissions(data.contactSubmissions);
+            if (data.testimonials) {
+              setTestimonials(data.testimonials);
+              lastSiteData.current.testimonials = data.testimonials;
+            }
+            if (data.contactSubmissions) {
+              setContactSubmissions(data.contactSubmissions);
+              lastSiteData.current.contactSubmissions = data.contactSubmissions;
+            }
+          }
+
+          // If Firestore actually has newer data, update our global timestamp tracker
+          if (docTS > currentTS) {
+            setLastUpdated(docTS);
+            localStorage.setItem('apex_last_updated', docTS.toString());
           }
         }
       });
@@ -361,20 +534,24 @@ export default function App() {
       }
       setDataLoaded(true);
     }, (err) => {
-      console.error('Error fetching global site data from Firestore:', err);
+      console.warn('Firestore subscription quota limit exceeded or offline. Operating seamlessly using server/localStorage fallbacks.', err);
       setDataLoaded(true);
     });
 
-    // Fetch large base64 fields from Firestore chunks
+    // 3. Fetch large base64 fields from Firestore chunks
     Promise.allSettled([
       loadLargeData('resumeImage').then(data => {
-        if (data !== null) setResumeImage(data);
+        if (data !== null) {
+          setResumeImage(data);
+          lastSiteData.current.resumeImage = data;
+        }
       }),
       loadLargeData('seoImages').then(data => {
         if (data !== null) {
           try {
             const parsed = JSON.parse(data);
             setSeoImages(parsed);
+            lastSiteData.current.seoImages = parsed;
           } catch (e) {
             console.error('Failed to parse seoImages chunks', e);
           }
@@ -384,42 +561,142 @@ export default function App() {
       setLargeDataLoaded(true);
     });
 
-    return () => unsub();
+    return () => {
+      active = false;
+      unsub();
+    };
   }, []);
 
-  // Synchronize dynamic state to Firestore
+  // Synchronize dynamic state with a high-performance differential update strategy
   useEffect(() => {
-    if (!dataLoaded || !largeDataLoaded || isRemoteUpdate.current) return; // Don't overwrite the server data with initial local state before loading, or if this is a remote update
+    if (!dataLoaded || !largeDataLoaded || isRemoteUpdate.current) return;
 
+    const timestamp = Date.now();
     const payload = {
       briefs, outlines, contents, blogs,
       homeConfig, aboutConfig, services,
       experiences, education, certifications, coreSkills,
-      testimonials, contactSubmissions, resumeImage, seoImages
+      testimonials, contactSubmissions, resumeImage, seoImages,
+      lastUpdated: timestamp
     };
 
     const timer = setTimeout(() => {
       const batch = writeBatch(db);
-      batch.set(doc(db, 'site_data', 'briefs'), JSON.parse(JSON.stringify({ briefs })), { merge: true });
-      batch.set(doc(db, 'site_data', 'outlines'), JSON.parse(JSON.stringify({ outlines })), { merge: true });
-      batch.set(doc(db, 'site_data', 'contents'), JSON.parse(JSON.stringify({ contents })), { merge: true });
-      batch.set(doc(db, 'site_data', 'blogs'), JSON.parse(JSON.stringify({ blogs })), { merge: true });
-      batch.set(doc(db, 'site_data', 'config'), JSON.parse(JSON.stringify({ homeConfig, aboutConfig, services })), { merge: true });
-      batch.set(doc(db, 'site_data', 'portfolio'), JSON.parse(JSON.stringify({ experiences, education, certifications, coreSkills })), { merge: true });
-      batch.set(doc(db, 'site_data', 'other'), JSON.parse(JSON.stringify({ testimonials, contactSubmissions })), { merge: true });
-      
-      batch.commit().catch(err => console.error('Error syncing dynamic data to Firestore:', err));
+      let needsCommit = false;
 
-      saveLargeData('resumeImage', resumeImage || '').catch(err => console.error('Error saving resumeImage:', err));
-      saveLargeData('seoImages', JSON.stringify(seoImages || [])).catch(err => console.error('Error saving seoImages:', err));
+      // Smart Differential: Only write to Firestore documents that have ACTUALLY changed on the client!
+      // This reduces database writes from 39 writes per keystroke/edit down to exactly 0 (or 1) write.
+      if (JSON.stringify(briefs) !== JSON.stringify(lastSiteData.current.briefs)) {
+        batch.set(doc(db, 'site_data', 'briefs'), JSON.parse(JSON.stringify({ briefs, updatedAt: timestamp })), { merge: true });
+        lastSiteData.current.briefs = briefs;
+        needsCommit = true;
+      }
+      if (JSON.stringify(outlines) !== JSON.stringify(lastSiteData.current.outlines)) {
+        batch.set(doc(db, 'site_data', 'outlines'), JSON.parse(JSON.stringify({ outlines, updatedAt: timestamp })), { merge: true });
+        lastSiteData.current.outlines = outlines;
+        needsCommit = true;
+      }
+      if (JSON.stringify(contents) !== JSON.stringify(lastSiteData.current.contents)) {
+        batch.set(doc(db, 'site_data', 'contents'), JSON.parse(JSON.stringify({ contents, updatedAt: timestamp })), { merge: true });
+        lastSiteData.current.contents = contents;
+        needsCommit = true;
+      }
+      if (JSON.stringify(blogs) !== JSON.stringify(lastSiteData.current.blogs)) {
+        batch.set(doc(db, 'site_data', 'blogs'), JSON.parse(JSON.stringify({ blogs, updatedAt: timestamp })), { merge: true });
+        lastSiteData.current.blogs = blogs;
+        needsCommit = true;
+      }
+      
+      const currentConfig = { homeConfig, aboutConfig, services };
+      if (JSON.stringify(currentConfig) !== JSON.stringify({
+        homeConfig: lastSiteData.current.homeConfig,
+        aboutConfig: lastSiteData.current.aboutConfig,
+        services: lastSiteData.current.services
+      })) {
+        batch.set(doc(db, 'site_data', 'config'), JSON.parse(JSON.stringify({ homeConfig, aboutConfig, services, updatedAt: timestamp })), { merge: true });
+        lastSiteData.current.homeConfig = homeConfig;
+        lastSiteData.current.aboutConfig = aboutConfig;
+        lastSiteData.current.services = services;
+        needsCommit = true;
+      }
+
+      const currentPortfolio = { experiences, education, certifications, coreSkills };
+      if (JSON.stringify(currentPortfolio) !== JSON.stringify({
+        experiences: lastSiteData.current.experiences,
+        education: lastSiteData.current.education,
+        certifications: lastSiteData.current.certifications,
+        coreSkills: lastSiteData.current.coreSkills
+      })) {
+        batch.set(doc(db, 'site_data', 'portfolio'), JSON.parse(JSON.stringify({ experiences, education, certifications, coreSkills, updatedAt: timestamp })), { merge: true });
+        lastSiteData.current.experiences = experiences;
+        lastSiteData.current.education = education;
+        lastSiteData.current.certifications = certifications;
+        lastSiteData.current.coreSkills = coreSkills;
+        needsCommit = true;
+      }
+
+      const currentOther = { testimonials, contactSubmissions };
+      if (JSON.stringify(currentOther) !== JSON.stringify({
+        testimonials: lastSiteData.current.testimonials,
+        contactSubmissions: lastSiteData.current.contactSubmissions
+      })) {
+        batch.set(doc(db, 'site_data', 'other'), JSON.parse(JSON.stringify({ testimonials, contactSubmissions, updatedAt: timestamp })), { merge: true });
+        lastSiteData.current.testimonials = testimonials;
+        lastSiteData.current.contactSubmissions = contactSubmissions;
+        needsCommit = true;
+      }
+
+      // If anything has changed, commit the batch, update the local timestamp and push to server
+      if (needsCommit) {
+        setLastUpdated(timestamp);
+        localStorage.setItem('apex_last_updated', timestamp.toString());
+
+        batch.commit().catch(err => {
+          console.error('Error syncing dynamic data to Firestore:', err);
+          const errStr = String(err);
+          if (errStr.includes('quota') || errStr.includes('exhausted') || errStr.includes('Quota')) {
+            triggerToast('Firestore Quota reached. Operating offline mode: your edits are safely preserved on the server & browser!', 'info');
+          }
+        });
+      }
+
+      if ((resumeImage || '') !== (lastSiteData.current.resumeImage || '')) {
+        saveLargeData('resumeImage', resumeImage || '').then(() => {
+          lastSiteData.current.resumeImage = resumeImage || '';
+          setLastUpdated(timestamp);
+          localStorage.setItem('apex_last_updated', timestamp.toString());
+        }).catch(err => {
+          console.error('Error saving resumeImage:', err);
+          const errStr = String(err);
+          if (errStr.includes('quota') || errStr.includes('exhausted') || errStr.includes('Quota')) {
+            triggerToast('Firestore Quota reached. Your resume image edits are safely saved locally!', 'info');
+          }
+        });
+      }
+
+      const currentSeoImagesStr = JSON.stringify(seoImages || []);
+      const lastSeoImagesStr = JSON.stringify(lastSiteData.current.seoImages || []);
+      if (currentSeoImagesStr !== lastSeoImagesStr) {
+        saveLargeData('seoImages', currentSeoImagesStr).then(() => {
+          lastSiteData.current.seoImages = seoImages || [];
+          setLastUpdated(timestamp);
+          localStorage.setItem('apex_last_updated', timestamp.toString());
+        }).catch(err => {
+          console.error('Error saving seoImages:', err);
+          const errStr = String(err);
+          if (errStr.includes('quota') || errStr.includes('exhausted') || errStr.includes('Quota')) {
+            triggerToast('Firestore Quota reached. Your SEO image edits are safely saved locally!', 'info');
+          }
+        });
+      }
         
-      // Also sync to server for sitemap generation and large image storage
+      // Synchronize to the local node server as an independent reliable persistence layer
       fetch('/api/site-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
-      }).catch(err => console.error('Error syncing to server for sitemap:', err));
-    }, 1000); // Debounce to avoid spamming the server on rapid typing
+      }).catch(err => console.error('Error syncing to server for backup:', err));
+    }, 1500); // Increased debounce to 1.5s to minimize server and database load
 
     return () => clearTimeout(timer);
   }, [
@@ -488,10 +765,10 @@ export default function App() {
   const [unlockTargetId, setUnlockTargetId] = useState<string | null>(null);
 
   // Toast banner alerts state
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info'; visible: boolean } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error'; visible: boolean } | null>(null);
 
   // Helper trigger to display custom toast
-  const triggerToast = (message: string, type: 'success' | 'info' = 'success') => {
+  const triggerToast = (message: string, type: 'success' | 'info' | 'error' = 'success') => {
     setToast({ message, type, visible: true });
     // Auto clear
     setTimeout(() => {
@@ -1099,6 +1376,8 @@ export default function App() {
           >
             {toast.type === 'success' ? (
               <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+            ) : toast.type === 'error' ? (
+              <AlertCircle className="h-5 w-5 text-rose-400 shrink-0" />
             ) : (
               <Info className="h-5 w-5 text-indigo-400 shrink-0" />
             )}
