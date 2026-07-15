@@ -341,7 +341,23 @@ export default function App() {
     contactSubmissions?: any;
     resumeImage?: any;
     seoImages?: any;
-  }>({});
+  }>({
+    briefs,
+    outlines,
+    contents,
+    blogs,
+    homeConfig,
+    aboutConfig,
+    services,
+    experiences,
+    education,
+    certifications,
+    coreSkills,
+    testimonials,
+    contactSubmissions,
+    resumeImage,
+    seoImages
+  });
 
   const unsubRef = React.useRef<(() => void) | null>(null);
 
@@ -437,11 +453,11 @@ export default function App() {
               setContactSubmissions(serverData.contactSubmissions);
               lastSiteData.current.contactSubmissions = serverData.contactSubmissions;
             }
-            if (serverData.resumeImage) {
+            if (serverData.resumeImage !== undefined && serverData.resumeImage !== null) {
               setResumeImage(serverData.resumeImage);
               lastSiteData.current.resumeImage = serverData.resumeImage;
             }
-            if (serverData.seoImages) {
+            if (serverData.seoImages !== undefined && serverData.seoImages !== null) {
               setSeoImages(serverData.seoImages);
               lastSiteData.current.seoImages = serverData.seoImages;
             }
@@ -567,7 +583,7 @@ export default function App() {
           const { data, updatedAt } = res;
           const currentTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
           // Only load from Firestore if Firestore's data is strictly newer than what we have locally
-          if (updatedAt > currentTS && data) {
+          if (updatedAt > currentTS && typeof data === 'string') {
             setResumeImage(data);
             lastSiteData.current.resumeImage = data;
           }
@@ -578,7 +594,7 @@ export default function App() {
           const { data, updatedAt } = res;
           const currentTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
           // Only load from Firestore if Firestore's data is strictly newer than what we have locally
-          if (updatedAt > currentTS && data) {
+          if (updatedAt > currentTS && typeof data === 'string') {
             try {
               const parsed = JSON.parse(data);
               setSeoImages(parsed);
