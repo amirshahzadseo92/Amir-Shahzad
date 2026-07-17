@@ -9,7 +9,11 @@ interface AboutProps {
   aboutConfig?: AboutConfig;
 }
 
-export default function About({ setCurrentPage, onToast }: AboutProps) {
+export default function About({ setCurrentPage, onToast, aboutConfig }: AboutProps) {
+  const fullName = aboutConfig?.fullName || "Hafiz Amir Shahzad Saifi";
+  const roleTitle = aboutConfig?.roleTitle || "SEO & Web Development Specialist";
+  const bio = aboutConfig?.bio || "I'm Hafiz Amir Shahzad Saifi, an SEO Specialist dedicated to helping businesses grow through strategic search engine optimization. I specialize in On Page SEO, Technical SEO, Keyword Research, SEO Audits, Link Building, and Content Optimization. My approach is focused on improving search visibility, increasing organic traffic, and building long-term organic authority with ethical, data-driven frameworks. I deliver top-tier, compliant web engineering and measurable SEO results that create lasting client value.";
+
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6 lg:px-8 bg-slate-50/30 min-h-screen flex items-center justify-center overflow-hidden">
       {/* Animated Card Container with beautiful flowing gradient border */}
@@ -35,10 +39,10 @@ export default function About({ setCurrentPage, onToast }: AboutProps) {
               Expert Profile
             </span>
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-slate-900 leading-tight">
-              Hafiz Amir Shahzad Saifi
+              {fullName}
             </h1>
             <h2 className="text-sm sm:text-base font-extrabold text-slate-500 tracking-wide uppercase font-mono">
-              SEO & Web Development Specialist
+              {roleTitle}
             </h2>
           </motion.div>
           
@@ -46,11 +50,45 @@ export default function About({ setCurrentPage, onToast }: AboutProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal text-center max-w-xl mx-auto"
+            className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal text-center max-w-xl mx-auto whitespace-pre-line"
             id="about-bio-text"
           >
-            I'm Hafiz Amir Shahzad Saifi, an SEO Specialist dedicated to helping businesses grow through strategic search engine optimization. I specialize in On Page SEO, Technical SEO, Keyword Research, SEO Audits, Link Building, and Content Optimization. My approach is focused on improving search visibility, increasing organic traffic, and building long-term organic authority with ethical, data-driven frameworks. I deliver top-tier, compliant web engineering and measurable SEO results that create lasting client value.
+            {bio}
           </motion.p>
+
+          {aboutConfig?.philosophyText && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.6 }}
+              className="text-left bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-2"
+            >
+              <h3 className="text-sm font-bold text-slate-900 font-mono uppercase tracking-wider flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-emerald-500" />
+                {aboutConfig.philosophyTitle || "Our Philosophy"}
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                {aboutConfig.philosophyText}
+              </p>
+            </motion.div>
+          )}
+
+          {aboutConfig?.missionText && (
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.8, delay: 0.7 }}
+              className="text-left bg-slate-50 border border-slate-100 rounded-2xl p-5 space-y-2"
+            >
+              <h3 className="text-sm font-bold text-slate-900 font-mono uppercase tracking-wider flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-emerald-500" />
+                Our Mission
+              </h3>
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed whitespace-pre-line">
+                {aboutConfig.missionText}
+              </p>
+            </motion.div>
+          )}
 
           {/* CTAs with beautiful hover, tap, and glowing animated-gradient-border-thin borders */}
           <motion.div 

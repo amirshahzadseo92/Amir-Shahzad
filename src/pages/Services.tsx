@@ -1,123 +1,16 @@
 import React from 'react';
-import { 
-  Layers, 
-  Cpu, 
-  Globe, 
-  Link, 
-  Search, 
-  MapPin, 
-  Sparkles, 
-  BarChart3, 
-  Target,
-  ClipboardCheck,
-  ArrowRight,
-  Code,
-  ShoppingCart,
-  Layout
-} from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { motion } from 'motion/react';
-import { ActivePage } from '../types';
+import { ActivePage, ServiceItem } from '../types';
 
 interface ServicesProps {
   setCurrentPage: (page: ActivePage) => void;
   onToast: (msg: string, type: 'success' | 'info') => void;
-  services?: any;
+  services?: ServiceItem[];
 }
 
-export default function Services({ setCurrentPage, onToast }: ServicesProps) {
-  const seoServices = [
-    {
-      title: "On Page SEO",
-      desc: "Optimize titles, meta descriptions, headings, internal links, and on page content.",
-      icon: Layers,
-      colorClass: "text-emerald-600 bg-emerald-50 border-emerald-100",
-      hoverClass: "hover:border-emerald-300 hover:shadow-emerald-50/50"
-    },
-    {
-      title: "Technical SEO",
-      desc: "Fix crawl issues, improve site speed, indexing, Core Web Vitals, XML sitemaps, and robots.txt.",
-      icon: Cpu,
-      colorClass: "text-blue-600 bg-blue-50 border-blue-100",
-      hoverClass: "hover:border-blue-300 hover:shadow-blue-50/50"
-    },
-    {
-      title: "Off Page SEO",
-      desc: "Build authority through ethical off page SEO strategies.",
-      icon: Globe,
-      colorClass: "text-indigo-600 bg-indigo-50 border-indigo-100",
-      hoverClass: "hover:border-indigo-300 hover:shadow-indigo-50/50"
-    },
-    {
-      title: "Link Building",
-      desc: "High quality guest posting, niche edits, outreach, and authority backlinks.",
-      icon: Link,
-      colorClass: "text-violet-600 bg-violet-50 border-violet-100",
-      hoverClass: "hover:border-violet-300 hover:shadow-violet-50/50"
-    },
-    {
-      title: "SEO Audit",
-      desc: "Complete website analysis with actionable recommendations.",
-      icon: ClipboardCheck,
-      colorClass: "text-rose-600 bg-rose-50 border-rose-100",
-      hoverClass: "hover:border-rose-300 hover:shadow-rose-50/50"
-    },
-    {
-      title: "Keyword Research",
-      desc: "Find high value keywords that attract targeted traffic.",
-      icon: Search,
-      colorClass: "text-amber-600 bg-amber-50 border-amber-100",
-      hoverClass: "hover:border-amber-300 hover:shadow-amber-50/50"
-    },
-    {
-      title: "Local SEO",
-      desc: "Optimize Google Business Profile and improve local search rankings.",
-      icon: MapPin,
-      colorClass: "text-teal-600 bg-teal-50 border-teal-100",
-      hoverClass: "hover:border-teal-300 hover:shadow-teal-50/50"
-    },
-    {
-      title: "Content Optimization",
-      desc: "Optimize existing content to improve rankings and user experience.",
-      icon: Sparkles,
-      colorClass: "text-cyan-600 bg-cyan-50 border-cyan-100",
-      hoverClass: "hover:border-cyan-300 hover:shadow-cyan-50/50"
-    },
-    {
-      title: "Competitor Analysis",
-      desc: "Analyze competitors and identify SEO opportunities.",
-      icon: BarChart3,
-      colorClass: "text-orange-600 bg-orange-50 border-orange-100",
-      hoverClass: "hover:border-orange-300 hover:shadow-orange-50/50"
-    },
-    {
-      title: "SEO Strategy",
-      desc: "Create a customized SEO growth plan based on business goals.",
-      icon: Target,
-      colorClass: "text-emerald-600 bg-emerald-50 border-emerald-100",
-      hoverClass: "hover:border-emerald-300 hover:shadow-emerald-50/50"
-    },
-    {
-      title: "Custom Website Development",
-      desc: "Build fast, responsive, and SEO friendly custom websites tailored to your business needs using modern coding standards.",
-      icon: Code,
-      colorClass: "text-sky-600 bg-sky-50 border-sky-100",
-      hoverClass: "hover:border-sky-300 hover:shadow-sky-50/50"
-    },
-    {
-      title: "Ecommerce SEO",
-      desc: "Optimize Shopify, WooCommerce, Magento, and other ecommerce stores to improve search rankings, increase organic traffic, and drive more sales.",
-      icon: ShoppingCart,
-      colorClass: "text-fuchsia-600 bg-fuchsia-50 border-fuchsia-100",
-      hoverClass: "hover:border-fuchsia-300 hover:shadow-fuchsia-50/50"
-    },
-    {
-      title: "WordPress Development",
-      desc: "Create responsive, secure, and user friendly WordPress websites with custom designs, speed optimization, and SEO ready structure.",
-      icon: Layout,
-      colorClass: "text-violet-600 bg-violet-50 border-violet-100",
-      hoverClass: "hover:border-violet-300 hover:shadow-violet-50/50"
-    }
-  ];
+export default function Services({ setCurrentPage, onToast, services = [] }: ServicesProps) {
+  const activeServices = services || [];
 
   const handleHireClick = () => {
     setCurrentPage('contact');
@@ -152,58 +45,96 @@ export default function Services({ setCurrentPage, onToast }: ServicesProps) {
 
       {/* Services Grid with Custom Animated Borders & VIP Aesthetics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 mb-16" id="services-grid">
-        {seoServices.map((service, index) => {
-          const IconComponent = service.icon;
-          return (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 25 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-50px" }}
-              transition={{ duration: 0.5, delay: Math.min(index * 0.08, 0.6), ease: "easeOut" }}
-              whileHover={{ 
-                y: -6,
-                scale: 1.025,
-              }}
-              whileTap={{ scale: 0.98 }}
-              className="animated-gradient-border-thin rounded-2xl overflow-hidden p-[2.5px] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
-              id={`service-card-wrapper-${index}`}
-            >
-              <div className="bg-white p-6 rounded-[14px] flex flex-col justify-between h-full flex-1 space-y-4">
-                <div className="space-y-4">
-                  {/* Icon wrapper */}
-                  <div className="flex items-center space-x-4">
-                    <motion.div 
-                      whileHover={{ rotate: 12, scale: 1.1 }}
-                      className={`p-3 rounded-xl border ${service.colorClass} transition-transform duration-300`}
-                    >
-                      <IconComponent className="h-5 w-5" />
-                    </motion.div>
-                    <h3 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight">
-                      {service.title}
-                    </h3>
+        {activeServices.length === 0 ? (
+          <div className="col-span-full text-center py-12 text-slate-400 text-sm font-medium font-sans">
+            No services published yet.
+          </div>
+        ) : (
+          activeServices.map((service, index) => {
+            const IconComponent = (LucideIcons as any)[service.iconName] || LucideIcons.HelpCircle;
+            
+            // Map simple color names to Tailwind color utility classes
+            const getColorClass = (color: string) => {
+              switch (color) {
+                case 'emerald': return 'text-emerald-600 bg-emerald-50 border-emerald-100';
+                case 'blue': return 'text-blue-600 bg-blue-50 border-blue-100';
+                case 'indigo': return 'text-indigo-600 bg-indigo-50 border-indigo-100';
+                case 'violet': return 'text-violet-600 bg-violet-50 border-violet-100';
+                case 'rose': return 'text-rose-600 bg-rose-50 border-rose-100';
+                case 'amber': return 'text-amber-600 bg-amber-50 border-amber-100';
+                case 'teal': return 'text-teal-600 bg-teal-50 border-teal-100';
+                case 'cyan': return 'text-cyan-600 bg-cyan-50 border-cyan-100';
+                case 'orange': return 'text-orange-600 bg-orange-50 border-orange-100';
+                case 'sky': return 'text-sky-600 bg-sky-50 border-sky-100';
+                case 'fuchsia': return 'text-fuchsia-600 bg-fuchsia-50 border-fuchsia-100';
+                default: return 'text-emerald-600 bg-emerald-50 border-emerald-100';
+              }
+            };
+
+            const colorClass = getColorClass(service.color);
+
+            return (
+              <motion.div
+                key={service.id || index}
+                initial={{ opacity: 0, y: 25 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: "-50px" }}
+                transition={{ duration: 0.5, delay: Math.min(index * 0.08, 0.6), ease: "easeOut" }}
+                whileHover={{ 
+                  y: -6,
+                  scale: 1.025,
+                }}
+                whileTap={{ scale: 0.98 }}
+                className="animated-gradient-border-thin rounded-2xl overflow-hidden p-[2.5px] shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
+                id={`service-card-wrapper-${index}`}
+              >
+                <div className="bg-white p-6 rounded-[14px] flex flex-col justify-between h-full flex-1 space-y-4">
+                  <div className="space-y-4">
+                    {/* Icon wrapper */}
+                    <div className="flex items-center space-x-4">
+                      <motion.div 
+                        whileHover={{ rotate: 12, scale: 1.1 }}
+                        className={`p-3 rounded-xl border ${colorClass} transition-transform duration-300`}
+                      >
+                        <IconComponent className="h-5 w-5" />
+                      </motion.div>
+                      <h3 className="text-lg sm:text-xl font-extrabold text-slate-950 tracking-tight">
+                        {service.title}
+                      </h3>
+                    </div>
+
+                    <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
+                      {service.shortDesc}
+                    </p>
+
+                    {service.highlights && service.highlights.length > 0 && (
+                      <ul className="text-xs sm:text-sm text-slate-500 space-y-1 pt-2">
+                        {service.highlights.map((highlight: string, idx: number) => (
+                          <li key={idx} className="flex items-center space-x-2">
+                            <span className="text-emerald-500 font-bold">•</span>
+                            <span>{highlight}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
                   </div>
 
-                  <p className="text-sm sm:text-base text-slate-600 leading-relaxed font-normal">
-                    {service.desc}
-                  </p>
+                  {/* Hire Button inside each card to convert leads */}
+                  <div className="pt-6 mt-4 border-t border-slate-100 flex justify-between items-center">
+                    <motion.button
+                      whileHover={{ x: 4 }}
+                      onClick={handleHireClick}
+                      className="text-xs sm:text-sm font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center space-x-1.5 transition-colors cursor-pointer group/btn"
+                    >
+                      <span>Inquire service</span>
+                      <LucideIcons.ArrowRight className="h-3.5 w-3.5 transform transition-transform group-hover/btn:translate-x-1" />
+                    </motion.button>
+                  </div>
                 </div>
-
-                {/* Hire Button inside each card to convert leads */}
-                <div className="pt-6 mt-4 border-t border-slate-100 flex justify-between items-center">
-                  <motion.button
-                    whileHover={{ x: 4 }}
-                    onClick={handleHireClick}
-                    className="text-xs sm:text-sm font-bold text-emerald-600 hover:text-emerald-700 inline-flex items-center space-x-1.5 transition-colors cursor-pointer group/btn"
-                  >
-                    <span>Inquire service</span>
-                    <ArrowRight className="h-3.5 w-3.5 transform transition-transform group-hover/btn:translate-x-1" />
-                  </motion.button>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
+              </motion.div>
+            );
+          })
+        )}
       </div>
 
       {/* Elegant CTA Callout */}
