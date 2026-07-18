@@ -564,6 +564,11 @@ export default function App() {
             }
           });
           setDataLoaded(true);
+
+          // Allow the states to propagate fully before enabling the local edit tracker
+          setTimeout(() => {
+            isRemoteUpdate.current = false;
+          }, 600);
         }, (err) => {
           console.warn('Firestore subscription quota limit exceeded or offline. Operating seamlessly using server/localStorage fallbacks.', err);
           setDataLoaded(true);

@@ -81,13 +81,31 @@ export default function Header({
 
         {/* Right side CTA buttons */}
         <div className="hidden md:flex items-center space-x-4">
-          {isLoggedIn && (
+          {isLoggedIn ? (
+            <>
+              <button
+                onClick={() => handleNavClick('dashboard')}
+                className="flex items-center space-x-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white px-4.5 py-2 text-sm font-semibold transition-all shadow-sm shadow-emerald-950/20 cursor-pointer"
+              >
+                <LayoutDashboard className="h-4 w-4" />
+                <span>Admin Panel</span>
+              </button>
+              <button
+                onClick={onLoginToggle}
+                className="flex items-center space-x-1.5 border border-zinc-800 hover:bg-zinc-900 rounded-full text-zinc-400 hover:text-white px-4 py-2 text-sm font-semibold transition-all cursor-pointer"
+                title="Logout"
+              >
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
+              </button>
+            </>
+          ) : (
             <button
-              onClick={() => handleNavClick('dashboard')}
-              className="flex items-center space-x-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white px-4.5 py-2 text-sm font-semibold transition-all shadow-sm shadow-emerald-950/20"
+              onClick={onLoginToggle}
+              className="flex items-center space-x-1.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white px-4.5 py-2 text-sm font-semibold transition-all shadow-sm shadow-emerald-950/20 cursor-pointer"
             >
-              <LayoutDashboard className="h-4 w-4" />
-              <span>Admin Panel</span>
+              <LogIn className="h-4 w-4" />
+              <span>Admin Login / Access Panel</span>
             </button>
           )}
         </div>
@@ -132,14 +150,37 @@ export default function Header({
                   </button>
                 );
               })}
-              {isLoggedIn && (
+              {isLoggedIn ? (
                 <div className="pt-4 border-t border-zinc-900 flex flex-col space-y-2 px-3">
                   <button
                     onClick={() => handleNavClick('dashboard')}
-                    className="group flex w-full items-center gap-3 py-3 text-base font-medium rounded-lg px-3 transition-all active:scale-95 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20"
+                    className="group flex w-full items-center gap-3 py-3 text-base font-medium rounded-lg px-3 transition-all active:scale-95 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 cursor-pointer"
                   >
                     <LayoutDashboard className="h-5 w-5 transition-all duration-300 group-hover:scale-125 group-hover:rotate-6 group-active:scale-110 group-active:-rotate-12 text-emerald-500" />
                     <span>Admin Panel</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      onLoginToggle();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="group flex w-full items-center gap-3 py-3 text-base font-medium rounded-lg px-3 transition-all active:scale-95 bg-zinc-900 text-zinc-300 hover:text-white cursor-pointer"
+                  >
+                    <LogOut className="h-5 w-5 text-zinc-400" />
+                    <span>Logout</span>
+                  </button>
+                </div>
+              ) : (
+                <div className="pt-4 border-t border-zinc-900 flex flex-col space-y-2 px-3">
+                  <button
+                    onClick={() => {
+                      onLoginToggle();
+                      setMobileMenuOpen(false);
+                    }}
+                    className="group flex w-full items-center gap-3 py-3 text-base font-medium rounded-lg px-3 transition-all active:scale-95 bg-emerald-600/10 text-emerald-400 hover:bg-emerald-600/20 cursor-pointer"
+                  >
+                    <LogIn className="h-5 w-5 text-emerald-500" />
+                    <span>Admin Login / Access Panel</span>
                   </button>
                 </div>
               )}

@@ -30,7 +30,7 @@ export default function Services({ setCurrentPage, onToast, services = [] }: Ser
         id="services-header"
       >
         <div className="inline-flex items-center space-x-2 bg-emerald-50 px-4 py-1.5 rounded-full border border-emerald-100 shadow-3xs mb-2">
-          <Sparkles className="h-3.5 w-3.5 text-emerald-600 animate-pulse" />
+          <LucideIcons.Sparkles className="h-3.5 w-3.5 text-emerald-600 animate-pulse" />
           <span className="text-2xs font-extrabold tracking-widest uppercase font-mono text-emerald-700">
             Professional Offerings
           </span>
@@ -153,7 +153,7 @@ export default function Services({ setCurrentPage, onToast, services = [] }: Ser
                 className="bg-slate-950 hover:bg-slate-900 text-white font-extrabold text-sm px-8 py-4 rounded-xl transition-all tracking-wider uppercase shadow-md cursor-pointer inline-flex items-center space-x-2"
               >
                 <span>Book a Consultation</span>
-                <ArrowRight className="h-4 w-4" />
+                <LucideIcons.ArrowRight className="h-4 w-4" />
               </button>
             </div>
           </div>
