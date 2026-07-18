@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { collection, doc, onSnapshot, setDoc, writeBatch } from 'firebase/firestore';
+import { collection, doc, onSnapshot, setDoc, writeBatch, getDocs } from 'firebase/firestore';
 import { db, saveLargeData, loadLargeData } from './lib/firebase';
 
 const SITE_DATA_DOC = 'global';
@@ -484,13 +484,14 @@ export default function App() {
       .finally(() => {
         if (!active) return;
 
-        // 2. Load / sync from Firestore Realtime updates (only if they are strictly newer than local state)
-        const unsub = onSnapshot(collection(db, 'site_data'), (snapshot) => {
-          if (!active) return;
+        // 2. Load / sync from Firestore (onSnapshot for admin, getDocs for guest/Lighthouse)
+        const isUserAdmin = localStorage.getItem('apex_is_logged_in') === 'true';
+
+        const handleFirestoreSnapshot = (snapshotDocs: any[]) => {
           let hasData = false;
           const currentTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
 
-          snapshot.docs.forEach(docSnap => {
+          snapshotDocs.forEach(docSnap => {
             const data = docSnap.data();
             if (data) {
               const docTS = data.updatedAt || 0;
@@ -569,12 +570,28 @@ export default function App() {
           setTimeout(() => {
             isRemoteUpdate.current = false;
           }, 600);
-        }, (err) => {
-          console.warn('Firestore subscription quota limit exceeded or offline. Operating seamlessly using server/localStorage fallbacks.', err);
-          setDataLoaded(true);
-        });
+        };
 
-        unsubRef.current = unsub;
+        if (isUserAdmin) {
+          console.log('[Sync] Initializing realtime listener for admin.');
+          const unsub = onSnapshot(collection(db, 'site_data'), (snapshot) => {
+            if (!active) return;
+            handleFirestoreSnapshot(snapshot.docs);
+          }, (err) => {
+            console.warn('Firestore subscription quota limit exceeded or offline. Operating seamlessly using server/localStorage fallbacks.', err);
+            setDataLoaded(true);
+          });
+          unsubRef.current = unsub;
+        } else {
+          console.log('[Sync] Guest/Lighthouse detected. Fetching data once via getDocs to prevent continuous connections.');
+          getDocs(collection(db, 'site_data')).then((snapshot) => {
+            if (!active) return;
+            handleFirestoreSnapshot(snapshot.docs);
+          }).catch((err) => {
+            console.warn('Guest: Firestore read limit exceeded or offline. Operating seamlessly using server/localStorage fallbacks.', err);
+            setDataLoaded(true);
+          });
+        }
       });
 
     // 3. Fetch large base64 fields from Firestore chunks
