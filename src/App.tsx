@@ -484,18 +484,24 @@ export default function App() {
       .finally(() => {
         if (!active) return;
 
-        // 2. Load / sync from Firestore (onSnapshot for admin, getDocs for guest/Lighthouse)
-        const isUserAdmin = localStorage.getItem('apex_is_logged_in') === 'true';
+        // If the user is a standard Guest or PageSpeed Insights bot, bypass Firestore completely
+        if (!isLoggedIn) {
+          console.log('[Sync] Guest/Lighthouse detected. Running exclusively in super-fast local fallback mode.');
+          setDataLoaded(true);
+          setLargeDataLoaded(true);
+          return;
+        }
 
+        // 2. Load / sync from Firestore for authenticated Admins ONLY
+        console.log('[Sync] Admin authenticated. Activating realtime Firestore listener & chunk loader.');
+        
         const handleFirestoreSnapshot = (snapshotDocs: any[]) => {
-          let hasData = false;
           const currentTS = parseInt(localStorage.getItem('apex_last_updated') || '0', 10);
 
           snapshotDocs.forEach(docSnap => {
             const data = docSnap.data();
             if (data) {
               const docTS = data.updatedAt || 0;
-              hasData = true;
               isRemoteUpdate.current = true;
               
               if (docSnap.id === 'briefs' && data.briefs) {
@@ -557,7 +563,6 @@ export default function App() {
                 }
               }
 
-              // If Firestore actually has newer data, update our global timestamp tracker
               if (docTS > currentTS) {
                 setLastUpdated(docTS);
                 localStorage.setItem('apex_last_updated', docTS.toString());
@@ -566,62 +571,49 @@ export default function App() {
           });
           setDataLoaded(true);
 
-          // Allow the states to propagate fully before enabling the local edit tracker
           setTimeout(() => {
             isRemoteUpdate.current = false;
           }, 600);
         };
 
-        if (isUserAdmin) {
-          console.log('[Sync] Initializing realtime listener for admin.');
-          const unsub = onSnapshot(collection(db, 'site_data'), (snapshot) => {
-            if (!active) return;
-            handleFirestoreSnapshot(snapshot.docs);
-          }, (err) => {
-            console.warn('Firestore subscription quota limit exceeded or offline. Operating seamlessly using server/localStorage fallbacks.', err);
-            setDataLoaded(true);
-          });
-          unsubRef.current = unsub;
-        } else {
-          console.log('[Sync] Guest/Lighthouse detected. Fetching data once via getDocs to prevent continuous connections.');
-          getDocs(collection(db, 'site_data')).then((snapshot) => {
-            if (!active) return;
-            handleFirestoreSnapshot(snapshot.docs);
-          }).catch((err) => {
-            console.warn('Guest: Firestore read limit exceeded or offline. Operating seamlessly using server/localStorage fallbacks.', err);
-            setDataLoaded(true);
-          });
-        }
-      });
+        const unsub = onSnapshot(collection(db, 'site_data'), (snapshot) => {
+          if (!active) return;
+          handleFirestoreSnapshot(snapshot.docs);
+        }, (err) => {
+          console.warn('Admin Firestore load failed/offline:', err);
+          setDataLoaded(true);
+        });
+        unsubRef.current = unsub;
 
-    // 3. Fetch large base64 fields from Firestore chunks
-    Promise.allSettled([
-      loadLargeData('resumeImage').then(res => {
-        if (res !== null) {
-          const { data } = res;
-          if (typeof data === 'string') {
-            setResumeImage(data);
-            lastSiteData.current.resumeImage = data;
-          }
-        }
-      }),
-      loadLargeData('seoImages').then(res => {
-        if (res !== null) {
-          const { data } = res;
-          if (typeof data === 'string') {
-            try {
-              const parsed = JSON.parse(data);
-              setSeoImages(parsed);
-              lastSiteData.current.seoImages = parsed;
-            } catch (e) {
-              console.error('Failed to parse seoImages chunks', e);
+        // 3. Fetch large base64 fields from Firestore chunks (Admin only)
+        Promise.allSettled([
+          loadLargeData('resumeImage').then(res => {
+            if (res !== null) {
+              const { data } = res;
+              if (typeof data === 'string') {
+                setResumeImage(data);
+                lastSiteData.current.resumeImage = data;
+              }
             }
-          }
-        }
-      })
-    ]).finally(() => {
-      setLargeDataLoaded(true);
-    });
+          }),
+          loadLargeData('seoImages').then(res => {
+            if (res !== null) {
+              const { data } = res;
+              if (typeof data === 'string') {
+                try {
+                  const parsed = JSON.parse(data);
+                  setSeoImages(parsed);
+                  lastSiteData.current.seoImages = parsed;
+                } catch (e) {
+                  console.error('Failed to parse seoImages chunks', e);
+                }
+              }
+            }
+          })
+        ]).finally(() => {
+          setLargeDataLoaded(true);
+        });
+      });
 
     return () => {
       active = false;
@@ -629,7 +621,7 @@ export default function App() {
         unsubRef.current();
       }
     };
-  }, []);
+  }, [isLoggedIn]);
 
   // Synchronize dynamic state with a high-performance differential update strategy
   useEffect(() => {
