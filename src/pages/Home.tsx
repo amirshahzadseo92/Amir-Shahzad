@@ -37,7 +37,7 @@ export default function Home({
         }}
         transition={{ 
           default: { duration: 0.8, ease: "easeOut" },
-          borderColor: { repeat: Infinity, duration: 3, ease: "easeInOut" }
+          borderColor: {  duration: 3, ease: "easeInOut" }
         }}
         className="max-w-3xl w-[96%] sm:w-full mx-auto space-y-8 bg-white/80 backdrop-blur-xl border-2 p-4 min-[400px]:p-8 sm:p-12 rounded-[2.5rem] shadow-[0_20px_50px_rgba(8,_112,_184,_0.07)]"
       >
@@ -54,7 +54,7 @@ export default function Home({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.2 }}
-            className="text-lg md:text-xl font-bold tracking-widest text-slate-500 uppercase font-display"
+            className="text-lg md:text-xl font-bold tracking-widest text-slate-600 uppercase font-display"
           >
             SEO & DEVELOPMENT SPECIALIST
           </motion.h2>
@@ -85,7 +85,7 @@ export default function Home({
                 "0px 4px 6px rgba(0,0,0,0.1)"
               ]
             }}
-            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut" }}
+            transition={{  duration: 3, ease: "easeInOut" }}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setCurrentPage('contact')}
@@ -101,7 +101,7 @@ export default function Home({
               borderColor: ["#e2e8f0", "#10b981", "#e2e8f0"],
               backgroundColor: ["#ffffff", "#f0fdf4", "#ffffff"]
             }}
-            transition={{ repeat: Infinity, duration: 3, ease: "easeInOut", delay: 1.5 }}
+            transition={{  duration: 3, ease: "easeInOut", delay: 1.5 }}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setCurrentPage('library')}

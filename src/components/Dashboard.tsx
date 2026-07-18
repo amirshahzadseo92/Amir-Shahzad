@@ -1901,8 +1901,8 @@ export default function Dashboard({
                             <p className="text-[11px] text-slate-500 truncate max-w-[400px]">{s.shortDesc}</p>
                           </div>
                           <div className="flex gap-1">
-                            <button onClick={() => handleEditService(s)} className="p-1 text-slate-400 hover:text-emerald-600"><Edit className="h-3.5 w-3.5" /></button>
-                            <button onClick={() => handleDeleteService(s.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
+                            <button aria-label="Edit Service" onClick={() => handleEditService(s)} className="p-1 text-slate-400 hover:text-emerald-600"><Edit className="h-3.5 w-3.5" /></button>
+                            <button aria-label="Delete Service" onClick={() => handleDeleteService(s.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
                           </div>
                         </div>
                       ))}
@@ -1926,7 +1926,7 @@ export default function Dashboard({
                     {/* Visual Card containing preview & actions */}
                     <div className="bg-slate-50 border border-slate-200/80 rounded-2xl p-6 flex flex-col md:flex-row items-center gap-6">
                       <div className="w-full md:w-1/3 bg-white border border-slate-100 rounded-xl overflow-hidden shadow-md group relative">
-                        <img 
+                        <img loading="lazy" 
                           src={resumeImage || undefined} 
                           alt="Resume Thumbnail Preview" 
                           className="w-full h-auto max-h-[220px] object-cover"
@@ -2062,8 +2062,8 @@ export default function Dashboard({
                             <p className="text-[11px] text-slate-500">{t.role} | {t.company} ({t.metric})</p>
                           </div>
                           <div className="flex gap-1">
-                            <button onClick={() => handleEditTest(t)} className="p-1 text-slate-400 hover:text-emerald-600"><Edit className="h-3.5 w-3.5" /></button>
-                            <button onClick={() => handleDeleteTest(t.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
+                            <button aria-label="Edit Testimonial" onClick={() => handleEditTest(t)} className="p-1 text-slate-400 hover:text-emerald-600"><Edit className="h-3.5 w-3.5" /></button>
+                            <button aria-label="Delete Testimonial" onClick={() => handleDeleteTest(t.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-3.5 w-3.5" /></button>
                           </div>
                         </div>
                       ))}
@@ -2108,8 +2108,8 @@ export default function Dashboard({
                             <p className="text-[11px] text-slate-400 font-sans">Published {post.date} by {post.author}</p>
                           </div>
                           <div className="flex gap-1">
-                            <button onClick={() => handleEditBlog(post)} className="p-1 text-slate-400 hover:text-emerald-600"><Edit className="h-4 w-4" /></button>
-                            <button onClick={() => handleDeleteBlog(post.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+                            <button aria-label="Edit Blog Post" onClick={() => handleEditBlog(post)} className="p-1 text-slate-400 hover:text-emerald-600"><Edit className="h-4 w-4" /></button>
+                            <button aria-label="Delete Blog Post" onClick={() => handleDeleteBlog(post.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
                           </div>
                         </div>
                       ))}
@@ -2133,7 +2133,7 @@ export default function Dashboard({
                             <h4 className="font-bold text-xs text-slate-800">{sub.fullName}</h4>
                             <p className="text-[10px] text-slate-400">{sub.businessName} | {sub.email}</p>
                           </div>
-                          <button onClick={() => handleDeleteSub(sub.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
+                          <button aria-label="Delete Submission" onClick={() => handleDeleteSub(sub.id)} className="p-1 text-slate-400 hover:text-red-500"><Trash2 className="h-4 w-4" /></button>
                         </div>
                         <p className="text-xs font-semibold text-slate-700">Subject: {sub.subject}</p>
                         <p className="text-xs text-slate-600 mt-1.5 whitespace-pre-wrap bg-white p-3.5 rounded-lg border border-slate-100">{sub.message}</p>
@@ -2228,7 +2228,7 @@ export default function Dashboard({
                                     <span className="font-mono text-slate-500">{( (img.originalSize || 0) / 1024).toFixed(1)} KB</span>
                                   </div>
                                   <div className="h-24 rounded-lg overflow-hidden bg-slate-200 flex items-center justify-center border border-slate-300/40 relative">
-                                    <img 
+                                    <img loading="lazy" 
                                       src={img.beforeImage || img.originalImage} 
                                       alt="Before" 
                                       className="h-full w-full object-cover"
@@ -2242,7 +2242,7 @@ export default function Dashboard({
                                     <span className="font-mono text-emerald-500">{( (img.optimizedSize || 0) / 1024).toFixed(1)} KB</span>
                                   </div>
                                   <div className="h-24 rounded-lg overflow-hidden bg-slate-200 flex items-center justify-center border border-slate-300/40 relative">
-                                    <img 
+                                    <img loading="lazy" 
                                       src={img.afterImage || img.optimizedImage} 
                                       alt="After" 
                                       className="h-full w-full object-cover"

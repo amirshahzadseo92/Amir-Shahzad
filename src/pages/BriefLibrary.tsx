@@ -688,7 +688,7 @@ export default function BriefLibrary({
                             >
                               <div className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 text-center">Before</div>
                               <div className="rounded-xl overflow-hidden border border-slate-200 shadow-sm transition-transform transform group-hover:scale-[1.02]">
-                                <img 
+                                <img loading="lazy" 
                                   src={img.beforeImage || img.originalImage} 
                                   alt="Before Transformation" 
                                   className="w-full h-auto object-cover"
@@ -702,7 +702,7 @@ export default function BriefLibrary({
                             >
                               <div className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-2 text-center">After</div>
                               <div className="rounded-xl overflow-hidden border border-emerald-200 shadow-sm transition-transform transform group-hover:scale-[1.02]">
-                                <img 
+                                <img loading="lazy" 
                                   src={img.afterImage || img.optimizedImage} 
                                   alt="After Transformation" 
                                   className="w-full h-auto object-cover"
@@ -748,7 +748,7 @@ export default function BriefLibrary({
               onClick={(e) => e.stopPropagation()}
               referrerPolicy="no-referrer"
             />
-            <button 
+            <button aria-label="Close image modal" 
               className="absolute top-6 right-6 text-white hover:text-emerald-400 transition-colors cursor-pointer bg-slate-800/50 hover:bg-slate-800 p-2 rounded-full"
               onClick={() => setSelectedImageModal(null)}
             >

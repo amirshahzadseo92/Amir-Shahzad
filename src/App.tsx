@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import { collection, doc, onSnapshot, setDoc, writeBatch, getDocs } from 'firebase/firestore';
 import { db, saveLargeData, loadLargeData } from './lib/firebase';
 
@@ -42,17 +42,17 @@ import {
 // Import modular layouts & subpages
 import Header from './components/Header';
 import Footer from './components/Footer';
-import Dashboard from './components/Dashboard';
-
-import Home from './pages/Home';
-import BriefLibrary from './pages/BriefLibrary';
-import BriefDetail from './pages/BriefDetail';
-import Pricing from './pages/Pricing';
-import Contact from './pages/Contact';
-import About from './pages/About';
-import Services from './pages/Services';
-import Resume from './pages/Resume';
 import SchemaMarkup from './components/SchemaMarkup';
+
+const Dashboard = lazy(() => import('./components/Dashboard'));
+const Home = lazy(() => import('./pages/Home'));
+const BriefLibrary = lazy(() => import('./pages/BriefLibrary'));
+const BriefDetail = lazy(() => import('./pages/BriefDetail'));
+const Pricing = lazy(() => import('./pages/Pricing'));
+const Contact = lazy(() => import('./pages/Contact'));
+const About = lazy(() => import('./pages/About'));
+const Services = lazy(() => import('./pages/Services'));
+const Resume = lazy(() => import('./pages/Resume'));
 
 export default function App() {
   // Navigation & Details Routing states
@@ -984,15 +984,16 @@ export default function App() {
 
       {/* Main Render Views Router */}
       <main className="flex-grow">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={currentPage + (selectedBriefId || '')}
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -12 }}
-            transition={{ duration: 0.25, ease: 'easeOut' }}
-          >
-            {currentPage === 'home' && (
+        <Suspense fallback={<div className="h-screen w-full flex items-center justify-center bg-white"><div className="w-8 h-8 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin"></div></div>}>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentPage + (selectedBriefId || '')}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.25, ease: 'easeOut' }}
+            >
+              {currentPage === 'home' && (
               <Home
                 briefs={briefs}
                 outlines={outlines}
@@ -1153,7 +1154,8 @@ export default function App() {
               />
             )}
           </motion.div>
-        </AnimatePresence>
+          </AnimatePresence>
+        </Suspense>
       </main>
 
       {/* Styled Footer */}

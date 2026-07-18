@@ -86,7 +86,7 @@ function AutomationDecorator() {
         animate={{ y: "110%" }}
         transition={{
           duration: 3.5,
-          repeat: Infinity,
+          
           ease: "easeInOut",
         }}
         className="absolute left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/80 to-transparent shadow-[0_0_12px_4px_rgba(16,185,129,0.5)] z-20"
@@ -111,7 +111,7 @@ function AutomationDecorator() {
           }}
           transition={{
             duration: 4.5,
-            repeat: Infinity,
+            
             delay: p.delay,
             ease: "easeOut",
           }}

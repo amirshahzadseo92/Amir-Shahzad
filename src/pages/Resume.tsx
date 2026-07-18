@@ -52,7 +52,7 @@ export default function Resume({
     return (
       <div className="mx-auto max-w-4xl px-4 py-6 sm:py-10 bg-white min-h-screen flex items-center justify-center animate-fadeIn">
         <div className="animated-gradient-border rounded-2xl shadow-2xl w-full max-w-3xl overflow-hidden">
-          <img 
+          <img loading="lazy" 
             src={resumeImage} 
             alt="Hafiz Amir Saifi Resume" 
             className="w-full h-auto object-contain rounded-xl max-h-[1600px] bg-white block"

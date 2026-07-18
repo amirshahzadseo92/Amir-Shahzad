@@ -88,7 +88,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
             }}
             transition={{
               duration: 5,
-              repeat: Infinity,
+              
               ease: "easeInOut"
             }}
             className="animate-ping absolute inline-flex h-full w-full rounded-full"
@@ -106,7 +106,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
             }}
             transition={{
               duration: 5,
-              repeat: Infinity,
+              
               ease: "easeInOut"
             }}
             className="relative inline-flex rounded-full h-2 w-2 border border-slate-950"
@@ -128,7 +128,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
             transition={{
               duration: 5,
               delay: 1.2, // offset to make them transition asynchronously
-              repeat: Infinity,
+              
               ease: "easeInOut"
             }}
             className="animate-pulse absolute inline-flex h-full w-full rounded-full"
@@ -147,7 +147,7 @@ export const Logo: React.FC<LogoProps> = ({ size = 'md', showText = true, theme 
             transition={{
               duration: 5,
               delay: 1.2, // offset
-              repeat: Infinity,
+              
               ease: "easeInOut"
             }}
             className="relative inline-flex rounded-full h-1.5 w-1.5 border border-slate-950"
